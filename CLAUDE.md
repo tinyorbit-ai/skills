@@ -1,0 +1,174 @@
+# Skills Marketplace — `tinyorbit-ai/skills`
+
+This repo is Matt's personal **agent skills marketplace**. Every skill lives here as a
+self-contained folder and is distributed to any machine/agent via the
+[`skills` CLI](https://skills.sh) (`vercel-labs/skills`, run as `npx skills`).
+
+> CLAUDE.md is the source of truth. Keep this file updated as skills and conventions evolve.
+
+## How distribution works
+
+The `skills` CLI indexes any public git repo containing valid `SKILL.md` files.
+Once a skill is pushed to `main`, it is installable anywhere:
+
+```bash
+npx skills add tinyorbit-ai/skills                         # interactive: pick skills
+npx skills add tinyorbit-ai/skills --skill <name> -g        # one skill, global (~/.claude/skills/)
+npx skills add tinyorbit-ai/skills --all                    # everything, all agents
+```
+
+No manifest, registry submission, or build step is required — **push = published**.
+The CLI symlinks (or `--copy`) installed skills into each agent's skills directory
+(`~/.claude/skills/`, `.cursor/skills/`, etc.). Skills work across 50+ agents;
+`allowed-tools` and `context: fork` are Claude Code-specific.
+
+## Repo structure
+
+```
+skills/
+├── <skill-name>/              # Production skill — discovered & installable by default
+│   ├── SKILL.md               # REQUIRED. Frontmatter + instructions, <200 lines
+│   ├── references/            # Optional. Docs loaded on demand (progressive disclosure)
+│   ├── scripts/               # Optional. Executable helpers the agent runs
+│   └── assets/                # Optional. Files used in skill output (templates, etc.)
+└── .experimental/             # Experimental skills — hidden from default discovery
+    └── <skill-name>/SKILL.md
+```
+
+The CLI discovers skills in `skills/`, `skills/.curated/`, `skills/.experimental/`,
+`skills/.system/`, a root `SKILL.md`, and agent dirs. We use **`skills/` for shipped
+skills** and **`skills/.experimental/` for WIP** (see below).
+
+## SKILL.md anatomy
+
+```yaml
+---
+name: skill-name                # REQUIRED. lowercase-with-hyphens, must match folder name
+description: One sentence on what it does + when to use it. Use when <trigger>.
+metadata:
+  internal: false               # Optional. true = hidden unless INSTALL_INTERNAL_SKILLS=1
+# allowed-tools: Bash, Read     # Optional, Claude Code only
+---
+
+# Skill Name
+
+Markdown instructions the agent follows when the skill triggers.
+```
+
+Rules (from the canonical create-skill guide — keep one in this repo as reference):
+
+- **200-line rule**: `SKILL.md` body stays under 200 lines. Overflow goes to
+  `references/*.md` and is linked, not inlined (progressive disclosure).
+- **`description` is the trigger.** It's always in context — make it specific and
+  include "Use when…". This is what makes the agent reach for the skill.
+- **Be concise.** The context window is shared; every line must justify its tokens.
+- **Match degrees of freedom to the task.** Prose for open-ended work; exact scripts
+  for fragile/deterministic operations.
+- Folder name === `name` in frontmatter.
+
+## Workflows
+
+### Add a new skill
+
+1. Scaffold: `npx skills init skills/<skill-name>` (creates `skills/<skill-name>/SKILL.md`)
+   — or start it in `skills/.experimental/<skill-name>/` if it's a draft.
+2. Write the frontmatter `description` first (it's the trigger) then the body.
+3. Keep `SKILL.md` < 200 lines; push detail into `references/`, `scripts/`, `assets/`.
+4. Validate locally before pushing:
+   - `npx skills add . --list` — confirms the skill is discovered & frontmatter parses.
+   - Install it locally and dry-run the workflow it describes.
+5. Commit one skill per commit where practical. Push to `main` — it's now live.
+6. Add a row to the **Skills index** table below.
+
+### Update an existing skill
+
+1. Edit the skill in place. Bump behavior, fix instructions, extend references.
+2. Re-validate with `npx skills add . --list` and a local install.
+3. Push. Consumers pull the change with:
+   ```bash
+   npx skills update <skill-name>        # or: npx skills update (all)
+   ```
+4. Skills are not versioned by the CLI — `update` always pulls latest from `main`.
+   For breaking changes, note it in the commit message and the index table.
+
+### Remove a skill
+
+1. Delete the skill folder from the repo and its **Skills index** row. Push.
+2. Already-installed copies are not auto-removed. Document that consumers run:
+   ```bash
+   npx skills remove <skill-name>
+   ```
+
+### Experimental / work-in-progress skills
+
+Two independent mechanisms — use **both** for true WIP:
+
+1. **Location**: keep it in `skills/.experimental/<name>/`. Dot-prefixed dirs are
+   not surfaced in default discovery for `tinyorbit-ai/skills`.
+2. **Flag**: set `metadata.internal: true` in the frontmatter. Internal skills are
+   only listed/installable when the consumer sets `INSTALL_INTERNAL_SKILLS=1`:
+   ```bash
+   INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill <name>
+   ```
+
+**Promote to stable** when ready: move the folder
+`skills/.experimental/<name>/ → skills/<name>/`, remove `metadata.internal`
+(or set `false`), validate, push, and add it to the index.
+
+Also use `metadata.internal: true` for repo-tooling skills (linting/validating/
+scaffolding skills) so they don't pollute discovery — these can stay in `skills/.system/`.
+
+## Command reference
+
+| Action | Command |
+|---|---|
+| Scaffold a skill | `npx skills init skills/<name>` |
+| List skills in this repo | `npx skills add . --list` |
+| Install all (this repo) | `npx skills add tinyorbit-ai/skills --all` |
+| Install one globally | `npx skills add tinyorbit-ai/skills --skill <name> -g` |
+| Include experimental/internal | `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill <name>` |
+| List installed | `npx skills list` (`--global` for user scope) |
+| Update | `npx skills update [<name>...]` |
+| Remove | `npx skills remove <name>` |
+| Search ecosystem | `npx skills find [query]` |
+
+Scope flags: `-g/--global` (user `~/.claude/skills/`) vs project (`.claude/skills/`,
+default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all agents.
+
+## Gotchas
+
+- **No versioning.** `update` = latest `main`. There's no pinning; treat `main` as
+  the release channel. Land breaking changes deliberately.
+- **`description` quality is everything.** A vague description means the agent never
+  triggers the skill. Lead with the capability, end with "Use when …".
+- **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
+  Split aggressively into `references/`.
+- **Folder name must equal `name`.** Mismatches break discovery/install.
+- **Experimental needs both** the `.experimental/` location *and* `metadata.internal:
+  true` — the dir alone won't gate it once discovery falls back to recursive search.
+- **Validate before pushing.** `push = published`; there's no review gate but us.
+
+## Skills index
+
+| Skill | Status | Description |
+|---|---|---|
+| `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. No business/demand gatekeeping. |
+| `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. |
+| `forge-discovery` | experimental | Idea → `wiki/brief.md`. Asks nothing about money/market/demand. |
+| `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
+| `forge-harden` | experimental | Hardens the *plan*: eng, design/UX, DevEx, security, + independent Codex pass. |
+| `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
+| `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional Codex; auto-fixes objective findings, learnings → `wiki/learnings.md`. |
+| `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry. |
+| `forge-debug` | experimental | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
+| `forge-ambition` | experimental | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
+| `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, AI-slop, feel; before/after fixes. Auto in `forge-review` (if UI); standalone. |
+| `forge-dx` | experimental | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
+| `forge-retro` | experimental | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
+
+> **forge suite** (13 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
+> Loop: `forge` → init → discovery (+ambition) → plan → harden → lock → per run: build →
+> review (+polish/+dx) → ship; at Done: retro. The 4 persona skills auto-invoke in their
+> phase and also run standalone. `forge-review` absorbed the old `forge-qa`. Install with
+> `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill '*'`. Promote to
+> `skills/` after one full dogfood run (per the experimental workflow above).
