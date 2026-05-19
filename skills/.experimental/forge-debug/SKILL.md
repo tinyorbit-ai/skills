@@ -1,6 +1,6 @@
 ---
 name: forge-debug
-description: Root-cause debugging with an iron law — no fix without an identified root cause. Four phases: investigate, analyze, hypothesize, implement a minimal fix plus a regression test. Surprising or instructive failures get written up as a wiki incident note. Use when something is broken, a test or gate fails, behaviour is wrong, "it worked yesterday", or when asked to "debug this", "why is this failing", "root cause this".
+description: Root-cause debugging with an iron law — no fix without an identified root cause. Four phases — investigate, analyze, hypothesize, implement a minimal fix plus a regression test. Surprising or instructive failures get written up as a wiki incident note. Use when something is broken, a test or gate fails, behaviour is wrong, "it worked yesterday", or when asked to "debug this", "why is this failing", "root cause this".
 metadata:
   internal: true
 ---
