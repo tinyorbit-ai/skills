@@ -65,6 +65,13 @@ Rules (from the canonical create-skill guide — keep one in this repo as refere
 - **Match degrees of freedom to the task.** Prose for open-ended work; exact scripts
   for fragile/deterministic operations.
 - Folder name === `name` in frontmatter.
+- **Never `": "` mid-sentence in `description:`.** A bare colon-space inside a
+  single-line YAML value (`description: Four phases: investigate, …`) makes YAML
+  parse it as a nested mapping, `parseSkillMd` returns `null`, and the skill
+  **silently vanishes from `npx skills` discovery** — no error, just gone. Use an
+  em-dash (` — `), a comma, or quote the whole value / switch to block scalar
+  (`description: |`). This trap shipped once in `forge-debug` and dropped it from
+  the remote install until fixed; don't relearn it.
 
 ## Workflows
 
