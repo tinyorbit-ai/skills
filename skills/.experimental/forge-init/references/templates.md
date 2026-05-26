@@ -1,7 +1,9 @@
 # forge-init templates
 
-Copy these verbatim, substituting `{PROJECT}` (repo/project name) and `{ONELINE}`
-(one-sentence problem/intent statement). Today's date: get it from the environment.
+Copy these verbatim, substituting `{PROJECT}` (repo/project name). `{ONELINE}`
+is intentionally left as `_filled by forge-discovery_` — discovery writes the
+real one-liner once the brief is captured. Don't prompt the user for it here.
+Today's date: get it from the environment.
 
 ---
 

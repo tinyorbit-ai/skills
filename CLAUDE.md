@@ -160,8 +160,8 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | Skill | Status | Description |
 |---|---|---|
 | `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. No business/demand gatekeeping. |
-| `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. |
-| `forge-discovery` | experimental | Idea → `wiki/brief.md`. Asks nothing about money/market/demand. |
+| `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
+| `forge-discovery` | experimental | Idea → `wiki/brief.md`. Base seven (what/who/feel/hard part/constraints/non-goals/alternatives) + sharpening five (moment, friction-it-replaces, smallest useful, surprise, 3-year fit). Asks nothing about money/market/demand. |
 | `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
 | `forge-harden` | experimental | Hardens the *plan*: eng, design/UX, DevEx, security, + independent adversarial pass (Codex / Gemini / Claude, configurable). |
 | `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |

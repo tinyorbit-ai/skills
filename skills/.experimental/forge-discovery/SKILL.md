@@ -1,6 +1,6 @@
 ---
 name: forge-discovery
-description: Discovery conversation that turns a raw idea into a precise brief — what you're building, who it's for (possibly only you), how it should feel, the hard/interesting part, constraints, non-goals, alternatives weighed. Deliberately asks nothing about money, market, demand, or whether it's "worth it". Use when you have an idea and need it pinned down, when asked to "shape this", "what are we building", or as stage 1 of forge before forge-plan.
+description: Discovery conversation that turns a raw idea into a precise brief — base seven questions (what / who & when / how it should feel / hard part / constraints / non-goals / alternatives) plus a sharpening five (the specific moment, the friction it replaces, smallest useful version, what surprised you imagining it, three-year fit). Deliberately asks nothing about money, market, demand, or whether it's "worth it". Use when you have an idea and need it pinned down, when asked to "shape this", "what are we building", or as stage 1 of forge before forge-plan.
 metadata:
   internal: true
 ---
@@ -30,8 +30,11 @@ and obvious entry-point files. Form a hypothesis of the idea before asking anyth
 
 ### 2. Discovery — ask in small batches via AskUserQuestion
 
-Cover these. Lead each with your best guess from the context scan so the user
-corrects rather than writes essays. One or two questions per round, not all at once.
+Cover the **base seven** below, then the **sharpening five** in §2b. Lead each
+with your best guess from the context scan so the user corrects rather than
+writes essays. One or two questions per round, never the whole list at once.
+
+**Base seven** — the shape:
 
 - **What is it?** One paragraph, the user's words. The thing itself.
 - **Who uses it, and when?** Could be only the user. A person in a situation, not a
@@ -53,6 +56,34 @@ concrete option and let them react. Anti-sycophantic: if two answers contradict
 (e.g. "must be dead simple" + a large feature list), name the tension and resolve
 it with them now.
 
+### 2b. Sharpening pass — five forcing questions (charter-safe)
+
+After the base seven, run these five. They're adapted from gstack's
+office-hours forcing questions, **stripped of every business/market/demand
+hook** — every one asks about the build, the experience, or the craft. Skip a
+question only if the answer is unambiguously in the base-seven answers.
+
+- **The specific moment.** Name the concrete moment this thing serves. Not "a
+  user" — *which* moment, the action right before, the action right after.
+  Concrete enough that you could film it.
+- **The friction it replaces.** What you currently do (or would do) without
+  this — and the friction in it. Measure in *effort, attention, or annoyance*,
+  never in money. If "nothing, this is new", say so — that's a valid answer.
+- **The smallest version that's already useful.** What's the thinnest version
+  of this thing that would *already* be worth using? This becomes the seed for
+  phase 1; spend real thought here.
+- **What surprised you imagining it.** When you imagine using the finished
+  thing, what's the part that surprises you — something better than expected,
+  or something harder than expected? That surprise often points at the real
+  shape.
+- **Three-year fit.** Three years from now, do you want this to be *more*
+  essential, *less* essential, or the same? Bigger surface, sharper niche, or
+  archived after the itch is scratched? All three are valid — the point is to
+  *know* now so the plan doesn't drift.
+
+Lead with your best read on each, like before. Two questions per round, not all
+five at once.
+
 ### 3. Reflect back: offer shapes, not verdicts
 
 Synthesize what you heard into 2–3 candidate **shapes** — different ways to build
@@ -73,17 +104,33 @@ explicitly says they don't want it.
 
 ### 4. Write `wiki/brief.md`
 
-Replace the stub. Sections: **What it is**, **Who & when**, **How it should feel**,
-**The hard/interesting part**, **Constraints**, **Non-goals**, **Shape chosen**
-(with a one-line *why* over the alternatives). Keep it tight — a page, not an essay.
+Replace the stub. Sections, in this order:
+
+- **What it is** — the paragraph from question 1.
+- **Who & when** — the specific moment from §2b plus the base who/when.
+- **How it should feel** — the experiential target.
+- **The hard/interesting part** — the bit that makes it worth your attention.
+- **The friction it replaces** — what the user does without it today, in
+  effort/attention.
+- **Smallest useful version** — the seed for phase 1.
+- **Three-year fit** — more essential / less essential / same, and why.
+- **Constraints** — stack, platform, fixed shape.
+- **Non-goals** — what it explicitly is *not*.
+- **Shape chosen** — the picked shape with a one-line *why* over alternatives.
+- **What surprised you** — the surprise from §2b, captured so later phases
+  honor it instead of designing it away.
+
+Keep it tight — a page, not an essay. Every section earns its place.
 
 If any genuine decision was made here (the shape, a fixed constraint), also write an
 ADR per `wiki/` conventions and link it from `wiki/index.md`.
 
 ### 5. Hand off
 
-Update `wiki/index.md` so [[brief]] reflects it's filled. Recommend `forge-plan`
-next (or returning to `forge` for the full pipeline).
+- Update `wiki/index.md`: replace the `{ONELINE}` placeholder (or
+  `_filled by forge-discovery_`) under "What this is (one line)" with a real
+  one-sentence summary derived from the brief. Mark [[brief]] as filled.
+- Recommend `forge-plan` next (or returning to `forge` for the full pipeline).
 
 ## Rules
 
