@@ -93,9 +93,11 @@ a high-severity finding.
   affected pass until clean**. Loop until every objective finding is resolved and
   the full gate + suite are green. Don't ask permission to fix something broken.
 - **Subjective findings → one batch at the end.** Genuine tradeoffs with no right
-  answer (and any unreconciled Codex disagreement) go into a single AskUserQuestion
-  batch. Don't drip questions mid-pass. Take a position on each; say what evidence
-  would change it (anti-sycophantic).
+  answer (and any unreconciled reviewer disagreement) go into a single
+  AskUserQuestion batch in the **Decision Brief** shape (forge suite's
+  `references/question-style.md`): concrete framing, named stakes,
+  recommendation with the *why* and the evidence that would flip it. Don't
+  drip questions mid-pass. Take a position on each; anti-sycophantic throughout.
 
 ## Learnings → wiki
 
@@ -126,3 +128,4 @@ hand to **`forge-ship`** to land the phase. Never ship from here.
 - `references/review-standards.md` — what each pass checks, in depth
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
+- forge suite's `references/question-style.md` — Decision Brief format for the taste batch

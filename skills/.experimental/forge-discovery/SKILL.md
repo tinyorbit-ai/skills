@@ -92,7 +92,9 @@ each: what it optimizes for, what it costs, what the first runnable version look
 like. These are build approaches, never "should you build it" — every option
 assumes the project happens.
 
-Lock the chosen shape with AskUserQuestion.
+Lock the chosen shape with AskUserQuestion in the **Decision Brief** shape
+(forge suite's `references/question-style.md`): concrete framing, named stakes,
+recommendation with the *why* and the evidence that would flip it.
 
 ### 3b. Ambition check (auto)
 

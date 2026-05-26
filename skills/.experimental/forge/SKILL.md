@@ -124,3 +124,4 @@ ran, and any unreconciled reviewer disagreement. On confirm, the plan is
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md`), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
+- `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced

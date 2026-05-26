@@ -46,7 +46,9 @@ If there's no UI in scope, say so and exit — nothing to do.
 3. **Fix in source.** Objective inconsistencies (off-scale spacing, broken
    alignment, missing states, slop patterns) → fix in the code on the current phase
    branch, re-verify visually, capture **before/after** screenshots. Subjective
-   taste calls → one AskUserQuestion batch with a recommendation.
+   taste calls → one AskUserQuestion batch in the **Decision Brief** shape
+   (forge suite's `references/question-style.md`): concrete framing, named
+   stakes, recommendation with the *why*.
 
 4. **Capture.** Append a `wiki/learnings.md` entry with the rule-to-remember
    (e.g. "use the spacing scale token, never raw px") so `forge-build` prevents it

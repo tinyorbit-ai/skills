@@ -50,7 +50,9 @@ If the build isn't developer-facing, say so and exit.
 
 4. **Fix and capture.** Objective defects (wrong docs, broken setup step, cryptic
    error with an easy better message, missing `--help`) → fix on the phase branch
-   and re-verify. Subjective calls → one AskUserQuestion batch. Append the
+   and re-verify. Subjective calls → one AskUserQuestion batch in the **Decision
+   Brief** shape (forge suite's `references/question-style.md`): concrete
+   framing, named stakes, recommendation with the *why*. Append the
    rule-to-remember to `wiki/learnings.md`; deferred polish → `wiki/improvements.md`.
    Tell the user what you changed and captured.
 

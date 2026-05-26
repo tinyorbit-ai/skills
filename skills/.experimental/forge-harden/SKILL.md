@@ -102,7 +102,10 @@ carry it to the final gate for the user to decide.
   injection vector): fix `wiki/plan.md` in place — strengthen the phase, add a
   phase, harden the gate. Don't ask permission to fix something objectively broken.
 - **Subjective / taste** (a tradeoff with no right answer): collect and present via
-  AskUserQuestion in one batch — don't drip questions through the analysis.
+  AskUserQuestion in one batch — don't drip questions through the analysis. Each
+  surfaced decision follows the **Decision Brief** shape (forge suite's
+  `references/question-style.md`): concrete framing, named stakes, recommendation
+  with the *why* and what would flip it.
 - Any decision changed or introduced → ADR (or update an existing ADR's Status /
   add a "Validated in practice" note). Link from `wiki/index.md`.
 
@@ -126,3 +129,4 @@ declare the plan locked.
 ## References
 
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
+- forge suite's `references/question-style.md` — Decision Brief format for the taste batch

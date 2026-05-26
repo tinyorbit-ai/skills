@@ -40,9 +40,11 @@ Run after a brief is drafted (or on demand against brief/plan). Read
    whether the extra ambition is worth *their* time and interest — the only
    currency here.
 
-4. **Offer it as a choice.** AskUserQuestion: keep the current shape, adopt the
-   bolder version, or take specific pieces of it. Take a position and say why, but
-   the timid version is a fully legitimate choice — "I want it small" ends it.
+4. **Offer it as a choice.** AskUserQuestion in the **Decision Brief** shape
+   (forge suite's `references/question-style.md`): keep the current shape,
+   adopt the bolder version, or take specific pieces. Take a position and say
+   why, naming the effort/craft cost of each — but the timid version is a fully
+   legitimate choice. "I want it small" ends it.
 
 5. **Record the outcome.** If ambition changed: update `wiki/brief.md` (and the
    relevant ADR / `wiki/plan.md` if it exists) and tell the user. If unchanged,
