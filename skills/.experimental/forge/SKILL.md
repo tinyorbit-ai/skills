@@ -85,8 +85,9 @@ with nothing — offer, via AskUserQuestion, to run setup→discovery→plan→h
 sequence so first-time setup isn't four invocations.)
 
 When `forge-harden` finishes, present the final lock gate (AskUserQuestion): phase
-list with each phase's verifiable gate, open taste decisions, any unreconciled Codex
-disagreement. On confirm, the plan is **locked** and the build loop is unlocked.
+list with each phase's verifiable gate, open taste decisions, which reviewer
+ran, and any unreconciled reviewer disagreement. On confirm, the plan is
+**locked** and the build loop is unlocked.
 
 ### Build loop (plan locked, phases remain) — ONE phase per run
 
@@ -122,3 +123,4 @@ disagreement. On confirm, the plan is **locked** and the build loop is unlocked.
 - `references/charter.md` — the worldview (mandatory read)
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md`), ADR format, capture rule
+- `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review

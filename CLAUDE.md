@@ -163,9 +163,9 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. |
 | `forge-discovery` | experimental | Idea → `wiki/brief.md`. Asks nothing about money/market/demand. |
 | `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
-| `forge-harden` | experimental | Hardens the *plan*: eng, design/UX, DevEx, security, + independent Codex pass. |
+| `forge-harden` | experimental | Hardens the *plan*: eng, design/UX, DevEx, security, + independent adversarial pass (Codex / Gemini / Claude, configurable). |
 | `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
-| `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional Codex; auto-fixes objective findings, learnings → `wiki/learnings.md`. |
+| `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, learnings → `wiki/learnings.md`. |
 | `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry. |
 | `forge-debug` | experimental | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
 | `forge-ambition` | experimental | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |

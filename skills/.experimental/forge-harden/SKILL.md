@@ -1,6 +1,6 @@
 ---
 name: forge-harden
-description: Hardens a locked plan from every angle — engineering rigor, design/UX, developer experience, security/abuse — plus an independent adversarial pass via the Codex CLI. Auto-fixes structural problems in the plan; surfaces only genuine taste decisions. Strengthens the plan; never vetoes the project. Use after forge-plan, when asked to "critique this", "harden the plan", "review the plan", "stress test this", or as stage 3 of forge.
+description: Hardens a locked plan from every angle — engineering rigor, design/UX, developer experience, security/abuse — plus an independent adversarial pass via a configurable third-party agent (Codex, Gemini, or Claude). Auto-fixes structural problems in the plan; surfaces only genuine taste decisions. Strengthens the plan; never vetoes the project. Use after forge-plan, when asked to "critique this", "harden the plan", "review the plan", "stress test this", or as stage 3 of forge.
 metadata:
   internal: true
 ---
@@ -56,25 +56,45 @@ Trust boundaries, input validation, authz, secret handling, injection (SQL / com
 / LLM-prompt), dependency supply-chain risk, anything that runs untrusted input. Note
 severity. (Threat-model the build; this is not "is it worth securing".)
 
-### 5. Independent Codex pass
+### 5. Independent reviewer pass
 
-Check `command -v codex`. If absent: state the pass is skipped, continue (don't
-block). If present: send Codex the plan + architecture and ask it, as an adversarial
-reviewer, for the weakest assumption, the most likely failure, and the phase whose
-gate won't catch a regression. Example:
+Resolve the adversarial reviewer per **`references/reviewer-agents.md`** in the
+forge suite — explicit `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then
+auto-probe `codex` → `gemini` → `claude`. State which one was picked and why
+before invoking. If none is available or config says `reviewer: none`, state
+the pass is skipped and continue (don't block).
+
+Send the standard prompt envelope (from `reviewer-agents.md`) with the artifact
+set to `wiki/plan.md` + `wiki/architecture.md`. For example, when the resolved
+reviewer is Codex:
 
 ```
-codex exec --skip-git-repo-check "Adversarially review this build plan. Find the
-weakest assumption, the most likely failure mode, and any phase whose verifiable
-gate would not catch a real regression. Be specific. Do not comment on whether the
-project is worth building — only on the plan's soundness.<<<
+codex exec --skip-git-repo-check "$(cat <<'EOF'
+You are an adversarial reviewer. Be concrete. Do not comment on whether the
+project is worth building — only on the artifact's soundness.
+
+Find: (1) the weakest assumption, (2) the most likely failure / missed case,
+(3) the phase whose verifiable gate would PASS through a real regression.
+
+List every finding with a severity (high/med/low) and a one-line proposed fix.
+No hedging.
+
+<<<
 $(cat wiki/plan.md)
->>>"
+
+--- ARCHITECTURE ---
+$(cat wiki/architecture.md)
+>>>
+EOF
+)"
 ```
 
-Reconcile Codex's findings with yours. **Do not smooth over disagreement** — where
-you and Codex disagree, say so explicitly and carry it to the final gate for the
-user to decide.
+Swap `codex exec --skip-git-repo-check` for `gemini -p` or `claude -p` when
+the resolver picks those.
+
+Reconcile the reviewer's findings with yours. **Do not smooth over
+disagreement** — where you and the reviewer disagree, say so explicitly and
+carry it to the final gate for the user to decide.
 
 ### 6. Apply findings
 
@@ -89,16 +109,20 @@ user to decide.
 ### 7. Write up and hand off
 
 Add a `## Review` section to `wiki/plan.md` (or update it): what each angle found,
-what changed, what's an open taste decision, and any unreconciled Codex
-disagreement. Anti-sycophantic throughout: take positions, state what evidence
-would flip them, don't hedge.
+what changed, what's an open taste decision, which reviewer ran, and any
+unreconciled reviewer disagreement. Anti-sycophantic throughout: take
+positions, state what evidence would flip them, don't hedge.
 
 Recommend returning to `forge` for the final lock gate, or — if run standalone —
-present the open taste decisions and Codex disagreements directly, then declare the
-plan locked.
+present the open taste decisions and reviewer disagreements directly, then
+declare the plan locked.
 
 ## Rules
 
 - Never produce a "kill the project" recommendation. Out of scope by charter.
 - A finding without a concrete plan change or a surfaced decision is noise — drop it.
 - Don't write feature code. The output is a harder plan, not an implementation.
+
+## References
+
+- forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
