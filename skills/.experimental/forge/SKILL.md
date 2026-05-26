@@ -40,11 +40,12 @@ Full map ───────────────────────�
 
 Every skill also runs standalone — invoke any directly:
   /forge-init  /forge-discovery  /forge-ambition  /forge-plan
-  /forge-harden       (orchestrator)
+  /forge-design-explore           (divergent design variants)
+  /forge-harden                   (orchestrator; --auto for auto-decision)
   /forge-harden-eng  /forge-harden-security  /forge-harden-design
   /forge-harden-dx   /forge-harden-scope
   /forge-build  /forge-review  /forge-polish  /forge-dx
-  /forge-ship  /forge-debug  /forge-retro
+  /forge-ship  /forge-docs  /forge-debug  /forge-retro
 
 /forge with no args continues from ▶ Next.
 ```

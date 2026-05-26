@@ -171,7 +171,9 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-harden-scope` | experimental | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
 | `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
 | `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, learnings → `wiki/learnings.md`. |
-| `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry. |
+| `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry; auto-invokes `forge-docs` if the phase touched a doc surface. |
+| `forge-docs` | experimental | Post-ship doc-drift check using Diataxis (tutorial / how-to / reference / explanation). Auto-fixes concrete drift; surfaces structural gaps as taste decisions. |
+| `forge-design-explore` | experimental | Divergent design exploration — 3-4 mockup variants for a UI surface before implementation. Charter-safe (no market framing). Locks the chosen shape as an ADR. |
 | `forge-debug` | experimental | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
 | `forge-ambition` | experimental | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
 | `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, AI-slop, feel; before/after fixes. Auto in `forge-review` (if UI); standalone. |

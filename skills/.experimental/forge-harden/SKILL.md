@@ -1,6 +1,6 @@
 ---
 name: forge-harden
-description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Reconciles findings, writes the plan's ## Review section, and surfaces unreconciled disagreements at the lock gate. Strengthens the plan, never vetoes the project. Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", or as stage 3 of forge.
+description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Two modes — interactive (default; surfaces taste decisions to the user) and --auto (auto-decides everything except irreversible-feeling shape calls, per six named principles). Strengthens the plan, never vetoes the project. Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", "auto-harden", or as stage 3 of forge.
 metadata:
   internal: true
 ---
@@ -17,6 +17,41 @@ independent reviewer pass, then consolidates everything into the plan's
 The project is worth building. **Critique the plan, never the premise.** No
 persona may conclude "this shouldn't be built" — out of scope by charter.
 Every finding is a plan change or a surfaced taste decision.
+
+## Modes
+
+- **Interactive** (default) — runs persona passes, surfaces taste decisions
+  one batch at a time at the end for the user to answer.
+- **`--auto`** — runs every persona pass and auto-decides objective findings
+  AND any taste decision that fits the auto-decision principles below.
+  Only **irreversible-feeling shape decisions** (the build's overall
+  framework, language, persistence model, etc.) reach the user. State which
+  principle resolved each auto-decision in the report.
+
+State the mode upfront. Default to interactive.
+
+### Auto-decision principles (only used in `--auto`)
+
+When auto-deciding a taste call surfaced by a persona, apply these six in
+order. Skip a principle that doesn't bear on the question; never bend one.
+
+1. **Charter holds.** Never produce an outcome that questions whether the
+   project should exist. The user's choice to build is settled.
+2. **Bias to the bolder version of what the user already chose.** If the
+   decision is about ambition within the chosen intent, prefer the more
+   excellent realization. (Same as `forge-ambition`'s posture.)
+3. **Bias to a falsifiable gate.** Where two options differ on whether a
+   phase's gate would catch a regression, pick the stronger gate every
+   time.
+4. **Bias to security on tied craft cost.** When two options have
+   equivalent effort and clarity, pick the more secure shape. Severity
+   tags from `forge-harden-security` carry.
+5. **Bias to fewer phases.** If work could land in phase N or N+1 and
+   nothing forces the later one, pick the earlier — keep phase count tight.
+6. **Surface, don't decide, the irreversible-feeling ones.** Framework
+   choice, language choice, persistence model, public API shape — these
+   reach the user even in `--auto`. The bar for "reach the user" is "the
+   user would want to own this in retrospect".
 
 ## Process
 
@@ -78,11 +113,16 @@ Append (or replace) the `## Review` section in `wiki/plan.md`:
 ```markdown
 ## Review
 
+**Mode:** interactive | --auto
 **Personas run:** forge-harden-eng, forge-harden-security[, -design][, -dx][, -scope]
 **Adversarial reviewer:** <codex | gemini | claude | none — reason>
 
 ### Findings fixed
 - <persona>: <one-line summary of what was fixed in the plan>
+- ...
+
+### Auto-decisions (--auto mode only)
+- <decision> → <chosen option> (principle <N>)
 - ...
 
 ### Open taste decisions

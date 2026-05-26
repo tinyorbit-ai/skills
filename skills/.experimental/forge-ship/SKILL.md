@@ -80,11 +80,26 @@ If decisions or incidents arose during the phase that aren't yet captured, write
 update the ADR or `wiki/notes/` entry now and link it. Update `wiki/index.md` if new
 ADRs/notes were added.
 
-### 5. Report
+### 5. Doc drift (auto if applicable)
+
+If the landed phase's diff touched a documented surface (README, `docs/`,
+`--help` text, exported API surface, OpenAPI spec, any `*.md` outside
+`wiki/`), invoke **`forge-docs`** scoped to the just-landed commit. It
+auto-fixes concrete drift (renamed commands, changed signatures, moved env
+vars) and surfaces structural gaps as taste decisions. If no doc surface
+was touched, skip cleanly and say so.
+
+`forge-docs`'s commits (if it actually edits anything) land on the base
+branch as one additional commit per phase, prefixed `docs:`. This is the
+only exception to "one commit per phase on base" — and only when docs
+actually changed.
+
+### 6. Report
 
 State: phase landed, the single commit hash on base, the gate that passed, the
-build-log entry written, and what the next phase + its branch + its gate are
-(from the plan). Optionally offer to create the next phase branch.
+build-log entry written, whether `forge-docs` ran and what it changed, and
+what the next phase + its branch + its gate are (from the plan). Optionally
+offer to create the next phase branch.
 
 ## Rules
 
