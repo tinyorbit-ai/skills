@@ -1,132 +1,121 @@
 ---
 name: forge-harden
-description: Hardens a locked plan from every angle — engineering rigor, design/UX, developer experience, security/abuse — plus an independent adversarial pass via a configurable third-party agent (Codex, Gemini, or Claude). Auto-fixes structural problems in the plan; surfaces only genuine taste decisions. Strengthens the plan; never vetoes the project. Use after forge-plan, when asked to "critique this", "harden the plan", "review the plan", "stress test this", or as stage 3 of forge.
+description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Reconciles findings, writes the plan's ## Review section, and surfaces unreconciled disagreements at the lock gate. Strengthens the plan, never vetoes the project. Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", or as stage 3 of forge.
 metadata:
   internal: true
 ---
 
 # forge-harden
 
-Stress-tests `wiki/plan.md` from multiple angles and an independent second voice,
-then revises the plan in place. The goal is a plan that survives contact with
-reality — not a verdict on the project.
+The orchestrator. Itself writes no findings — it routes through the five
+persona skills (each of which is also runnable standalone), then runs the
+independent reviewer pass, then consolidates everything into the plan's
+`## Review` section and the lock gate.
 
 ## Charter
 
-The project is worth building. **Critique the plan, never the premise.** You will
-not conclude "this shouldn't be built", "no one will want this", "not worth the
-effort", or steer toward a smaller thing for value/market reasons. Every angle below
-asks "how does this plan fail and how do we make it not fail" — never "should this
-exist". If a finding's only fix is "don't build it", you've mis-framed the finding.
+The project is worth building. **Critique the plan, never the premise.** No
+persona may conclude "this shouldn't be built" — out of scope by charter.
+Every finding is a plan change or a surfaced taste decision.
 
 ## Process
 
-Prereq: `wiki/plan.md` exists with phases + gates. If not, run `forge-plan` first.
+Prereq: `wiki/plan.md` exists with phases + gates. If not, run `forge-plan`
+first.
 
-### 0. Detect scope (decides which angles apply)
+### 1. Detect scope
 
-From the brief/plan: does it have a UI? Is it developer-facing (library / API /
-CLI / SDK)? Run the UX angle only if there's a UI; the DX angle only if dev-facing.
-State which angles you're running and why.
+From `wiki/brief.md` + `wiki/plan.md`:
 
-### 1. Engineering & architecture rigor (always)
+- Does the plan ship a UI? → run `forge-harden-design`.
+- Is the plan developer-facing (library / API / CLI / SDK)? → run
+  `forge-harden-dx`.
+- Did the user request a scope check (arg or AskUserQuestion answer)? →
+  run `forge-harden-scope`.
 
-Walk the plan and architecture for: failure modes, edge cases (nil/empty/wrong
-type/overflow/timeout/partial failure/concurrent writes/stale cache), idempotency
-and retry safety, data integrity and transaction boundaries, error propagation,
-test coverage gaps per phase, performance traps (N+1, unbounded growth, hot loops),
-and whether each phase's **verifiable gate actually proves the phase goal** (a weak
-gate is a critique finding — strengthen it).
+State plainly which personas are running and why before invoking any.
 
-### 2. Design & UX (if UI)
+### 2. Run persona passes
 
-Information hierarchy, every interaction state (loading / empty / error / success /
-partial), the user journey's rough edges, accessibility (keyboard, contrast, targets,
-screen readers), responsive intent. Concrete, not "make it nice".
+Invoke each applicable persona skill in this order. Each persona handles
+its own auto-fixes to `wiki/plan.md`; the orchestrator collects their
+report blocks and any taste decisions they surface.
 
-### 3. Developer experience (if dev-facing)
+| Order | Persona | Always? |
+|---|---|---|
+| 1 | `forge-harden-eng` | yes |
+| 2 | `forge-harden-security` | yes |
+| 3 | `forge-harden-design` | only if UI |
+| 4 | `forge-harden-dx` | only if dev-facing |
+| 5 | `forge-harden-scope` | only if requested |
 
-API/CLI ergonomics, naming, error-message quality, setup friction, the first
-five-minute experience, docs surface the plan implies. Who the developer is and
-their patience budget — not as a market, as a usability constraint.
+Persona skills run sequentially (later passes see the earlier ones' plan
+fixes). Each returns a structured summary block — keep them verbatim for
+the consolidated report.
 
-### 4. Security & abuse (always)
+### 3. Independent reviewer pass
 
-Trust boundaries, input validation, authz, secret handling, injection (SQL / command
-/ LLM-prompt), dependency supply-chain risk, anything that runs untrusted input. Note
-severity. (Threat-model the build; this is not "is it worth securing".)
+Resolve the adversarial reviewer per `references/reviewer-agents.md` —
+explicit `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then auto-probe
+`codex` → `gemini` → `claude`. State which one was picked. If none is
+available or config says `reviewer: none`, state the pass is skipped.
 
-### 5. Independent reviewer pass
+Send the standard prompt envelope from `reviewer-agents.md` with the
+artifact = current `wiki/plan.md` + `wiki/architecture.md` (post persona
+fixes — the reviewer should see the strengthened plan, not the original).
 
-Resolve the adversarial reviewer per **`references/reviewer-agents.md`** in the
-forge suite — explicit `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then
-auto-probe `codex` → `gemini` → `claude`. State which one was picked and why
-before invoking. If none is available or config says `reviewer: none`, state
-the pass is skipped and continue (don't block).
+### 4. Reconcile
 
-Send the standard prompt envelope (from `reviewer-agents.md`) with the artifact
-set to `wiki/plan.md` + `wiki/architecture.md`. For example, when the resolved
-reviewer is Codex:
+- The reviewer's findings that agree with personas → already addressed.
+- The reviewer's findings that contradict personas → carry to the taste
+  batch verbatim. Do not smooth over disagreement. State whose argument
+  you find more compelling and why, but let the user decide.
 
+### 5. Write the consolidated `## Review` section
+
+Append (or replace) the `## Review` section in `wiki/plan.md`:
+
+```markdown
+## Review
+
+**Personas run:** forge-harden-eng, forge-harden-security[, -design][, -dx][, -scope]
+**Adversarial reviewer:** <codex | gemini | claude | none — reason>
+
+### Findings fixed
+- <persona>: <one-line summary of what was fixed in the plan>
+- ...
+
+### Open taste decisions
+- <decision 1 — framed as Decision Brief>
+- ...
+
+### Reviewer-vs-persona disagreements
+- <if any — verbatim from reconciliation step>
 ```
-codex exec --skip-git-repo-check "$(cat <<'EOF'
-You are an adversarial reviewer. Be concrete. Do not comment on whether the
-project is worth building — only on the artifact's soundness.
 
-Find: (1) the weakest assumption, (2) the most likely failure / missed case,
-(3) the phase whose verifiable gate would PASS through a real regression.
+### 6. Hand off — final lock gate
 
-List every finding with a severity (high/med/low) and a one-line proposed fix.
-No hedging.
+If invoked by `forge`: return so `forge` can run its lock gate.
 
-<<<
-$(cat wiki/plan.md)
-
---- ARCHITECTURE ---
-$(cat wiki/architecture.md)
->>>
-EOF
-)"
-```
-
-Swap `codex exec --skip-git-repo-check` for `gemini -p` or `claude -p` when
-the resolver picks those.
-
-Reconcile the reviewer's findings with yours. **Do not smooth over
-disagreement** — where you and the reviewer disagree, say so explicitly and
-carry it to the final gate for the user to decide.
-
-### 6. Apply findings
-
-- **Structural / objective** (a real gap, a weak gate, a missing edge case, an
-  injection vector): fix `wiki/plan.md` in place — strengthen the phase, add a
-  phase, harden the gate. Don't ask permission to fix something objectively broken.
-- **Subjective / taste** (a tradeoff with no right answer): collect and present via
-  AskUserQuestion in one batch — don't drip questions through the analysis. Each
-  surfaced decision follows the **Decision Brief** shape (forge suite's
-  `references/question-style.md`): concrete framing, named stakes, recommendation
-  with the *why* and what would flip it.
-- Any decision changed or introduced → ADR (or update an existing ADR's Status /
-  add a "Validated in practice" note). Link from `wiki/index.md`.
-
-### 7. Write up and hand off
-
-Add a `## Review` section to `wiki/plan.md` (or update it): what each angle found,
-what changed, what's an open taste decision, which reviewer ran, and any
-unreconciled reviewer disagreement. Anti-sycophantic throughout: take
-positions, state what evidence would flip them, don't hedge.
-
-Recommend returning to `forge` for the final lock gate, or — if run standalone —
-present the open taste decisions and reviewer disagreements directly, then
-declare the plan locked.
+If invoked standalone: present the open taste decisions and reviewer
+disagreements directly as one `AskUserQuestion` batch in the **Decision
+Brief** shape (forge suite's `references/question-style.md`). When the
+user has answered, declare the plan locked.
 
 ## Rules
 
 - Never produce a "kill the project" recommendation. Out of scope by charter.
-- A finding without a concrete plan change or a surfaced decision is noise — drop it.
-- Don't write feature code. The output is a harder plan, not an implementation.
+- The orchestrator itself never writes findings — that's each persona's
+  job. Keep the orchestrator thin.
+- A persona's auto-fix is non-negotiable; the orchestrator doesn't
+  re-litigate persona fixes, only consolidates them.
+- Run personas sequentially so later passes see the cumulative plan.
+- Anti-sycophantic throughout: take positions, state what evidence would
+  flip them, don't hedge.
 
 ## References
 
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
+- `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
+  `forge-harden-dx`, `forge-harden-scope` — the five persona skills

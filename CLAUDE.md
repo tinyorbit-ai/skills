@@ -163,7 +163,12 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
 | `forge-discovery` | experimental | Idea → `wiki/brief.md`. Base seven (what/who/feel/hard part/constraints/non-goals/alternatives) + sharpening five (moment, friction-it-replaces, smallest useful, surprise, 3-year fit). Asks nothing about money/market/demand. |
 | `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
-| `forge-harden` | experimental | Hardens the *plan*: eng, design/UX, DevEx, security, + independent adversarial pass (Codex / Gemini / Claude, configurable). |
+| `forge-harden` | experimental | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). |
+| `forge-harden-eng` | experimental | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. Edges, idempotency, test gaps, and whether each gate actually proves its phase goal. |
+| `forge-harden-design` | experimental | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Hierarchy, every interaction state, accessibility, responsive intent — folded into phase work. |
+| `forge-harden-dx` | experimental | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Five-minute path, error-message obligation, naming, install friction — folded into phase work. |
+| `forge-harden-security` | experimental | Plan-time security review (CSO persona). Modes — DAILY / DEEP. OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged. |
+| `forge-harden-scope` | experimental | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
 | `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
 | `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, learnings → `wiki/learnings.md`. |
 | `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry. |
