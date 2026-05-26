@@ -180,9 +180,14 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-dx` | experimental | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
 | `forge-retro` | experimental | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
 
-> **forge suite** (13 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
-> Loop: `forge` → init → discovery (+ambition) → plan → harden → lock → per run: build →
-> review (+polish/+dx) → ship; at Done: retro. The 4 persona skills auto-invoke in their
-> phase and also run standalone. `forge-review` absorbed the old `forge-qa`. Install with
-> `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill '*'`. Promote to
-> `skills/` after one full dogfood run (per the experimental workflow above).
+> **forge suite** (20 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
+> Loop: `forge` → init → discovery (+ambition) → plan → (+design-explore if open) →
+> harden → lock → per run: build → review (+polish/+dx) → ship (+docs); at Done: retro.
+> `forge-harden` orchestrates five plan-time persona skills (-eng / -security always;
+> -design if UI; -dx if dev-facing; -scope on request) plus an independent reviewer
+> pass via Codex / Gemini / Claude (configurable in `wiki/.forge/config.yaml`). Each
+> persona is also runnable standalone. The four runtime persona skills
+> (forge-polish, forge-dx, forge-docs, forge-ambition) auto-invoke in their phase and
+> also run standalone. `forge-review` absorbed the old `forge-qa`. Install with
+> `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill '*'`. Promote
+> to `skills/` after one full dogfood run (per the experimental workflow above).
