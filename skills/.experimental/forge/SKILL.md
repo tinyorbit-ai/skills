@@ -1,6 +1,6 @@
 ---
 name: forge
-description: Resumable end-to-end build pipeline for makers — tells you where you left off and continues from exactly there, with zero business/market/demand gatekeeping. Routes through setup, discovery, planning, hardening, then a build→review→ship loop one phase at a time. Invoke with `help` (or `--help` / `?`) to print a status-aware usage map instead of running. Use when starting OR resuming a project, when asked to "forge this", "forge help", "continue", "where was I", "build the next phase", "let's build X", or any time you want forge to pick up the thread.
+description: Resumable end-to-end build pipeline for makers — tells you where you left off and continues from exactly there, with zero gatekeeping on whether the project should exist or whether you're the right person to build it (context, including business context, is welcome — it just never becomes a verdict). Routes through setup, discovery, planning, hardening, then a build→review→ship loop one phase at a time, with a wiki knowledge base alongside. Invoke with `help` (or `--help` / `?`) to print a status-aware usage map instead of running. Use when starting OR resuming a project, when asked to "forge this", "forge help", "continue", "where was I", "build the next phase", "let's build X", or any time you want forge to pick up the thread.
 metadata:
   internal: true
 ---
@@ -13,10 +13,13 @@ gatekeeping on whether the thing should exist — ever.
 
 ## Charter (governs everything)
 
-The project is worth building because you chose to build it. forge never questions
-whether it should exist, never raises money/market/demand/"is it worth it", never
-calls an idea useless, never optimizes for speed-to-value. It understands the build,
-locks decisions, hardens it, and builds it in clean verifiable phases. Full charter:
+Two things forge never questions: whether the project should exist (you chose to
+build it — settled), and whether you're the right person to build it (settled). It
+never calls an idea useless or optimizes for speed-to-value. **Everything else is
+open, and context is welcome — more is better than less.** Business, market, and
+demand context are valid *input* that sharpens the build; they just never become a
+verdict on those two settled questions. forge understands the build, locks decisions,
+hardens it, and builds it in clean verifiable phases. Full charter:
 `references/charter.md` — read it before doing anything.
 
 ## Help mode (short-circuit)
@@ -37,6 +40,7 @@ Full map ───────────────────────�
   PLAN   init · discovery (+ambition) · plan · harden
   BUILD  build · review (+polish +dx) · ship   ·· one phase per /forge run
   LOOK   debug (root-cause) · retro (synthesis, auto at Done)
+  WIKI   wiki (ask · ingest context) · wiki-maintain (index · health) ·· any time
 
 Every skill also runs standalone — invoke any directly:
   /forge-init  /forge-discovery  /forge-ambition  /forge-plan
@@ -46,6 +50,7 @@ Every skill also runs standalone — invoke any directly:
   /forge-harden-dx   /forge-harden-scope
   /forge-build  /forge-review  /forge-polish  /forge-dx
   /forge-ship  /forge-docs  /forge-debug  /forge-retro
+  /forge-wiki  /forge-wiki-maintain   (knowledge base — ask, ingest, upkeep)
 
 /forge with no args continues from ▶ Next.
 ```

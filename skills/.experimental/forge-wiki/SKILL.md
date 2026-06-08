@@ -1,0 +1,125 @@
+---
+name: forge-wiki
+description: Ask anything against the project's wiki, and ingest any source into its knowledge base — email, business context, research, conversations, pasted notes, files. Answers from indexes then articles with citations; ingests through a quality filter into flat Timeline-based living articles under wiki/knowledge/. Plan-first — it proposes what it will write or merge and waits for approval before mutating the wiki. Use when asked to "ask the wiki", "what do we know about X", "ingest this", "add this context", "remember this email/doc", "compile this into the wiki", or any time external context should live alongside the repo.
+metadata:
+  internal: true
+---
+
+# forge-wiki
+
+The wiki's read/write brain. Two jobs: **answer questions** from the wiki, and
+**ingest context** into it. The wiki layout, article format, and Timeline rules live
+in the forge orchestrator's `references/wiki.md` — read it before writing anything.
+
+## Charter
+
+Context is welcome — **more is better than less** (`references/charter.md`). Ingest
+business rationale, market/competitive notes, demand signals, stakeholder email,
+user research, conversations — all of it. The one thing you may never do with
+ingested context: turn it into a verdict on whether the project should exist or
+whether the user is the right person to build it. Those two questions are settled.
+
+## Routing
+
+Read the request and pick the mode. If `wiki/` doesn't exist, run `forge-init` first.
+
+- A **question** ("what do we know about…", "why did we…", "ask the wiki…") → **ASK**.
+- **Material to capture** (a pasted block, a file path, "ingest this", "remember
+  this", "add this context") → **INGEST**.
+- Ambiguous → ask the user which they meant before acting.
+
+---
+
+## ASK
+
+Answer using the wiki as the primary source. Full procedure in
+`references/ask.md`. In short:
+
+1. Read `wiki/index.md`, then `wiki/knowledge/INDEX.md`. Identify the 1–3 relevant
+   topics and any relevant project-record files (brief, ADRs, learnings).
+2. Read those topic `_index.md` files; select the 3–8 most relevant articles. Read
+   them in full. Grep `wiki/` for keywords the indexes might have missed.
+3. Synthesize a direct answer. **Cite every source by wikilink** (e.g. "per
+   `[[knowledge/business-context/q3-launch-driver]]`"). Name gaps the wiki doesn't
+   cover. List sources consulted at the end.
+4. Flags: `--sources-only` returns relevant paths without synthesizing;
+   `--file-back` offers to file the synthesis as a new article (this is an INGEST —
+   go plan-first per below) only when it genuinely creates new connections.
+
+ASK is read-only by default. It never writes unless `--file-back` is given and you
+have run the plan-first gate.
+
+---
+
+## INGEST (plan-first — always)
+
+Capture a source into `wiki/knowledge/` as a living article. **Never mutate the wiki
+before showing the plan and getting approval.** Full quality filter, matching, and
+merge rules in `references/ingest.md`. The shape:
+
+### 1. Read the source
+
+Take it from the pasted text, the file path, or the named conversation. Read it in
+full. If it's a file outside the wiki, keep the original path for the `sources:` line.
+
+### 2. Quality filter (decide the disposition)
+
+- **Article-worthy** — structured, ≥ a few concrete points → becomes/updates an
+  article.
+- **Timeline-only** — a single thread, note, or quote that reinforces existing
+  knowledge but can't anchor its own article → must merge into an existing article;
+  if none fits, downgrade to *skip* and say so.
+- **Skip** — stub, pure link dump, no real content → log the reason, write nothing.
+
+### 3. Match: NEW vs MERGE
+
+Grep the candidate topic and read topic `_index.md` summaries. Either it's **NEW**
+(no existing article covers this) or **MERGE** (one does — append to its Timeline,
+don't overwrite). Pick the target topic by *content fit* (anti-sprawl: grep
+`knowledge/INDEX.md` for a near-synonym first; create a new top-level topic only if
+nothing fits; never a subfolder).
+
+### 4. Propose the plan — and stop
+
+Show the user, before touching disk:
+
+- **Disposition** — article-worthy / timeline-only / skip.
+- **NEW** → target `wiki/knowledge/<topic>/<slug>.md`, the proposed Summary line, and
+  the Core Concept in brief. Note if it would create a new topic.
+- **MERGE** → which article, the classification (Reinforced / Refined / Contradicted),
+  and — if Refined/Contradicted — the exact Core Concept diff.
+- Any **Contradicted** rewrite is high-stakes: call it out explicitly.
+
+Then ask for approval (AskUserQuestion). Only on yes do you write.
+
+### 5. Write
+
+On approval, write per `references/ingest.md` and the article format in
+`references/wiki.md`:
+
+- **NEW** — full article with frontmatter (`title`, `compiled`, `last_evidence`,
+  `sources`, `quality`, `tags`), Summary, Core Concept, Key Points, Related,
+  Timeline (one `Compiled` entry).
+- **MERGE** — append the Timeline entry with the right verb; update Core Concept only
+  for Refined/Contradicted that clear the quality bar; append the source path to
+  `sources:`; bump `last_evidence` (leave `compiled`).
+- Append a row to `wiki/knowledge/_compilation-log.md`.
+- Add the article to its topic `_index.md` and ensure it's reachable from
+  `wiki/index.md` → `[[knowledge/INDEX]]` (or run `forge-wiki-maintain` to
+  regenerate). Use `[[wikilinks]]`.
+
+### 6. Report
+
+Tell the user what landed: article path, NEW or MERGE (+verb), topic, whether a new
+topic was created, and the one-line Summary. This is the capture rule — say it in the
+same turn.
+
+## Rules
+
+- Plan-first on every mutation. No silent writes, ever.
+- Never overwrite an article — the Timeline is append-only; Core Concept changes are
+  deliberate, quality-gated, and (for Contradicted) user-confirmed with a diff.
+- Obsidian `[[wikilinks]]` only; every new file reachable from an index in the same
+  change.
+- After a batch of ingests, suggest `forge-wiki-maintain` to regenerate indexes and
+  health-check links.

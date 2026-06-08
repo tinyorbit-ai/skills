@@ -159,9 +159,9 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 
 | Skill | Status | Description |
 |---|---|---|
-| `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. No business/demand gatekeeping. |
-| `forge-init` | experimental | Scaffolds the Obsidian-style `wiki/`; injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
-| `forge-discovery` | experimental | Idea → `wiki/brief.md`. Base seven (what/who/feel/hard part/constraints/non-goals/alternatives) + sharpening five (moment, friction-it-replaces, smallest useful, surprise, 3-year fit). Asks nothing about money/market/demand. |
+| `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
+| `forge-init` | experimental | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base); injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
+| `forge-discovery` | experimental | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening five ("I don't know yet" is valid). Context welcome; never reopens whether it should exist / who builds it. |
 | `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
 | `forge-harden` | experimental | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). |
 | `forge-harden-eng` | experimental | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. Edges, idempotency, test gaps, and whether each gate actually proves its phase goal. |
@@ -179,8 +179,10 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, AI-slop, feel; before/after fixes. Auto in `forge-review` (if UI); standalone. |
 | `forge-dx` | experimental | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
 | `forge-retro` | experimental | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
+| `forge-wiki` | experimental | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
+| `forge-wiki-maintain` | experimental | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
 
-> **forge suite** (20 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
+> **forge suite** (22 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
 > Loop: `forge` → init → discovery (+ambition) → plan → (+design-explore if open) →
 > harden → lock → per run: build → review (+polish/+dx) → ship (+docs); at Done: retro.
 > `forge-harden` orchestrates five plan-time persona skills (-eng / -security always;
@@ -188,6 +190,12 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 > pass via Codex / Gemini / Claude (configurable in `wiki/.forge/config.yaml`). Each
 > persona is also runnable standalone. The four runtime persona skills
 > (forge-polish, forge-dx, forge-docs, forge-ambition) auto-invoke in their phase and
-> also run standalone. `forge-review` absorbed the old `forge-qa`. Install with
+> also run standalone. The `wiki/` is two layers — a project record (brief, plan,
+> ADRs, build-log, learnings) and a `knowledge/` base of ingested context as
+> Timeline-based living articles (`forge-wiki` ingests/asks, `forge-wiki-maintain`
+> keeps indexes + links healthy). Charter (relaxed): the only off-limits moves are
+> questioning whether the project should exist or whether the user should build it;
+> all context, business included, is welcome as input. `forge-review` absorbed the
+> old `forge-qa`. Install with
 > `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill '*'`. Promote
 > to `skills/` after one full dogfood run (per the experimental workflow above).

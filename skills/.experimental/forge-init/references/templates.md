@@ -36,6 +36,13 @@ _None yet — the first ADR lands with [[plan]]._
 
 _None yet — root-cause writeups land here as they happen._
 
+## Knowledge base
+
+Ingested context the build rests on — business rationale, research, email,
+conversations. Living articles with Timelines; ingest with `forge-wiki`.
+
+- [[knowledge/INDEX]] — topic directory for ingested context
+
 ## Reading order
 
 1. [[brief]] — what and why
@@ -158,6 +165,45 @@ Empty files, just to keep the directories in git.
 
 ---
 
+## `wiki/knowledge/INDEX.md`
+
+```markdown
+# Knowledge Base — {PROJECT}
+
+Part of [[index]]. Ingested context the build rests on — business rationale,
+research, email, conversations. Living articles with Timelines (Compiled →
+Reinforced → Refined → Contradicted). Ingest with `forge-wiki`; keep this index
+current with `forge-wiki-maintain`.
+
+## Topic Directory
+
+| Topic | Articles | Index |
+|-------|----------|-------|
+| _none yet_ | 0 | — |
+
+## Quick lookup
+
+_Empty — topics and articles appear here as context is ingested._
+```
+
+---
+
+## `wiki/knowledge/_compilation-log.md`
+
+```markdown
+# Compilation log
+
+Append-only audit of what `forge-wiki` ingested. One row per source.
+
+| Date | Source | Action | Article | Verb | Quality | Reason |
+|------|--------|--------|---------|------|---------|--------|
+```
+
+Actions: `ingested-new` · `ingested-timeline` · `skipped`.
+Verbs (for ingested rows): `Compiled` · `Reinforced` · `Refined` · `Contradicted`.
+
+---
+
 ## ADR template (for reference; `forge-plan`/`forge-harden` use it)
 
 `wiki/decisions/NNNN-slug.md`:
@@ -213,9 +259,18 @@ This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for t
   system fails is stronger signal than the happy path.
 - **Deliberate scope cuts** → record in `wiki/improvements.md` ("deferred X for Y").
 - **Architecture changes** → keep `wiki/architecture.md` honest as phases land.
+- **External context that informs the build** (business rationale, research,
+  email, a decision-driving conversation, competitive or user notes) → ingest it
+  into the knowledge base at `wiki/knowledge/` as a living article with a Timeline.
+  Use `forge-wiki` to do this (it's plan-first); `forge-wiki-maintain` keeps the
+  indexes and links healthy. **More context is better than less** — capture it.
 - When you make such a change, **say so in your reply** — note which wiki file you
   updated. Under-capturing the *why* is the failure mode to avoid; when in doubt,
   write it down.
+
+> Charter: the project's right to exist and the user's fitness to build it are
+> settled and never questioned. Context (including business/market context) is
+> always welcome as input — it just never becomes a verdict on those two things.
 
 ## Phase & branch discipline
 
