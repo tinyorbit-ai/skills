@@ -1,7 +1,9 @@
 # forge-init templates
 
-Copy these verbatim, substituting `{PROJECT}` (repo/project name) and `{ONELINE}`
-(one-sentence problem/intent statement). Today's date: get it from the environment.
+Copy these verbatim, substituting `{PROJECT}` (repo/project name). `{ONELINE}`
+is intentionally left as `_filled by forge-discovery_` — discovery writes the
+real one-liner once the brief is captured. Don't prompt the user for it here.
+Today's date: get it from the environment.
 
 ---
 
@@ -198,6 +200,10 @@ Empty files, just to keep the directories in git.
 This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for the
 *why*. Code says what; the wiki says why. Keeping it current is not optional.
 
+- **Linking is Obsidian-style.** Cross-reference wiki files with `[[wikilinks]]`
+  (e.g. `[[architecture]]`, `[[decisions/0007-slug]]`), not plain Markdown links.
+  **Every wiki file must be reachable from `wiki/index.md`** — when you create one,
+  add it to the relevant section of `index.md` in the same change.
 - **Non-trivial decisions & trade-offs** → record an ADR in `wiki/decisions/`
   (Context · Decision · Why · Alternatives · Consequences). The *why* and the roads
   not taken matter more than the choice. Number ADRs sequentially, zero-padded

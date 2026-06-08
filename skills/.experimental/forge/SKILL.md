@@ -40,8 +40,12 @@ Full map ───────────────────────�
 
 Every skill also runs standalone — invoke any directly:
   /forge-init  /forge-discovery  /forge-ambition  /forge-plan
-  /forge-harden  /forge-build  /forge-review  /forge-polish
-  /forge-dx  /forge-ship  /forge-debug  /forge-retro
+  /forge-design-explore           (divergent design variants)
+  /forge-harden                   (orchestrator; --auto for auto-decision)
+  /forge-harden-eng  /forge-harden-security  /forge-harden-design
+  /forge-harden-dx   /forge-harden-scope
+  /forge-build  /forge-review  /forge-polish  /forge-dx
+  /forge-ship  /forge-docs  /forge-debug  /forge-retro
 
 /forge with no args continues from ▶ Next.
 ```
@@ -85,8 +89,9 @@ with nothing — offer, via AskUserQuestion, to run setup→discovery→plan→h
 sequence so first-time setup isn't four invocations.)
 
 When `forge-harden` finishes, present the final lock gate (AskUserQuestion): phase
-list with each phase's verifiable gate, open taste decisions, any unreconciled Codex
-disagreement. On confirm, the plan is **locked** and the build loop is unlocked.
+list with each phase's verifiable gate, open taste decisions, which reviewer
+ran, and any unreconciled reviewer disagreement. On confirm, the plan is
+**locked** and the build loop is unlocked.
 
 ### Build loop (plan locked, phases remain) — ONE phase per run
 
@@ -122,3 +127,5 @@ disagreement. On confirm, the plan is **locked** and the build loop is unlocked.
 - `references/charter.md` — the worldview (mandatory read)
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md`), ADR format, capture rule
+- `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
+- `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced

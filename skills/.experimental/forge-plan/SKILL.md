@@ -39,7 +39,9 @@ API/interface shape, persistence, project structure, build order, testing approa
 For each *non-trivial* one:
 
 - Present the realistic options with a recommendation and a reason.
-- Lock it with AskUserQuestion (take a position; say what would change your mind).
+- Lock it with AskUserQuestion in the **Decision Brief** shape (forge suite's
+  `references/question-style.md`): framing names the concrete tradeoff;
+  recommended option carries the *why* and the evidence that would flip it.
 - Write an ADR: `wiki/decisions/NNNN-slug.md` (Context · Decision · Why ·
   Alternatives · Consequences). Link it from `wiki/index.md`. Trivial choices don't
   need an ADR — reserve them for decisions a future reader would ask "why?" about.
@@ -89,5 +91,7 @@ harden the plan before building (or return to `forge`).
 - A flat task list is not a plan. No phases / no gates / no branches = not done.
 - Don't write feature code. Architecture, decisions, phases only.
 - Every locked decision gets an ADR with a non-empty "Alternatives considered".
+- Every AskUserQuestion call follows the Decision Brief shape (forge suite's
+  `references/question-style.md`).
 - Don't reduce scope to make it "more shippable" — that's the gatekeeping forge
   rejects. Reorder and slice for soundness; keep the ambition the brief set.

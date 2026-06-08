@@ -1,6 +1,6 @@
 ---
 name: forge-review
-description: Staff-grade review of a freshly built phase — security, high-quality tests written and all passing, strict type safety with escape hatches banned, runtime verification of the gate and goal, and an optional third-party Codex pass. Auto-fixes every objective finding, surfaces only genuine taste decisions, and records lessons in the wiki. Use after forge-build, when asked to "review this", "review the phase", "security and quality review", or as the review step of the forge loop.
+description: Staff-grade review of a freshly built phase — security, high-quality tests written and all passing, strict type safety with escape hatches banned, runtime verification of the gate and goal, plus an optional third-party adversarial pass (Codex, Gemini, or Claude per config). Auto-fixes every objective finding, surfaces only genuine taste decisions, and records lessons in the wiki. Use after forge-build, when asked to "review this", "review the phase", "security and quality review", or as the review step of the forge loop.
 metadata:
   internal: true
 ---
@@ -10,7 +10,9 @@ metadata:
 The quality gate between building a phase and shipping it. Folds in the gstack
 review principles: security, real tests, strict types, third-party eyes — then
 **fixes what it finds** and remembers the lesson. Also does the runtime
-verification that the old `forge-qa` did (this skill replaces it).
+verification that the old `forge-qa` did (this skill replaces it). The
+third-party pass is configurable — Codex, Gemini, or Claude — via the shared
+reviewer abstraction (`forge/references/reviewer-agents.md`).
 
 ## Charter
 
@@ -51,18 +53,37 @@ a high-severity finding.
    - If the build is **developer-facing** (CLI/API/SDK/lib), invoke **`forge-dx`**
      here (live onboarding/TTHW/error-message audit). Same: objective fixes fold in.
    - Both are scoped to what the phase changed and skip cleanly if out of scope.
-6. **Optional Codex third-party pass.** `command -v codex`; if absent, state it's
-   skipped and continue (don't block). If present, send the diff + phase spec and
-   ask for the weakest point, the most likely missed failure, and any test that
-   would pass through a real regression. Example:
+6. **Optional third-party adversarial pass.** Resolve the reviewer per
+   **`forge/references/reviewer-agents.md`** — explicit `wiki/.forge/config.yaml`,
+   then `$FORGE_REVIEWER`, then auto-probe `codex` → `gemini` → `claude`. State
+   which one was picked and why. If none available or config says
+   `reviewer: none`, state the pass is skipped and continue (don't block).
+
+   Send the standard prompt envelope from `reviewer-agents.md` with the
+   artifact = phase diff (`git diff <base>...HEAD`) + the phase spec from
+   `wiki/plan.md`. Example invocation when Codex is resolved:
+
    ```
-   codex exec --skip-git-repo-check "Adversarially review this phase diff for
-   security, missing tests, and type-safety holes. Be specific. Do not comment on
-   whether the project is worth building.<<<
+   codex exec --skip-git-repo-check "$(cat <<'EOF'
+   You are an adversarial reviewer of a freshly built phase. Find: (1) the
+   weakest point, (2) the most likely missed failure / regression, (3) any test
+   that would PASS through a real regression. Severity-tag each finding
+   (high/med/low) and propose a one-line fix. Be specific. Do not comment on
+   whether the project is worth building.
+
+   <<<
    $(git diff <base>...HEAD)
-   >>>"
+
+   --- PHASE SPEC ---
+   $(sed -n '/^## Phase <n>/,/^## Phase /p' wiki/plan.md)
+   >>>
+   EOF
+   )"
    ```
-   Reconcile; carry genuine disagreements to the taste batch (don't smooth them).
+
+   Swap `codex exec --skip-git-repo-check` for `gemini -p` or `claude -p` when
+   the resolver picks those. Reconcile; carry genuine disagreements to the
+   taste batch (don't smooth them).
 
 ## Fix policy
 
@@ -72,9 +93,11 @@ a high-severity finding.
   affected pass until clean**. Loop until every objective finding is resolved and
   the full gate + suite are green. Don't ask permission to fix something broken.
 - **Subjective findings → one batch at the end.** Genuine tradeoffs with no right
-  answer (and any unreconciled Codex disagreement) go into a single AskUserQuestion
-  batch. Don't drip questions mid-pass. Take a position on each; say what evidence
-  would change it (anti-sycophantic).
+  answer (and any unreconciled reviewer disagreement) go into a single
+  AskUserQuestion batch in the **Decision Brief** shape (forge suite's
+  `references/question-style.md`): concrete framing, named stakes,
+  recommendation with the *why* and the evidence that would flip it. Don't
+  drip questions mid-pass. Take a position on each; anti-sycophantic throughout.
 
 ## Learnings → wiki
 
@@ -104,3 +127,5 @@ hand to **`forge-ship`** to land the phase. Never ship from here.
 
 - `references/review-standards.md` — what each pass checks, in depth
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
+- forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
+- forge suite's `references/question-style.md` — Decision Brief format for the taste batch

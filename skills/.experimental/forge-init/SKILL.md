@@ -29,8 +29,10 @@ that captures the *why* as you go.
 ### 2. Scaffold the wiki
 
 Create `wiki/` with these files **only if missing** (never overwrite). Use the
-templates in `references/templates.md`, filling the project name and a one-line
-problem statement (ask the user for the one-liner if not obvious from the repo):
+templates in `references/templates.md`, substituting `{PROJECT}` from the repo
+directory name. Leave `{ONELINE}` as the placeholder `_filled by forge-discovery_`
+— **do not ask the user for a one-liner here**. The proper brief intake belongs
+to `forge-discovery`, which captures the full problem framing, not a sentence.
 
 ```
 wiki/
@@ -77,11 +79,24 @@ Confirm the base branch (current branch, usually `main`). Record it in
 (Full contract: the forge suite's `branch-discipline` reference. `forge-ship`
 enforces it. `forge-init` only sets it up and records the base branch.)
 
-### 5. Report
+### 5. Report and offer to chain into discovery
 
 List every file created and every file the rules block was injected into (created
-vs. updated-in-place). Then recommend: run `forge-discovery` next (or `forge` for the
-full pipeline).
+vs. updated-in-place).
+
+Then **offer (via AskUserQuestion)** to invoke `forge-discovery` right now to
+build the real project brief. Two options:
+
+- **Yes — run discovery now.** Recommended default. Chains directly into
+  `forge-discovery`, which collects the full brief and replaces the
+  `wiki/brief.md` stub + the `{ONELINE}` placeholder in `wiki/index.md`.
+- **Not yet — I'll run it later.** Stop here; the scaffold is complete and the
+  user can run `forge-discovery` (or `forge`) whenever they're ready.
+
+If the user invoked `forge-init` as part of a `forge` orchestration run, defer
+the offer to `forge` (it already handles "fresh project → setup → discovery →
+plan → harden" chaining via its own AskUserQuestion). Standalone runs of
+`forge-init` are the ones that need this offer.
 
 ## Rules
 
