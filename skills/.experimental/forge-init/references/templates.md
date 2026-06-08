@@ -268,6 +268,30 @@ This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for t
   updated. Under-capturing the *why* is the failure mode to avoid; when in doubt,
   write it down.
 
+### Ambient capture — file context as it surfaces in conversation
+
+You don't wait to be asked. When the user drops **durable, build-relevant context**
+mid-conversation, capture it into `wiki/knowledge/` in the **same turn**, then note
+it in one line. This is what keeps the wiki a living record instead of a stale one.
+
+- **Capture** (durable, affects the build): stakeholder directives ("my PM said do X
+  over Y"), constraints, deadlines, decision drivers, business rationale, user/research
+  findings, hard preferences ("we must support offline"). Anything a future session
+  would need to understand *why* the build is shaped as it is.
+- **Skip** (transient): questions, thinking-aloud, chit-chat, instructions about the
+  current task, anything not durable. When unsure, lean toward capturing — but a
+  one-off aside is not an article.
+- **Additive writes happen immediately, no approval** — a new `knowledge/` article, or
+  a Timeline append (`Compiled` / `Reinforced`) to an existing one. Then say, briefly:
+  `📓 noted: <one line> → [[knowledge/<topic>/<slug>]]`.
+- **Only pause to confirm** when a capture would **rewrite or contradict** an existing
+  article's Core Concept (a `Refined`/`Contradicted` change) — show the diff first.
+- Use `forge-wiki`'s article format + Timeline and keep every new file reachable from
+  the index. Run `forge-wiki-maintain` now and then to regenerate indexes and check
+  links. Explicit `forge-wiki` ingests (a pasted doc, a file) stay **plan-first**.
+- **Control:** if the user says "pause/mute wiki capture", stop ambient capture for the
+  rest of the session (explicit `forge-wiki` still works); "resume capture" re-enables it.
+
 > Charter: the project's right to exist and the user's fitness to build it are
 > settled and never questioned. Context (including business/market context) is
 > always welcome as input — it just never becomes a verdict on those two things.

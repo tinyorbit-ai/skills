@@ -150,9 +150,17 @@ Whenever a non-trivial decision, trade-off, scope cut, incident, review learning
 **a piece of context that informs the build** arises: **write it to the wiki and tell
 the user you did, in the same turn.** Decisions → `decisions/`. Incidents → `notes/`.
 Review lessons → `learnings.md`. Scope cuts → `improvements.md`. External context
-(email, research, business rationale, conversation) → `forge-wiki` ingests it into
-`knowledge/`. Under-capturing the *why* is the failure mode forge exists to prevent.
-When in doubt, write it down.
+(email, research, business rationale) → `forge-wiki` ingests it into `knowledge/`.
+
+This includes **context the user simply mentions in conversation** — "my PM said do X
+over Y", a constraint, a deadline, a user finding. Don't wait to be asked: file
+durable, build-relevant mentions into `knowledge/` as they surface (additive writes go
+in immediately; a Core Concept rewrite confirms first). This *ambient capture* is what
+makes the wiki a living record. The project's injected `forge-wiki-rules` make it the
+default behavior for every agent; `forge-wiki` is the tool that does the writing.
+
+Under-capturing the *why* is the failure mode forge exists to prevent. When in doubt,
+write it down.
 
 ## The wiki skills
 

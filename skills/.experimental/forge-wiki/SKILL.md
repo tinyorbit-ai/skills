@@ -1,6 +1,6 @@
 ---
 name: forge-wiki
-description: Ask anything against the project's wiki, and ingest any source into its knowledge base — email, business context, research, conversations, pasted notes, files. Answers from indexes then articles with citations; ingests through a quality filter into flat Timeline-based living articles under wiki/knowledge/. Plan-first — it proposes what it will write or merge and waits for approval before mutating the wiki. Use when asked to "ask the wiki", "what do we know about X", "ingest this", "add this context", "remember this email/doc", "compile this into the wiki", or any time external context should live alongside the repo.
+description: Ask anything against the project's wiki, and capture any context into its knowledge base — email, business context, research, conversations, pasted notes, files, or durable facts the user mentions in passing. Answers from indexes then articles with citations; files context through a quality filter into flat Timeline-based living articles under wiki/knowledge/. Explicit ingest is plan-first (proposes writes/merges before mutating); ambient capture of conversational context auto-files additive notes and confirms only on rewrites. Use when asked to "ask the wiki", "what do we know about X", "ingest this", "add this context", "remember this", "compile this into the wiki", or any time context should live alongside the repo.
 metadata:
   internal: true
 ---
@@ -25,7 +25,9 @@ Read the request and pick the mode. If `wiki/` doesn't exist, run `forge-init` f
 
 - A **question** ("what do we know about…", "why did we…", "ask the wiki…") → **ASK**.
 - **Material to capture** (a pasted block, a file path, "ingest this", "remember
-  this", "add this context") → **INGEST**.
+  this", "add this context") → **INGEST** (plan-first).
+- **Durable context that surfaced in conversation** (the user mentioned a constraint,
+  a stakeholder directive, a deadline) → **AMBIENT CAPTURE** (lighter; see below).
 - Ambiguous → ask the user which they meant before acting.
 
 ---
@@ -114,12 +116,35 @@ Tell the user what landed: article path, NEW or MERGE (+verb), topic, whether a 
 topic was created, and the one-line Summary. This is the capture rule — say it in the
 same turn.
 
+---
+
+## AMBIENT CAPTURE (lighter — additive is auto)
+
+This is the path the project's `forge-wiki-rules` use when durable context surfaces in
+conversation (the agent files it *without* being explicitly invoked). It trades the
+full plan-first gate for low friction, but **only for additive writes**:
+
+- **Qualifies:** durable, build-relevant context — stakeholder directives ("my PM said
+  do X over Y"), constraints, deadlines, decision drivers, business rationale,
+  user/research findings, hard preferences. Skip transient chatter and task
+  instructions.
+- **Additive → write immediately, no approval.** A NEW article, or a `Compiled` /
+  `Reinforced` Timeline append to an existing one. Then note it in one line:
+  `📓 noted: <one line> → [[knowledge/<topic>/<slug>]]`.
+- **Rewrites still confirm.** If the new context would `Refine`/`Contradict` an
+  existing Core Concept, stop and show the diff first — same as INGEST.
+- Same format, taxonomy, logging, and indexing as INGEST (Steps 5–6 / `references/
+  ingest.md`). Suggest `forge-wiki-maintain` after a run of captures.
+- Honor "pause/mute wiki capture" — go silent until "resume capture".
+
 ## Rules
 
-- Plan-first on every mutation. No silent writes, ever.
+- **Explicit INGEST is plan-first** — propose, then write on approval. **Ambient
+  capture auto-files additive writes** and confirms only rewrites. Neither ever
+  silently rewrites a Core Concept.
 - Never overwrite an article — the Timeline is append-only; Core Concept changes are
   deliberate, quality-gated, and (for Contradicted) user-confirmed with a diff.
 - Obsidian `[[wikilinks]]` only; every new file reachable from an index in the same
   change.
-- After a batch of ingests, suggest `forge-wiki-maintain` to regenerate indexes and
-  health-check links.
+- After a batch of ingests/captures, suggest `forge-wiki-maintain` to regenerate
+  indexes and health-check links.
