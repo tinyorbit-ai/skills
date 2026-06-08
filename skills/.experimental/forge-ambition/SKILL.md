@@ -1,6 +1,6 @@
 ---
 name: forge-ambition
-description: Charter-safe ambition check — pressure-tests whether you're building the most ambitious version of the thing YOU already chose to build. Challenges self-imposed limits and timid premises; never asks about money, market, demand, or whether it's worth building. Auto-invoked by forge-discovery before the brief locks; also standalone. Use when asked "am I thinking big enough", "challenge this", "ambition check", or when a brief/plan feels smaller than it could be.
+description: Charter-safe ambition check — pressure-tests whether you're building the most ambitious version of the thing YOU already chose to build. Challenges self-imposed limits and timid premises; never reopens whether the project should exist or whether you're the right person to build it. Auto-invoked by forge-discovery before the brief locks; also standalone. Use when asked "am I thinking big enough", "challenge this", "ambition check", or when a brief/plan feels smaller than it could be.
 metadata:
   internal: true
 ---
@@ -12,12 +12,13 @@ version of the thing you chose?* — with none of the gatekeeping.
 
 ## Charter (hard boundary)
 
-The project is worth building; that is settled and never revisited. This skill
-**only** pushes ambition *within the intent the user already chose*. It must never:
-ask if it's worth building, raise money/market/demand/users, suggest pivoting to a
-"better product", or expand scope toward a business. It expands scope only toward a
-*more excellent version of the same thing*, and only with the user's consent. If you
-can't make a suggestion without invoking value/market, don't make it.
+The project's right to exist and the user's fitness to build it are settled and never
+revisited. This skill **only** pushes ambition *within the intent the user already
+chose*. It must never reopen "is it worth building" or "are you the right person", and
+never suggest pivoting to a "better product" or expanding scope toward a business.
+Context is fine to *consider* — but it expands scope only toward a *more excellent
+version of the same thing*, and only with the user's consent. The boldness it argues
+for is about craft and intent, never about market upside.
 
 ## What it does
 

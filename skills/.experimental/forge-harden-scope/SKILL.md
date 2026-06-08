@@ -1,6 +1,6 @@
 ---
 name: forge-harden-scope
-description: Plan-time scope review (charter-safe CEO analogue) — pressure-tests whether the plan is the boldest version of what the user already chose. Three modes — EXPAND (raise ambition within the chosen intent), HOLD (lock the current scope deliberately), TRIM (strip non-essential phases). Never asks money/market/demand or whether the project should exist; "smaller on purpose" is a respected answer. Use after forge-plan when ambition feels off, when asked "scope review", "is this ambitious enough", "trim the plan", or via forge-harden orchestration. Complements forge-ambition (which runs at brief time).
+description: Plan-time scope review (charter-safe CEO analogue) — pressure-tests whether the plan is the boldest version of what the user already chose. Three modes — EXPAND (raise ambition within the chosen intent), HOLD (lock the current scope deliberately), TRIM (strip non-essential phases). Never reopens whether the project should exist or whether the user should build it; "smaller on purpose" is a respected answer. Use after forge-plan when ambition feels off, when asked "scope review", "is this ambitious enough", "trim the plan", or via forge-harden orchestration. Complements forge-ambition (which runs at brief time).
 metadata:
   internal: true
 ---
@@ -14,12 +14,13 @@ intent.
 
 ## Charter (hard boundary)
 
-The project is worth building — settled, never re-litigated. This skill
-only pressure-tests scope *within the intent the user already chose*. It
-never asks: is it worth building, money/market/demand, who would use it,
-whether to pivot to a "better product". Scope changes only toward a *more
-excellent or more focused* version of the same thing, and only with the
-user's consent. "I want it small" is a complete answer that ends the
+The project's right to exist and the user's fitness to build it are settled,
+never re-litigated. This skill only pressure-tests scope *within the intent
+the user already chose*. It never reopens "is it worth building" or "are you
+the right person", and never suggests pivoting to a "better product".
+Context is fine to consider; scope changes only toward a *more excellent or
+more focused* version of the same thing, and only with the user's consent.
+"I want it small" is a complete answer that ends the
 review.
 
 ## Modes
