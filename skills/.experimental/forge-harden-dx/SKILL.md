@@ -44,7 +44,60 @@ Prereq: `wiki/plan.md` exists and ships a dev-facing surface. Read it,
 `wiki/brief.md` (especially "Who & when"), `wiki/architecture.md`, and
 `wiki/learnings.md` (past DX rules count).
 
-### 1. Walk the plan for these
+### 0. The persona card (gate — nothing proceeds without it)
+
+Every DX judgment is relative to *who* the developer is. From the brief's
+"Who & when" (or one AskUserQuestion if the brief doesn't pin it), write a
+persona card into the plan's `### DX` subsection:
+
+```
+TARGET DEVELOPER
+Who:       <description — could be only the user>
+Context:   <when/why they reach for this tool>
+Tolerance: <minutes/steps before they'd abandon>
+Expects:   <what they assume exists before trying (docs? types? --help?)>
+```
+
+Every finding below is filtered through "would *this* developer abandon
+here?" — not a generic developer. Charter note: the persona describes the
+experience to respect, never a market to win.
+
+### 0b. Set the first-run bar
+
+Estimate the plan's current time-to-first-success (TTHW — from "I have
+nothing" to "it did the thing once") by counting the actual steps the plan
+implies. Then have the user pick the bar via Decision Brief, calibrated
+against tools they *admire* (craft reference, not competition):
+
+- **Excellent** — under ~2 minutes; usually demands a zero-config path.
+- **Solid** — 2–5 minutes; the default for most builds.
+- **Current trajectory** — ~<X> minutes as planned; accept and note it.
+
+The chosen bar becomes a phase gate ("a fresh clone reaches first success
+in under N minutes following only the README").
+
+### 0c. Design the magical moment
+
+Name the moment the developer goes from "is this worth my time?" to "oh —
+it's real" (first real output, first deploy, first query answered). Then
+pick its delivery vehicle via Decision Brief — each option with honest
+craft cost:
+
+- **Copy-paste demo command** — one command produces the moment. Cheap,
+  needs install first.
+- **Interactive playground / sandbox** — zero install. Most felt; costs a
+  hosted surface.
+- **Recorded walkthrough (GIF/video)** — zero friction, but passive.
+- **Guided tutorial on the developer's own data** — deepest; longest
+  time-to-magic.
+
+The chosen vehicle gets a phase obligation. A plan with no designed magical
+moment ships a tool nobody *feels* — that's a finding, not a nice-to-have.
+
+### 1. Rated walk — score each 0–10, fix to 10
+
+Run the **rate → fix-to-10 → re-rate loop** (forge suite's
+`references/scoring.md`) over these six. Deltas go in the report.
 
 - **The five-minute experience.** From "I have nothing" to "it did the
   thing once" — does the plan obligate this path? Which phase delivers it?
@@ -66,6 +119,17 @@ Prereq: `wiki/plan.md` exists and ships a dev-facing surface. Read it,
   reference page, the example. Which phase produces each? If "docs come
   later" is the implicit plan, name it as a finding.
 
+### 1b. Trace the journey — one question per friction point
+
+Walk the planned journey stage by stage (discover → install → first success
+→ real usage → debug) *as the persona*, against what the plan actually
+obligates. Each friction point is **evidence-grounded** — not "install
+might be hard" but "step 3 assumes Docker is running; the plan checks
+nothing and this persona sees a raw connection error". Surface each
+friction point as its **own** Decision Brief (fix in plan / document it /
+accept the friction) — never batch frictions into one mega-question; each
+deserves its own decision.
+
 ### 2. Fix policy
 
 - **Objective** (missing five-minute path, missing error-message
@@ -80,11 +144,19 @@ Prereq: `wiki/plan.md` exists and ships a dev-facing surface. Read it,
 
 ```
 forge-harden-dx (mode: EXPANSION | POLISH | TRIAGE)
-  Findings fixed: <N>
+  Persona: <one line> · First-run bar: <excellent | solid | current, N min>
+  Magical moment: <moment> via <vehicle> (phase <n>)
+  Scores (before → after): 5-min path <a>→<b> · ergonomics <a>→<b> · errors <a>→<b>
+                           help/types <a>→<b> · install <a>→<b> · docs <a>→<b>
+  Findings fixed: <N> · Friction points decided: <N>
   Phase obligations added: <list>
-  Five-minute path: phase <n> | MISSING (fixed)
   Taste decisions surfaced: <N>
 ```
+
+If a previous `## Review` block exists, lead with the trend line per
+`references/scoring.md`. The persona card, first-run bar, and magical
+moment let `forge-dx` (runtime) test reality against what the plan
+promised — the boomerang: plan said 3 minutes, reality says 8.
 
 Orchestrator folds into the plan's `## Review` section. Standalone: write
 the section yourself and present the taste batch.
@@ -99,3 +171,6 @@ the section yourself and present the taste batch.
 ## References
 
 - forge suite's `references/question-style.md` — Decision Brief format
+- forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
+- forge suite's `references/craft-patterns.md` — respect the developer's time
+- `forge-dx` — runtime counterpart; reads the persona card + first-run bar set here

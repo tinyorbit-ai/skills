@@ -43,27 +43,77 @@ Prereq: `wiki/plan.md` exists and includes UI work. Read it, the brief
 (`wiki/brief.md`'s "How it should feel"), `wiki/architecture.md`, and any
 existing `DESIGN.md` or design ADRs. Past `wiki/learnings.md` rules count.
 
-### 1. Walk the plan for these
+### 0. Principles (applied throughout, not recited)
 
-- **Information hierarchy.** For each UI surface the plan implies, what's
-  the primary thing the eye should land on? Does the plan say it? If
-  unclear, that's a finding — name it in the phase.
-- **Interaction states.** Loading / empty / error / success / partial —
-  every plan that ships a screen must commit to all five. Missing states in
-  the plan = missing states in the build. Add them to the phase work bullets.
-- **Accessibility obligations.** Keyboard navigation, focus order, color
-  contrast, target sizes, screen-reader labels, motion reduction. Each is
-  a plan-level commitment, not a "we'll get to it" — fold into phase gates
-  where the work touches an input or output surface.
-- **Responsive intent.** What breakpoints? What collapses? What stays
-  fixed? Plans that say "mobile + desktop" without specifics produce
-  unintentional designs.
-- **The journey's rough edges.** First-run, empty state, recovery from
-  error, return after long absence. Plans almost always over-spec the
-  happy path and under-spec the edges. Flag the gap.
-- **System vs. one-off.** If the plan implies multiple surfaces, does it
-  set up spacing/color/type *system* decisions, or will each phase invent
-  its own? If the latter, a system ADR is missing — recommend it.
+1. **Empty states are features.** "No items found." is not a design — every
+   empty state needs context and a primary action.
+2. **Every screen has a hierarchy.** If everything competes, nothing wins.
+3. **Specificity over vibes.** "Clean, modern UI" is not a design decision —
+   name the type, the spacing scale, the interaction pattern.
+4. **Edge cases are user experiences.** The 47-char name, zero results,
+   first-time vs. thousandth use.
+5. **Generic patterns are findings.** If a described surface would look like
+   every AI-generated site, the plan under-specifies it.
+6. **Responsive is not "stacked on mobile".** Each viewport gets intent.
+7. **Accessibility is specified or it doesn't exist.**
+8. **Subtraction default** and **design for trust** — forge suite's
+   `references/craft-patterns.md`.
+
+### 1. Rated passes — each writes an artifact into the plan
+
+Run the **rate → fix-to-10 → re-rate loop** (forge suite's
+`references/scoring.md`) over the six passes. The fix for each pass is a
+**concrete artifact written into `wiki/plan.md`** (in the phase or a
+`### Design` subsection) — prose obligations don't count as fixes.
+
+- **Pass 1 — Information hierarchy.** Rate: does the plan say what the eye
+  lands on first, second, third, per surface? Fix-to-10: a short ASCII
+  sketch or ordered list per surface. Constraint worship: if this screen
+  could only show 3 things, which 3?
+- **Pass 2 — Interaction states.** Rate: loading / empty / error / success /
+  partial committed for every screen? Fix-to-10: a state table —
+
+  ```
+  SURFACE         | LOADING | EMPTY | ERROR | SUCCESS | PARTIAL
+  <each surface>  | <spec>  | <spec>| <spec>| <spec>  | <spec>
+  ```
+
+  Every cell one line; "n/a" must be argued, not assumed.
+- **Pass 3 — Journey & feel.** Rate: does the plan honor the brief's "How it
+  should feel" at each step? Fix-to-10: a storyboard for the core flow —
+
+  ```
+  STEP | USER DOES        | USER FEELS        | PLAN SPECIFIES?
+  1    | <action>         | <target emotion>  | <what supports it / GAP>
+  ```
+
+  First-run, recovery-from-error, and return-after-absence are steps too.
+- **Pass 4 — Specificity (anti-generic).** Rate: are surfaces described as
+  specific, intentional UI — or placeholder patterns ("a dashboard with
+  cards")? Fix-to-10: rewrite each vague description with a named, concrete
+  alternative.
+- **Pass 5 — System alignment.** Rate: do surfaces draw from one
+  spacing/color/type system? If a `DESIGN.md` exists (see
+  `forge-design-system`), annotate the plan with its tokens. If none exists
+  and the plan implies 2+ surfaces, the 10 requires recommending
+  `forge-design-system` — a missing system is a real gap, not a style choice.
+- **Pass 6 — Responsive & accessibility.** Rate: breakpoints named, collapse
+  behavior intentional, keyboard nav / contrast / target sizes (44px min) /
+  screen-reader labels / motion reduction folded into phase gates? Fix-to-10:
+  per-viewport intent lines + a11y obligations in the gates.
+
+### 1b. Unresolved-decisions table
+
+Close with the ambushes — design decisions the plan leaves open, with the
+default that ships if nobody decides:
+
+```
+DECISION LEFT OPEN              | IF DEFERRED, WHAT SHIPS
+Empty state for <surface>?      | "No items found."
+Mobile nav pattern?             | Desktop nav crammed behind a hamburger
+```
+
+Each row becomes either a plan fix (objective) or a taste decision (below).
 
 ### 2. Fix policy
 
@@ -79,11 +129,15 @@ existing `DESIGN.md` or design ADRs. Past `wiki/learnings.md` rules count.
 
 ```
 forge-harden-design (mode: EXPANSION | POLISH | TRIAGE)
+  Scores (before → after): hierarchy <a>→<b> · states <a>→<b> · journey <a>→<b>
+                           specificity <a>→<b> · system <a>→<b> · responsive+a11y <a>→<b>
+  Artifacts written: <state table | storyboard | hierarchy sketches | decisions table>
   Findings fixed: <N>
-  States added to phases: <list>
-  Accessibility obligations folded: <N>
   Taste decisions surfaced: <N>
 ```
+
+If a previous `## Review` block exists, lead with the trend line per
+`references/scoring.md`.
 
 Orchestrator folds into the plan's `## Review` section. Standalone: write
 the section yourself and present the taste batch.
@@ -94,8 +148,14 @@ the section yourself and present the taste batch.
 - Never kill the project. Never frame in market/conversion.
 - "Smaller on purpose" applies — a deliberately minimal UI is fine; demand
   intention, not size.
-- Respect any `DESIGN.md` or system ADRs already in place.
+- Respect any `DESIGN.md` or system ADRs already in place (see
+  `forge-design-system` for creating one).
+- A pass without its artifact is unfinished — tables and storyboards go
+  *into the plan*, not into the chat.
 
 ## References
 
 - forge suite's `references/question-style.md` — Decision Brief format
+- forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
+- forge suite's `references/craft-patterns.md` — constraint worship, subtraction default, design for trust
+- `forge-design-system` — creates the DESIGN.md Pass 5 aligns against

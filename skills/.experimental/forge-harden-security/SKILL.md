@@ -20,14 +20,17 @@ this is not "is it worth securing".
 
 ## Modes
 
-- **DAILY** (default) — zero-noise pass. Only findings with high
-  confidence and concrete plan changes. Skip speculative threats. Run on
-  every plan, every iteration.
-- **DEEP** — comprehensive monthly-style audit. Broader coverage,
-  including lower-confidence findings worth surfacing for discussion.
-  Use periodically or before a release.
+- **DAILY** (default) — zero-noise pass. Every finding carries a
+  confidence score `N/10` (how sure it's real — severity is separate);
+  **report only confidence ≥ 8/10** with concrete plan changes. Skip
+  speculative threats entirely. Run on every plan, every iteration.
+- **DEEP** — comprehensive monthly-style audit. Report anything at
+  confidence ≥ 2/10, but **tag everything below 8/10 as `TENTATIVE`** so
+  the user can triage cheaply. Filter only true noise (test fixtures,
+  placeholders, docs examples). Use periodically or before a release.
 
-State the mode upfront. Default to DAILY.
+The gates are defined in forge suite's `references/scoring.md`. State the
+mode upfront. Default to DAILY.
 
 ## When it runs
 
@@ -98,11 +101,16 @@ Severity-tag every finding (`high` / `med` / `low`).
 
 ```
 forge-harden-security (mode: DAILY | DEEP)
-  Findings fixed: <N> (high: <h>, med: <m>, low: <l>)
+  Findings fixed: <N> (high: <h>, med: <m>, low: <l>; TENTATIVE: <t>)
+  Trend: <N> last harden → <N> now | first run
   Trust boundaries named: <list>
   LLM surface review: applied | n/a
   Taste decisions surfaced: <N>
 ```
+
+The trend line compares against the previous `## Review` block's security
+findings (per `references/scoring.md`) — visible compounding, so the user
+sees the threat surface shrinking (or growing) run over run.
 
 Orchestrator folds into the plan's `## Review` section. Standalone: write
 the section yourself and present the taste batch.
@@ -111,9 +119,12 @@ the section yourself and present the taste batch.
 
 - Never kill the project — a finding's fix is always a plan change.
 - Severity tags are required. "Security finding" without H/M/L is noise.
+- Confidence gates are hard: DAILY drops sub-8/10 findings silently;
+  DEEP keeps them with `TENTATIVE`. Never report an ungated hunch as fact.
 - DAILY is the default. DEEP requires explicit opt-in.
 - Don't fix code here. Plan changes only.
 
 ## References
 
 - forge suite's `references/question-style.md` — Decision Brief format
+- forge suite's `references/scoring.md` — confidence gates + trend tracking
