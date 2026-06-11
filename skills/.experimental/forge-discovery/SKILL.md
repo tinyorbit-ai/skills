@@ -117,10 +117,10 @@ explicitly, take it at face value, and move on.
   of this thing that would *already* be worth using? This becomes the seed for
   phase 1; spend real thought here.
 - **Watched anyone do it the current way?** Have you actually watched the thing
-  this replaces being done — yourself included — and what *surprised* you about
-  it? Surprise is the gate: it's the difference between knowing the workflow and
-  having looked at it. "Haven't watched" is fine — it becomes a phase-1 note
-  ("do it manually once before automating it"), not a blocker.
+  this replaces being done — yourself included — and what *surprised* you?
+  Surprise is the gate: the difference between knowing the workflow and having
+  looked at it. "Haven't watched" is fine — it becomes a phase-1 note ("do it
+  manually once before automating it"), not a blocker.
 - **What you're most drawn to — or most unsure about.** Imagining the finished
   thing, which part are you most excited to use, and which part are you least sure
   about? (If something already surprised you imagining it, name that — but no need
@@ -162,8 +162,7 @@ Replace the stub. Sections, in this order:
 - **How it should feel** — the experiential target.
 - **The hard/interesting part** — the hunch at what'll be tricky (or "not sure yet").
 - **The friction it replaces** — what the user does without it today, in
-  effort/attention — plus anything observed/surprising from the watched-it-done
-  question (or the "do it manually once" note if unwatched).
+  effort/attention, plus anything observed/surprising from the watched-it-done question.
 - **Smallest useful version** — the seed for phase 1.
 - **Three-year fit** — more essential / less essential / same, and why.
 - **Constraints** — stack, platform, fixed shape.
