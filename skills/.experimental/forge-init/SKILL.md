@@ -1,6 +1,6 @@
 ---
 name: forge-init
-description: One-time project setup for the forge workflow. Scaffolds an Obsidian-style wiki/ (index, brief, plan, architecture, decisions/ ADRs, notes/, improvements), and injects wiki + ADR + phase/branch discipline rules into CLAUDE.md and AGENTS.md (creating them if absent, idempotently). Use when starting a forge project, when asked to "init forge", "set up the wiki", "scaffold docs", or before forge-discovery/forge-plan on a fresh repo.
+description: One-time project setup for the forge workflow. Scaffolds an Obsidian-style wiki/ with two layers — a project record (index, brief, plan, architecture, decisions/ ADRs, notes/, improvements) and a knowledge/ base for ingested context — and injects wiki + ADR + phase/branch discipline rules into CLAUDE.md and AGENTS.md (creating them if absent, idempotently). Use when starting a forge project, when asked to "init forge", "set up the wiki", "scaffold docs", or before forge-discovery/forge-plan on a fresh repo.
 metadata:
   internal: true
 ---
@@ -13,9 +13,11 @@ it never clobbers existing content.
 
 ## Charter
 
-The project is worth building because you chose to. forge never questions whether it
-should exist or raises money/market/demand. This skill just builds the scaffolding
-that captures the *why* as you go.
+The project is worth building because you chose to, and you're the right person to
+build it — both settled, never questioned. Context, on the other hand, is welcome:
+more is better than less. This skill builds the scaffolding that captures the *why*
+as you go — including a knowledge base that can ingest any context the build rests on
+(`references/charter.md`).
 
 ## What it does
 
@@ -36,7 +38,8 @@ to `forge-discovery`, which captures the full problem framing, not a sentence.
 
 ```
 wiki/
-├── index.md          map of content + reading order (links to everything below)
+├── index.md          map of content + reading order (links to BOTH layers below)
+│   ── Project record ──
 ├── brief.md          stub — "filled by forge-discovery"
 ├── plan.md           stub — "filled by forge-plan"
 ├── architecture.md   stub — 30-second architecture, filled as phases land
@@ -45,10 +48,20 @@ wiki/
 ├── notes/            incident notes live here (YYYY-MM-DD-slug.md); .gitkeep
 ├── learnings.md      running review lessons (appended by forge-review)
 ├── retro.md          running build retrospectives (appended by forge-retro)
-└── improvements.md   running "what I'd do with more time" + scope cuts
+├── improvements.md   running "what I'd do with more time" + scope cuts
+│   ── Knowledge base (ingested context) ──
+└── knowledge/        living articles ingested by forge-wiki; maintained by forge-wiki-maintain
+    ├── INDEX.md            topic directory (stub — fills as topics form)
+    └── _compilation-log.md ingest audit trail (header row only at init)
 ```
 
-If `wiki/` already exists, only add the missing files; report what was added.
+The `knowledge/` layer starts essentially empty — just `INDEX.md` and
+`_compilation-log.md`. Topics and articles are created on demand by `forge-wiki`
+when the user ingests context (email, research, business rationale, conversations).
+`wiki/index.md` must include a **Knowledge base** section linking `[[knowledge/INDEX]]`.
+
+If `wiki/` already exists, only add the missing files (including the `knowledge/`
+layer if an older project predates it); report what was added.
 
 ### 3. Inject the rules into CLAUDE.md and AGENTS.md
 

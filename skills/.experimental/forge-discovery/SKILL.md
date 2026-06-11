@@ -12,12 +12,14 @@ Pins a fuzzy idea into a precise brief. Output: `wiki/brief.md`. This is the
 
 ## Charter
 
-The project is worth building because you chose it. **Do not ask whether it should
-exist.** Forbidden, by design — never ask about, hint at, or factor in: market size,
-demand evidence, monetization, competitors-as-threat, "is this worth building",
-"will anyone use it", "what's the fastest path to value", or how to validate the
-idea. If only the user will ever use it, that is a complete reason. Your job is to
-understand the build they want, not to qualify it.
+The project is worth building because you chose it, and you're the right person to
+build it — **both settled; never ask whether it should exist or whether you're the
+one to build it.** Everything else is fair game. Context is welcome — more is better
+than less: if the user offers market, demand, business, competitive, or user context,
+take it in gladly and let it sharpen the brief. The one thing you never do is turn
+that context into a verdict on the two settled questions ("so is this worth it?",
+"are you the right person?"). If only the user will ever use it, that's a complete
+reason. Your job is to understand the build they want, not to qualify it.
 
 ## Process
 
@@ -140,9 +142,9 @@ recommendation with the *why* and the evidence that would flip it.
 
 Before writing the brief, invoke **`forge-ambition`** on the draft. It pressure-tests
 whether this is the most ambitious version of *the thing the user already chose* —
-strictly charter-safe (no money/market/demand; "smaller on purpose" is a valid
-answer it must accept). Fold its outcome into the brief. Skip only if the user
-explicitly says they don't want it.
+charter-safe (it never reopens whether the project should exist or whether the user
+should build it; "smaller on purpose" is a valid answer it must accept). Fold its
+outcome into the brief. Skip only if the user explicitly says they don't want it.
 
 ### 4. Write `wiki/brief.md`
 

@@ -36,6 +36,13 @@ _None yet — the first ADR lands with [[plan]]._
 
 _None yet — root-cause writeups land here as they happen._
 
+## Knowledge base
+
+Ingested context the build rests on — business rationale, research, email,
+conversations. Living articles with Timelines; ingest with `forge-wiki`.
+
+- [[knowledge/INDEX]] — topic directory for ingested context
+
 ## Reading order
 
 1. [[brief]] — what and why
@@ -158,6 +165,45 @@ Empty files, just to keep the directories in git.
 
 ---
 
+## `wiki/knowledge/INDEX.md`
+
+```markdown
+# Knowledge Base — {PROJECT}
+
+Part of [[index]]. Ingested context the build rests on — business rationale,
+research, email, conversations. Living articles with Timelines (Compiled →
+Reinforced → Refined → Contradicted). Ingest with `forge-wiki`; keep this index
+current with `forge-wiki-maintain`.
+
+## Topic Directory
+
+| Topic | Articles | Index |
+|-------|----------|-------|
+| _none yet_ | 0 | — |
+
+## Quick lookup
+
+_Empty — topics and articles appear here as context is ingested._
+```
+
+---
+
+## `wiki/knowledge/_compilation-log.md`
+
+```markdown
+# Compilation log
+
+Append-only audit of what `forge-wiki` ingested. One row per source.
+
+| Date | Source | Action | Article | Verb | Quality | Reason |
+|------|--------|--------|---------|------|---------|--------|
+```
+
+Actions: `ingested-new` · `ingested-timeline` · `skipped`.
+Verbs (for ingested rows): `Compiled` · `Reinforced` · `Refined` · `Contradicted`.
+
+---
+
 ## ADR template (for reference; `forge-plan`/`forge-harden` use it)
 
 `wiki/decisions/NNNN-slug.md`:
@@ -213,9 +259,42 @@ This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for t
   system fails is stronger signal than the happy path.
 - **Deliberate scope cuts** → record in `wiki/improvements.md` ("deferred X for Y").
 - **Architecture changes** → keep `wiki/architecture.md` honest as phases land.
+- **External context that informs the build** (business rationale, research,
+  email, a decision-driving conversation, competitive or user notes) → ingest it
+  into the knowledge base at `wiki/knowledge/` as a living article with a Timeline.
+  Use `forge-wiki` to do this (it's plan-first); `forge-wiki-maintain` keeps the
+  indexes and links healthy. **More context is better than less** — capture it.
 - When you make such a change, **say so in your reply** — note which wiki file you
   updated. Under-capturing the *why* is the failure mode to avoid; when in doubt,
   write it down.
+
+### Ambient capture — file context as it surfaces in conversation
+
+You don't wait to be asked. When the user drops **durable, build-relevant context**
+mid-conversation, capture it into `wiki/knowledge/` in the **same turn**, then note
+it in one line. This is what keeps the wiki a living record instead of a stale one.
+
+- **Capture** (durable, affects the build): stakeholder directives ("my PM said do X
+  over Y"), constraints, deadlines, decision drivers, business rationale, user/research
+  findings, hard preferences ("we must support offline"). Anything a future session
+  would need to understand *why* the build is shaped as it is.
+- **Skip** (transient): questions, thinking-aloud, chit-chat, instructions about the
+  current task, anything not durable. When unsure, lean toward capturing — but a
+  one-off aside is not an article.
+- **Additive writes happen immediately, no approval** — a new `knowledge/` article, or
+  a Timeline append (`Compiled` / `Reinforced`) to an existing one. Then say, briefly:
+  `📓 noted: <one line> → [[knowledge/<topic>/<slug>]]`.
+- **Only pause to confirm** when a capture would **rewrite or contradict** an existing
+  article's Core Concept (a `Refined`/`Contradicted` change) — show the diff first.
+- Use `forge-wiki`'s article format + Timeline and keep every new file reachable from
+  the index. Run `forge-wiki-maintain` now and then to regenerate indexes and check
+  links. Explicit `forge-wiki` ingests (a pasted doc, a file) stay **plan-first**.
+- **Control:** if the user says "pause/mute wiki capture", stop ambient capture for the
+  rest of the session (explicit `forge-wiki` still works); "resume capture" re-enables it.
+
+> Charter: the project's right to exist and the user's fitness to build it are
+> settled and never questioned. Context (including business/market context) is
+> always welcome as input — it just never becomes a verdict on those two things.
 
 ## Phase & branch discipline
 
