@@ -30,6 +30,24 @@ Every finding is a plan change or a surfaced taste decision.
 
 State the mode upfront. Default to interactive.
 
+### Decision classes (both modes)
+
+Every decision surfaced by a persona or the reviewer falls into one of three:
+
+- **Mechanical** — one clearly right answer (strengthen a weak gate, name a
+  missing state). Auto-decided silently in both modes; that's the personas'
+  auto-fix lane.
+- **Taste** — reasonable people could disagree. Interactive: goes to the
+  taste batch. `--auto`: decided by the principles below, stated in the
+  report.
+- **User Challenge** — the personas *and* the independent reviewer both
+  conclude a direction the **user explicitly chose** (in the brief, an ADR,
+  or a locked answer) should change. Qualitatively different from taste:
+  **never auto-decided, in any mode.** The user's stated direction is the
+  default; the reviewers carry the burden of proof. Present both reviewer
+  positions verbatim with your read — and "keep my direction" is a complete
+  answer that ends it, recorded as a HOLD ADR so it isn't re-litigated.
+
 ### Auto-decision principles (only used in `--auto`)
 
 When auto-deciding a taste call surfaced by a persona, apply these six in
@@ -129,6 +147,9 @@ Append (or replace) the `## Review` section in `wiki/plan.md`:
 - <decision 1 — framed as Decision Brief>
 - ...
 
+### User Challenges (never auto-decided)
+- <user's chosen direction> ← challenged by <personas + reviewer>; <one-line case>
+
 ### Reviewer-vs-persona disagreements
 - <if any — verbatim from reconciliation step>
 ```
@@ -157,5 +178,7 @@ user has answered, declare the plan locked.
 
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
+- forge suite's `references/scoring.md` — the personas' rating loop + trend lines
+- forge suite's `references/craft-patterns.md` — the thinking moves the personas cite
 - `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
   `forge-harden-dx`, `forge-harden-scope` — the five persona skills

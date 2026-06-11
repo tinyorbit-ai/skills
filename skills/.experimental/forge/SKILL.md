@@ -44,6 +44,7 @@ Full map ───────────────────────�
 
 Every skill also runs standalone — invoke any directly:
   /forge-init  /forge-discovery  /forge-ambition  /forge-plan
+  /forge-design-system            (DESIGN.md — the design source of truth)
   /forge-design-explore           (divergent design variants)
   /forge-harden                   (orchestrator; --auto for auto-decision)
   /forge-harden-eng  /forge-harden-security  /forge-harden-design
@@ -131,6 +132,9 @@ ran, and any unreconciled reviewer disagreement. On confirm, the plan is
 
 - `references/charter.md` — the worldview (mandatory read)
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
-- `references/wiki.md` — wiki layout (incl. `learnings.md`), ADR format, capture rule
+- `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
+- `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
+- `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
+- `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply

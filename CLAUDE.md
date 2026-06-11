@@ -161,34 +161,38 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 |---|---|---|
 | `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
 | `forge-init` | experimental | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base); injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
-| `forge-discovery` | experimental | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening five ("I don't know yet" is valid). Context welcome; never reopens whether it should exist / who builds it. |
-| `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. |
-| `forge-harden` | experimental | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). |
-| `forge-harden-eng` | experimental | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. Edges, idempotency, test gaps, and whether each gate actually proves its phase goal. |
-| `forge-harden-design` | experimental | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Hierarchy, every interaction state, accessibility, responsive intent — folded into phase work. |
-| `forge-harden-dx` | experimental | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Five-minute path, error-message obligation, naming, install friction — folded into phase work. |
-| `forge-harden-security` | experimental | Plan-time security review (CSO persona). Modes — DAILY / DEEP. OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged. |
+| `forge-discovery` | experimental | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six, each with push-until gates and red flags ("I don't know yet" is valid). Context welcome; never reopens whether it should exist / who builds it. |
+| `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. Mandates 2–3 approaches first (minimal-viable / ideal-architecture / lateral) at equal weight. |
+| `forge-harden` | experimental | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). Decision classes — Mechanical / Taste / User Challenge (the last never auto-decided). |
+| `forge-harden-eng` | experimental | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. 0–10 rated dimensions, complexity smells (>8 files), search-before-building gate, and whether each gate actually proves its phase goal. |
+| `forge-harden-design` | experimental | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Six rated passes, each fixing-to-10 with an artifact written into the plan (state table, journey storyboard, unresolved-decisions table). |
+| `forge-harden-dx` | experimental | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Persona-card gate, first-run TTHW bar, magical-moment vehicle, evidence-grounded friction trace — folded into phase work. |
+| `forge-harden-security` | experimental | Plan-time security review (CSO persona). Modes — DAILY (confidence ≥8/10, zero noise) / DEEP (≥2/10, TENTATIVE-tagged). OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged + trend line. |
 | `forge-harden-scope` | experimental | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
 | `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
-| `forge-review` | experimental | Staff-grade code review: security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, learnings → `wiki/learnings.md`. |
+| `forge-review` | experimental | Staff-grade code review: scope-drift + plan-completion audit, security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, numbered evidence chain, learnings (confidence-scored) → `wiki/learnings.md`. |
 | `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry; auto-invokes `forge-docs` if the phase touched a doc surface. |
 | `forge-docs` | experimental | Post-ship doc-drift check using Diataxis (tutorial / how-to / reference / explanation). Auto-fixes concrete drift; surfaces structural gaps as taste decisions. |
-| `forge-design-explore` | experimental | Divergent design exploration — 3-4 mockup variants for a UI surface before implementation. Charter-safe (no market framing). Locks the chosen shape as an ADR. |
+| `forge-design-system` | experimental | DESIGN.md as design source of truth — memorable-thing question, 2–3 named aesthetic directions, anti-default typography, token system (color / 4px spacing / radius / motion), HTML specimen page. Feeds the taste profile. |
+| `forge-design-explore` | experimental | Divergent design exploration — 3-4 mockup variants for a UI surface before implementation. Reads/writes the taste profile. Charter-safe (no market framing). Locks the chosen shape as an ADR. |
 | `forge-debug` | experimental | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
 | `forge-ambition` | experimental | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
-| `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, AI-slop, feel; before/after fixes. Auto in `forge-review` (if UI); standalone. |
+| `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, the 11-pattern AI-slop blacklist, feel; design+slop scores baseline→final, numbered before/after evidence. Auto in `forge-review` (if UI); standalone. |
 | `forge-dx` | experimental | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
 | `forge-retro` | experimental | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
 | `forge-wiki` | experimental | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
 | `forge-wiki-maintain` | experimental | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
 
-> **forge suite** (22 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
-> Loop: `forge` → init → discovery (+ambition) → plan → (+design-explore if open) →
-> harden → lock → per run: build → review (+polish/+dx) → ship (+docs); at Done: retro.
+> **forge suite** (23 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
+> Loop: `forge` → init → discovery (+ambition) → plan → (+design-system /
+> +design-explore if UI) → harden → lock → per run: build → review (+polish/+dx) →
+> ship (+docs); at Done: retro.
 > `forge-harden` orchestrates five plan-time persona skills (-eng / -security always;
 > -design if UI; -dx if dev-facing; -scope on request) plus an independent reviewer
 > pass via Codex / Gemini / Claude (configurable in `wiki/.forge/config.yaml`). Each
-> persona is also runnable standalone. The four runtime persona skills
+> persona is also runnable standalone, runs the shared 0–10 rate→fix-to-10→re-rate
+> loop (`forge/references/scoring.md`), and cites the shared voice + craft-pattern
+> references. The four runtime persona skills
 > (forge-polish, forge-dx, forge-docs, forge-ambition) auto-invoke in their phase and
 > also run standalone. The `wiki/` is two layers — a project record (brief, plan,
 > ADRs, build-log, learnings) and a `knowledge/` base of ingested context as
