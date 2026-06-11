@@ -1,6 +1,6 @@
 ---
 name: forge-discovery
-description: Discovery conversation that turns a raw idea into a precise brief — base seven questions (what / who & when / how it should feel / hard part / constraints / non-goals / alternatives) plus a sharpening five (the specific moment, the friction it replaces, smallest useful version, what surprised you imagining it, three-year fit). Deliberately asks nothing about money, market, demand, or whether it's "worth it". Works from either a one-sentence idea or an existing one-pager/research doc — anchors on what you give it and never guesses the project from folder names. Use when you have an idea and need it pinned down, when asked to "shape this", "what are we building", or as stage 1 of forge before forge-plan.
+description: Discovery conversation that turns a raw idea into a precise brief — base seven questions (what / who & when / how it should feel / hard part / constraints / non-goals / alternatives) plus a sharpening six (the specific moment, the friction it replaces, smallest useful version, watched-it-done observation, drawn-to/unsure, three-year fit), each with a push-until gate so vague answers get one sharp follow-up. Deliberately asks nothing about money, market, demand, or whether it's "worth it". Works from either a one-sentence idea or an existing one-pager/research doc — anchors on what you give it and never guesses the project from folder names. Use when you have an idea and need it pinned down, when asked to "shape this", "what are we building", or as stage 1 of forge before forge-plan.
 metadata:
   internal: true
 ---
@@ -87,23 +87,25 @@ list at once.
   space, and why this shape over those. (Framed as design context — not "why won't
   competitors win", purely "what shape and why this one".)
 
-Take positions. If the user is vague on the feel or the hard part, propose a
-concrete option and let them react. Anti-sycophantic: if two answers contradict
-(e.g. "must be dead simple" + a large feature list), name the tension and resolve
-it with them now.
+**Every question has a push gate.** Each of these (and the sharpening six below)
+has a "push until you hear" bar and named red flags in `references/questions.md` —
+when an answer is vague, push once with the sharper frame from there, then once
+more if needed, never a third time (forge suite's `references/voice.md`: banned
+hedges, calibrated acknowledgment, respecting "just do it"). If two answers
+contradict (e.g. "must be dead simple" + a large feature list), name the tension
+and resolve it with them now.
 
-### 2b. Sharpening pass — five forcing questions (charter-safe)
+### 2b. Sharpening pass — six forcing questions (charter-safe)
 
-After the base seven, run these five. They're adapted from gstack's
+After the base seven, run these six. They're adapted from gstack's
 office-hours forcing questions, **stripped of every business/market/demand
 hook** — every one asks about the build, the experience, or the craft. Skip a
 question if the answer is already in the base-seven answers.
 
-**These are generative prompts, not an interrogation.** Several are speculative —
-they ask you to imagine a thing that doesn't exist yet. *"I don't know yet — I'll
-learn that by building it"* is a completely valid answer to any of them. Offer it
-explicitly, take it at face value, and move on. Never press someone to invent
-certainty they can't have this early.
+**These are generative prompts, not an interrogation.** The push gates target
+unexamined vagueness, never honest uncertainty: *"I don't know yet — I'll learn
+that by building it"* is a completely valid answer to any of them. Offer it
+explicitly, take it at face value, and move on.
 
 - **The specific moment.** Name the concrete moment this thing serves. Not "a
   user" — *which* moment, the action right before, the action right after.
@@ -114,6 +116,11 @@ certainty they can't have this early.
 - **The smallest version that's already useful.** What's the thinnest version
   of this thing that would *already* be worth using? This becomes the seed for
   phase 1; spend real thought here.
+- **Watched anyone do it the current way?** Have you actually watched the thing
+  this replaces being done — yourself included — and what *surprised* you about
+  it? Surprise is the gate: it's the difference between knowing the workflow and
+  having looked at it. "Haven't watched" is fine — it becomes a phase-1 note
+  ("do it manually once before automating it"), not a blocker.
 - **What you're most drawn to — or most unsure about.** Imagining the finished
   thing, which part are you most excited to use, and which part are you least sure
   about? (If something already surprised you imagining it, name that — but no need
@@ -124,7 +131,7 @@ certainty they can't have this early.
   *know* now so the plan doesn't drift.
 
 Lead with your best read on each, like before. Two questions per round, not all
-five at once.
+six at once.
 
 ### 3. Reflect back: offer shapes, not verdicts
 
@@ -155,7 +162,8 @@ Replace the stub. Sections, in this order:
 - **How it should feel** — the experiential target.
 - **The hard/interesting part** — the hunch at what'll be tricky (or "not sure yet").
 - **The friction it replaces** — what the user does without it today, in
-  effort/attention.
+  effort/attention — plus anything observed/surprising from the watched-it-done
+  question (or the "do it manually once" note if unwatched).
 - **Smallest useful version** — the seed for phase 1.
 - **Three-year fit** — more essential / less essential / same, and why.
 - **Constraints** — stack, platform, fixed shape.
@@ -184,3 +192,9 @@ ADR per `wiki/` conventions and link it from `wiki/index.md`.
   skill's job. Shape the build; never grade the premise.
 - The brief must make the *non-goals* and *the feel* explicit — those two are the
   most common things later stages need and the most common things left implicit.
+
+## References
+
+- `references/questions.md` — per-question push-until gates and red flags
+- forge suite's `references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
+- forge suite's `references/question-style.md` — Decision Brief format for the shape lock
