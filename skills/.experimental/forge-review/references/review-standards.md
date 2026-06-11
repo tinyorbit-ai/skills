@@ -7,6 +7,36 @@ silently wrong) · **high** (incorrect under realistic conditions) · **medium**
 findings are auto-fixed and re-verified; low is fixed if cheap, else logged to
 `wiki/improvements.md`.
 
+## 0. Scope & completion audit
+
+**Scope drift.** Extract the phase's stated intent (its Goal + Work bullets in
+`wiki/plan.md`, plus the phase branch's commit messages). Run
+`git diff <base>...HEAD --stat` and classify every touched file against the
+intent. Output one verdict with citations:
+
+- `CLEAN` — every file traces to the spec.
+- `DRIFT DETECTED` — name each out-of-scope file and what it changes. Drift is
+  surfaced, never silently accepted: small adjacent fixes can stay (note them);
+  unrelated feature work is a finding (move it to its own phase/branch).
+- `REQUIREMENTS MISSING` — name each spec'd item with no corresponding change.
+
+**Plan completion.** Turn the phase's Work bullets + gate into a checklist
+(every actionable item, not a sample). For each item, first classify *how* it
+can be verified, then verdict it:
+
+- **DIFF-VERIFIABLE** — visible in the diff. Verify by reading the change.
+- **RUNTIME** — needs the thing executed (covered again in pass 5, but the
+  verdict lands here).
+- **EXTERNAL-STATE** — lives outside the repo (a deployed config, a third-party
+  dashboard, an OAuth app). Verify what you can from the machine; anything you
+  can't gets `[UNVERIFIABLE]` plus the exact manual check the user should run.
+
+Verdicts: `[DONE]` (clear evidence — cite file/line or output) · `[PARTIAL]`
+(some of the behavior, not all — say which half) · `[NOT DONE]` · `[CHANGED]`
+(implemented differently than spec'd — fine if argued, a finding if silent).
+**Be conservative with DONE.** A file being touched is not evidence; the
+specific behavior described must be present.
+
 ## 1. Security & abuse
 
 - **Trust boundaries:** every input crossing one (HTTP, CLI args, env, files, DB,

@@ -25,10 +25,21 @@ speed. Never conclude "don't build this".
 Review the **current phase's diff** against the base branch (`git diff <base>...HEAD`
 on the phase branch) plus anything that diff touches. Read `wiki/learnings.md`
 first — its rules are mandatory and enforced here; a violation of a past learning is
-a high-severity finding.
+a high-severity finding. When a learning drives a finding or a check, say so
+visibly: `Prior learning applied: <rule> (from <date>, phase <n>)` — the
+compounding should be legible, not silent.
 
 ## The passes (run all; details in `references/review-standards.md`)
 
+0. **Scope & completion audit.** Two checks before any quality pass:
+   - **Scope drift** — compare the diff's files against the phase spec's stated
+     intent; classify `CLEAN / DRIFT (out-of-scope files, cite each) /
+     REQUIREMENTS MISSING (spec'd work absent from the diff)`. Drift isn't
+     automatically wrong — but it's never silent.
+   - **Plan completion** — extract the phase's Work bullets and gate as a
+     checklist; verdict each item `[DONE] / [PARTIAL] / [NOT DONE]` with the
+     evidence path. Be conservative: a touched file is not a DONE — the specific
+     behavior must be present. Details in `references/review-standards.md`.
 1. **Security & abuse.** Trust boundaries, input validation, authz, secrets, injection
    (SQL / command / LLM-prompt / path), unsafe deserialization, dependency risk,
    anything touching untrusted input. Severity-tag every finding.
@@ -107,12 +118,22 @@ the phase, **what was found**, **how it was fixed**, and the **rule-to-remember*
 `wiki/index.md`. If a finding was a real incident/surprising root cause, also write
 `wiki/notes/`. **Tell the user what you captured, in the same turn.**
 
+## Evidence chain
+
+Number every finding (`finding-001`, `finding-002`, …) the moment it's raised, and
+keep the number through fix and re-verify. Visual/runtime findings get paired
+artifacts named by number (`finding-001-before.png` / `finding-001-after.png`;
+command output pasted inline for non-visual ones). "Fixed" without its numbered
+evidence is a claim, not a fix.
+
 ## Hand off
 
 When every objective finding is fixed, the full gate + test suite are green, types
-are clean, and taste decisions are resolved: report the review summary (passes run,
-findings fixed by severity, learnings recorded, open taste decisions if any) and
-hand to **`forge-ship`** to land the phase. Never ship from here.
+are clean, and taste decisions are resolved: report the review summary — scope
+audit verdict, completion checklist, passes run, findings fixed by severity
+(with the trend vs. the previous phase's review where one exists, per forge
+suite's `references/scoring.md`), learnings recorded, open taste decisions if
+any — and hand to **`forge-ship`** to land the phase. Never ship from here.
 
 ## Rules
 
