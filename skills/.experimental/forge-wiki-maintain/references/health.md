@@ -52,6 +52,16 @@ auto-fixable and `--fix` was passed.
     (`wiki/knowledge/*/*/`). Flag every one as a policy violation — the knowledge base
     is flat, one level. *Report* — do NOT auto-move (moves must preserve link/index
     integrity); list them for the user to re-home.
+16. **Stale learnings.** For each `wiki/learnings.md` entry that references a
+    file/path, check the path still exists; flag `STALE: <rule> references deleted
+    <path>` as a retire candidate. Entries missing a `confidence N/10` are flagged
+    too. *Auto-fixable* under `--fix` for the confidence field only (default it to
+    `5/10 (backfilled)`); retiring a rule is a user call.
+17. **Contradicting learnings.** Flag pairs of learnings whose rules conflict
+    ("always X" vs. a later "never X" without the earlier one being struck) — the
+    older one is a retire candidate. Also flag struck (`~~…~~`) entries missing the
+    `retired <date> — <why>` annotation. *Report* — resolving a contradiction is a
+    user call.
 
 ## Report format
 
@@ -73,6 +83,7 @@ Generated: <date>
 ### Stale evidence
 ### Timeline health (missing / bloated / broken sources)
 ### Taxonomy (split candidates / near-duplicate topics / flat violations)
+### Learnings hygiene (stale refs / contradictions / missing confidence)
 ```
 
 ## Fix policy

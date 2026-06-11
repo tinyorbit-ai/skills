@@ -47,8 +47,9 @@ Run the checks in `references/health.md` and write `wiki/knowledge/_health-repor
 Headline categories: orphans, index accuracy, missing summaries, missing frontmatter,
 broken `[[wikilinks]]`, duplicate coverage, stubs, stale evidence (`last_evidence`
 > ~180 days), bloated/again broken Timelines, oversized+heterogeneous topics (split
-candidates), near-duplicate topic names, and flat-invariant violations (nested
-subfolders).
+candidates), near-duplicate topic names, flat-invariant violations (nested
+subfolders), and **learnings hygiene** (rules referencing deleted files,
+contradicting rule pairs, entries missing their confidence score).
 
 - **`--fix`** auto-fixes the safe ones: regenerate all indexes, add missing Summary
   lines (read the article, write a specific one), add a missing `## Timeline` with a

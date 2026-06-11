@@ -36,7 +36,11 @@ interaction. If the request is "explore the design" generically, ask
 (plain `AskUserQuestion`) which surface. Don't explore everything at once.
 
 Read `wiki/brief.md` (especially "How it should feel"), `wiki/plan.md`'s
-relevant phase, and any `DESIGN.md` or design ADRs.
+relevant phase, any `DESIGN.md` or design ADRs (see `forge-design-system`),
+and the taste profile at `wiki/.forge/taste.md` if it exists — bias the
+variant set toward the user's approved record, avoid resurrecting rejected
+shapes, and **flag** conflicts out loud ("your record leans dense; this
+brief asks for airy") rather than silently obeying either side.
 
 ### 2. Generate 3–4 variants
 
@@ -80,6 +84,10 @@ Once the user picks:
   variant by name.
 - If the project has a `DESIGN.md`, append a one-line entry pointing at
   the new ADR.
+- Append to the taste profile (`wiki/.forge/taste.md`, format per forge
+  suite's `references/wiki.md`): the approved variant's axis values, and
+  any variant the user *rejected with a reason* — rejections steer future
+  explorations as much as approvals.
 
 ### 5. Hand off
 

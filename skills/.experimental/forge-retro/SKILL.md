@@ -34,6 +34,12 @@ improve. Never about speed, output volume, "shipping faster", or business value.
 2. **Synthesize, don't list.** Produce:
    - **What shipped** — the phases, what each delivered, told as one coherent story
      of the build, not a changelog.
+   - **The trend lines** — review finding counts and harden/polish score deltas
+     across phases (each review/harden report recorded them, per forge suite's
+     `references/scoring.md`). Falling counts = the learnings loop is working —
+     say so; rising counts = a process finding to dig into. Also: which learnings
+     were *applied* most ("Prior learning applied" mentions) and which never fired
+     (retire candidates).
    - **Recurring patterns** — across learnings/incidents: the same class of issue
      showing up (e.g. "three phases needed error-path fixes in review"). Patterns,
      not anecdotes.

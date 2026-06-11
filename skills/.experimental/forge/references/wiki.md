@@ -35,6 +35,8 @@ wiki/
 ├── learnings.md        Running log of review findings + the rule-to-remember. (forge-review)
 ├── retro.md            Running build retrospectives — synthesis across phases. (forge-retro)
 ├── improvements.md     Running, honest "what I'd do with more time" + deliberate scope cuts.
+├── .forge/             Machine-ish state — config.yaml (reviewer), taste.md (design-taste
+│                       record), specimen.html (forge-design-system preview).
 │
 │   ── Knowledge base ──
 └── knowledge/
@@ -79,10 +81,46 @@ than its happy path — capture it.
 
 ## Learnings (`wiki/learnings.md`)
 
-A running, append-only list written by `forge-review`. One entry per review pass
-that found something worth remembering: what was found, how it was fixed, and the
-**rule-to-remember** (the generalizable lesson). Dated, references the phase. This is
-the project's accumulated taste — later reviews read it first and enforce its rules.
+A running list written by `forge-review` (and `forge-polish` / `forge-dx`). One
+entry per review pass that found something worth remembering:
+
+```markdown
+- **2026-06-11 · phase 3 · confidence 8/10** — found: <what> · fixed: <how> ·
+  **rule:** <the generalizable lesson, phrased so forge-build avoids it next time>
+```
+
+- **Confidence `N/10`** is how generalizable the rule is — a one-off quirk is a
+  3, a structural lesson is a 9. High-confidence rules are *enforced* by later
+  reviews; low-confidence ones are *checked* and either promoted (bump the
+  number, note the date) or retired when they stop holding.
+- **Application is visible.** When a learning drives a check or finding, the
+  skill says `Prior learning applied: <rule> (confidence N/10, from <date>)` —
+  the compounding is legible, never silent.
+- **Learnings can die.** A rule contradicted by reality gets struck (kept as
+  `~~rule~~ retired YYYY-MM-DD — <why>`), not silently deleted — the reversal is
+  itself a lesson. `forge-wiki-maintain` flags stale references and
+  contradicting pairs.
+
+This is the project's accumulated taste — later reviews read it first.
+
+## Taste profile (`wiki/.forge/taste.md`)
+
+The user's recorded design taste, accumulated across explorations — what
+`forge-design-explore` and `forge-design-system` read *before* generating, so
+variants start from the user's record instead of from zero. Append-only entries:
+
+```markdown
+- **2026-06-11 · approved** — direction: calm-utility · type: Space Grotesk +
+  JetBrains Mono · density: data-dense · (from: design-system lock)
+- **2026-06-11 · rejected** — card-grid layout for list surfaces ("feels like a
+  dashboard template") · (from: design-explore, surface: results view)
+```
+
+Both verdicts are recorded — rejections steer as much as approvals. Generators
+bias toward the approved record and **flag** conflicts out loud ("your record
+leans minimal; this brief asks for playful — which wins here?") rather than
+silently obeying either side. The profile is per-project; it never overrides an
+explicit user choice in the moment.
 
 ## Knowledge articles (`wiki/knowledge/<topic>/<slug>.md`)
 

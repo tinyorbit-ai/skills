@@ -113,10 +113,13 @@ compounding should be legible, not silent.
 ## Learnings → wiki
 
 For each non-trivial thing found and fixed, append to `wiki/learnings.md`: the date,
-the phase, **what was found**, **how it was fixed**, and the **rule-to-remember**
-(generalizable, phrased so `forge-build` avoids it next time). Link from
-`wiki/index.md`. If a finding was a real incident/surprising root cause, also write
-`wiki/notes/`. **Tell the user what you captured, in the same turn.**
+the phase, a **confidence `N/10`** (how generalizable the rule is — structural
+lesson 8–9, one-off quirk 2–3), **what was found**, **how it was fixed**, and the
+**rule-to-remember** (generalizable, phrased so `forge-build` avoids it next time).
+Format per forge suite's `references/wiki.md`. Link from `wiki/index.md`. If a
+finding was a real incident/surprising root cause, also write `wiki/notes/`. If a
+past learning was contradicted this pass, retire it visibly (strike + why) rather
+than silently violating it. **Tell the user what you captured, in the same turn.**
 
 ## Evidence chain
 
