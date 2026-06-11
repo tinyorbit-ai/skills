@@ -22,7 +22,7 @@ push?". A decision brief on every yes/no is noise.
 
 ## The shape
 
-Each AskUserQuestion question has three required parts and one optional:
+Each AskUserQuestion question has three required parts and two optional:
 
 1. **The framing** — one sentence in the `question` text. Plain language, the
    *concrete tradeoff*, no jargon. Not "Which approach?" — "Do we accept slower
@@ -31,7 +31,9 @@ Each AskUserQuestion question has three required parts and one optional:
 2. **The stakes** — one short clause inside the question or the first option's
    description, naming what *actually changes about the build* depending on
    this choice. Not vague ("affects performance") — concrete ("phase 3's gate
-   either runs in CI or has to be a manual check").
+   either runs in CI or has to be a manual check"). When the question is
+   technical, add an **ELI10 sentence** — plain English a non-specialist
+   reads in five seconds, naming the stakes without the jargon.
 
 3. **Your read** — your recommendation, set as the **first option**, labelled
    with `(recommended)`, with the `description` carrying the *why* and what
@@ -39,18 +41,26 @@ Each AskUserQuestion question has three required parts and one optional:
    options as equals when one is clearly better in context.
 
 4. **Optional: a Net line** — one-liner at the end of the `question` text
-   summarizing the frame, when the framing itself runs long. Usually skippable
-   if the framing is already tight.
+   synthesizing the tradeoff ("Net: JSON buys gate simplicity now at the cost
+   of a migration later"), when the framing itself runs long.
+
+5. **Optional: completeness tags** — when the options genuinely differ in how
+   much of the problem they cover (not just *how* they solve it), tag each
+   option's description with `covers N/10 of the surface` so the user sees the
+   coverage gap, not just the style difference. Skip when coverage is equal.
 
 ## Each option's `description`
 
-Concrete, not vague. Two rules:
+Concrete, not vague. Three rules:
 
 - **State the tradeoff in build-terms.** Effort, surface area, gate
   verifiability, branch count, future flexibility — never "better UX" or
   "more scalable" with no further teeth.
 - **Include the consequence the user has to live with.** "Picks A → phase 4
   becomes mandatory" reads true; "Picks A → cleaner architecture" reads sycophantic.
+- **Every option gets a real case and a real cost.** If you can't write a
+  genuine point in an option's favor and a genuine cost it carries, it isn't a
+  real option — drop it rather than padding the list.
 
 ## Anti-patterns (don't)
 
