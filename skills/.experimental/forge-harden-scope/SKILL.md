@@ -65,6 +65,19 @@ For each, describe the bolder version — same intent, more excellent
 realization. Name the *craft cost* honestly (effort, hard parts, time)
 in the user's currency, never market currency.
 
+Frame each expansion **expansively, then concretely** — lead with what the
+finished thing feels like, close with the shape and cost:
+
+> Flat (avoid): "Add live reload. Phase 3 effort: ~1 day."
+>
+> Expansive (aim for): "Imagine saving the file and the preview is already
+> right — no rerun, no refresh, the tool keeps up with your hands. Concrete
+> shape: a file watcher + re-render in phase 3, ~1 day, one new dependency."
+
+Both are honest; only one lets the user *feel* the version they'd be
+choosing. The feel is for the user's own experience of the thing — never
+audience growth dressed as delight.
+
 **HOLD**: state plainly which scope choices look deliberate, which feel
 unexamined, and which deserve to be recorded as held-on-purpose. Surface
 those last via Decision Brief so they become explicit decisions.
@@ -79,7 +92,10 @@ re-land if the user does want it eventually). "Cuts" go to
 AskUserQuestion in the **Decision Brief** shape (forge suite's
 `references/question-style.md`):
 
-- For EXPAND findings: keep current / adopt bolder / take specific pieces.
+- For EXPAND findings: **one question per expansion** so the user
+  cherry-picks (keep current / adopt bolder / take specific pieces) —
+  never one bundled "expand everything?" question. Rejected expansions go
+  to `wiki/improvements.md` as parked.
 - For HOLD findings: confirm-and-record / re-examine.
 - For TRIM findings: keep phase / move to improvements / delete outright.
 

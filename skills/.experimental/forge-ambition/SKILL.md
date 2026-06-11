@@ -36,18 +36,38 @@ Run after a brief is drafted (or on demand against brief/plan). Read
    they wanted, never to reach/scale/revenue. One or two vivid paragraphs, not a
    roadmap.
 
-3. **Name the cost honestly.** What the bolder version actually takes (effort,
+3. **Stack the small unlocks.** Separate from the one bolder version: rapid-fire
+   **2–4 small ideas**, each independently adoptable and cheap relative to the
+   build (hours, not weeks), each making the thing more *delightful to its own
+   user* — the kind you'd show someone. Stack them fast and vivid, not as a
+   strategy memo:
+
+   > Structured (avoid): "Consider adding an export feature. This would improve
+   > the tool's utility."
+   >
+   > Stacked (aim for): "Oh — and what if the dedupe run ended with a one-line
+   > 'reclaimed 4.2 GB' summary? Or wrote an undo script alongside? Or showed the
+   > worst duplicate side-by-side before deleting? Each is a small unlock; any of
+   > them turns 'a script I ran' into 'a tool I trust'."
+
+   Lead with the fun; let the user edit it down. Same intent, same audience —
+   never a new feature direction smuggled in as delight.
+
+4. **Name the cost honestly.** What the bolder version actually takes (effort,
    difficulty, the hard part they'd have to face). No selling. The user decides
    whether the extra ambition is worth *their* time and interest — the only
    currency here.
 
-4. **Offer it as a choice.** AskUserQuestion in the **Decision Brief** shape
-   (forge suite's `references/question-style.md`): keep the current shape,
-   adopt the bolder version, or take specific pieces. Take a position and say
-   why, naming the effort/craft cost of each — but the timid version is a fully
-   legitimate choice. "I want it small" ends it.
+5. **Offer it as choices.** The bolder version: one AskUserQuestion in the
+   **Decision Brief** shape (forge suite's `references/question-style.md`) —
+   keep the current shape, adopt the bolder version, or take specific pieces.
+   The small unlocks: one `multiSelect` AskUserQuestion where each unlock is an
+   option the user cherry-picks (with its one-line cost) — adopted ones land in
+   the brief, rejected ones go to `wiki/improvements.md` as parked, not deleted.
+   Take a position on both — but the timid version is a fully legitimate
+   choice. "I want it small" ends it.
 
-5. **Record the outcome.** If ambition changed: update `wiki/brief.md` (and the
+6. **Record the outcome.** If ambition changed: update `wiki/brief.md` (and the
    relevant ADR / `wiki/plan.md` if it exists) and tell the user. If unchanged,
    note that the scope was deliberately held — that's a decision worth recording
    too, so it isn't re-litigated later.

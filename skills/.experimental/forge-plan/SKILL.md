@@ -26,11 +26,29 @@ Prereq: `wiki/brief.md` exists and is filled. If not, run `forge-discovery` firs
 Read `wiki/brief.md`, `wiki/architecture.md`, `CLAUDE.md`/`AGENTS.md`, and the
 current codebase shape. Confirm the base branch and record it in the plan header.
 
-### 2. Draft the architecture
+### 2. Generate the approaches — at least two, equal weight
 
-Sketch the system: components, data flow, storage, external dependencies, the key
-modules and their boundaries. Render it as a small ASCII or mermaid diagram. Write
-the 30-second version into `wiki/architecture.md` (replace its stub).
+Before committing to an architecture, draft **2–3 genuinely different ways to
+build the brief** (not three names for the same shape):
+
+```
+APPROACH A — <name>        (required: the MINIMAL VIABLE — fewest moving parts)
+APPROACH B — <name>        (required: the IDEAL ARCHITECTURE — best long-term shape)
+APPROACH C — <name>        (optional: the CREATIVE/LATERAL — a different framing
+                            of the problem, include when one genuinely exists)
+```
+
+For each: a 1–2 sentence summary, effort (S/M/L), what it reuses from existing
+code, two pros, two cons. **Minimal and ideal carry equal weight** — never
+default to minimal because it's smaller. If the right answer is the ambitious
+one, say so; the brief's ambition (locked at discovery) is the tiebreaker, not
+shippability. Present as one Decision Brief and lock the choice as ADR 0001.
+
+### 2b. Draft the architecture
+
+Sketch the chosen approach: components, data flow, storage, external dependencies,
+the key modules and their boundaries. Render it as a small ASCII or mermaid diagram.
+Write the 30-second version into `wiki/architecture.md` (replace its stub).
 
 ### 3. Surface and lock every real decision
 
@@ -89,6 +107,8 @@ harden the plan before building (or return to `forge`).
 ## Rules
 
 - A flat task list is not a plan. No phases / no gates / no branches = not done.
+- One approach presented is not a choice. Minimal-viable and ideal-architecture
+  are both always on the table, at equal weight (§2).
 - Don't write feature code. Architecture, decisions, phases only.
 - Every locked decision gets an ADR with a non-empty "Alternatives considered".
 - Every AskUserQuestion call follows the Decision Brief shape (forge suite's
