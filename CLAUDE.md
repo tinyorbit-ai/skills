@@ -159,31 +159,32 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 
 | Skill | Status | Description |
 |---|---|---|
-| `forge` | experimental | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
-| `forge-init` | experimental | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base); injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
-| `forge-discovery` | experimental | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six, each with push-until gates and red flags ("I don't know yet" is valid). Context welcome; never reopens whether it should exist / who builds it. |
-| `forge-plan` | experimental | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. Mandates 2–3 approaches first (minimal-viable / ideal-architecture / lateral) at equal weight. |
-| `forge-harden` | experimental | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). Decision classes — Mechanical / Taste / User Challenge (the last never auto-decided). |
-| `forge-harden-eng` | experimental | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. 0–10 rated dimensions, complexity smells (>8 files), search-before-building gate, and whether each gate actually proves its phase goal. |
-| `forge-harden-design` | experimental | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Six rated passes, each fixing-to-10 with an artifact written into the plan (state table, journey storyboard, unresolved-decisions table). |
-| `forge-harden-dx` | experimental | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Persona-card gate, first-run TTHW bar, magical-moment vehicle, evidence-grounded friction trace — folded into phase work. |
-| `forge-harden-security` | experimental | Plan-time security review (CSO persona). Modes — DAILY (confidence ≥8/10, zero noise) / DEEP (≥2/10, TENTATIVE-tagged). OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged + trend line. |
-| `forge-harden-scope` | experimental | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
-| `forge-build` | experimental | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
-| `forge-review` | experimental | Staff-grade code review: scope-drift + plan-completion audit, security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, numbered evidence chain, learnings (confidence-scored) → `wiki/learnings.md`. |
-| `forge-ship` | experimental | Lands a phase: green gate → one squashed commit on base → build-log entry; auto-invokes `forge-docs` if the phase touched a doc surface. |
-| `forge-docs` | experimental | Post-ship doc-drift check using Diataxis (tutorial / how-to / reference / explanation). Auto-fixes concrete drift; surfaces structural gaps as taste decisions. |
-| `forge-design-system` | experimental | DESIGN.md as design source of truth — memorable-thing question, 2–3 named aesthetic directions, anti-default typography, token system (color / 4px spacing / radius / motion), HTML specimen page. Feeds the taste profile. |
-| `forge-design-explore` | experimental | Divergent design exploration — 3-4 mockup variants for a UI surface before implementation. Reads/writes the taste profile. Charter-safe (no market framing). Locks the chosen shape as an ADR. |
-| `forge-debug` | experimental | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
-| `forge-ambition` | experimental | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
-| `forge-polish` | experimental | Designer's-eye QA on the *running* UI: consistency, hierarchy, the 11-pattern AI-slop blacklist, feel; design+slop scores baseline→final, numbered before/after evidence. Auto in `forge-review` (if UI); standalone. |
-| `forge-dx` | experimental | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
-| `forge-retro` | experimental | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
-| `forge-wiki` | experimental | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
-| `forge-wiki-maintain` | experimental | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
+| `forge` | stable | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→harden→(build→review→ship loop, one phase/run). `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
+| `forge-init` | stable | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base); injects wiki/ADR/phase rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
+| `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six, each with push-until gates and red flags ("I don't know yet" is valid). Context welcome; never reopens whether it should exist / who builds it. |
+| `forge-plan` | stable | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each) + seed ADRs. Mandates 2–3 approaches first (minimal-viable / ideal-architecture / lateral) at equal weight. |
+| `forge-harden` | stable | Plan-time hardening orchestrator — runs the persona skills (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request) + independent adversarial pass (Codex / Gemini / Claude). Decision classes — Mechanical / Taste / User Challenge (the last never auto-decided). |
+| `forge-harden-eng` | stable | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. 0–10 rated dimensions, complexity smells (>8 files), search-before-building gate, and whether each gate actually proves its phase goal. |
+| `forge-harden-design` | stable | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Six rated passes, each fixing-to-10 with an artifact written into the plan (state table, journey storyboard, unresolved-decisions table). |
+| `forge-harden-dx` | stable | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Persona-card gate, first-run TTHW bar, magical-moment vehicle, evidence-grounded friction trace — folded into phase work. |
+| `forge-harden-security` | stable | Plan-time security review (CSO persona). Modes — DAILY (confidence ≥8/10, zero noise) / DEEP (≥2/10, TENTATIVE-tagged). OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged + trend line. |
+| `forge-harden-scope` | stable | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
+| `forge-build` | stable | Builds the next phase as a staff engineer (best version, in-boundary), then → forge-review. |
+| `forge-review` | stable | Staff-grade code review: scope-drift + plan-completion audit, security, real tests passing, strict types (escape hatches banned), runtime verify, optional third-party pass (Codex / Gemini / Claude, configurable); auto-fixes objective findings, numbered evidence chain, learnings (confidence-scored) → `wiki/learnings.md`. |
+| `forge-ship` | stable | Lands a phase: green gate → one squashed commit on base → build-log entry; auto-invokes `forge-docs` if the phase touched a doc surface. |
+| `forge-docs` | stable | Post-ship doc-drift check using Diataxis (tutorial / how-to / reference / explanation). Auto-fixes concrete drift; surfaces structural gaps as taste decisions. |
+| `forge-design-system` | stable | DESIGN.md as design source of truth — memorable-thing question, 2–3 named aesthetic directions, anti-default typography, token system (color / 4px spacing / radius / motion), HTML specimen page. Feeds the taste profile. |
+| `forge-design-explore` | stable | Divergent design exploration — 3-4 mockup variants for a UI surface before implementation. Reads/writes the taste profile. Charter-safe (no market framing). Locks the chosen shape as an ADR. |
+| `forge-debug` | stable | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
+| `forge-ambition` | stable | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
+| `forge-polish` | stable | Designer's-eye QA on the *running* UI: consistency, hierarchy, the 11-pattern AI-slop blacklist, feel; design+slop scores baseline→final, numbered before/after evidence. Auto in `forge-review` (if UI); standalone. |
+| `forge-dx` | stable | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
+| `forge-retro` | stable | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
+| `forge-wiki` | stable | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
+| `forge-wiki-maintain` | stable | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
 
-> **forge suite** (23 skills) lives in `skills/.experimental/` with `metadata.internal: true`.
+> **forge suite** (23 skills) is **released** — it lives in `skills/` and is installable
+> by default (no `INSTALL_INTERNAL_SKILLS` flag needed).
 > Loop: `forge` → init → discovery (+ambition) → plan → (+design-system /
 > +design-explore if UI) → harden → lock → per run: build → review (+polish/+dx) →
 > ship (+docs); at Done: retro.
@@ -200,6 +201,5 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 > keeps indexes + links healthy). Charter (relaxed): the only off-limits moves are
 > questioning whether the project should exist or whether the user should build it;
 > all context, business included, is welcome as input. `forge-review` absorbed the
-> old `forge-qa`. Install with
-> `INSTALL_INTERNAL_SKILLS=1 npx skills add tinyorbit-ai/skills --skill '*'`. Promote
-> to `skills/` after one full dogfood run (per the experimental workflow above).
+> old `forge-qa`. Install the whole suite with
+> `npx skills add tinyorbit-ai/skills --skill 'forge*'` (or `--all` for everything).
