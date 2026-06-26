@@ -86,18 +86,17 @@ vocabulary:
 
 ### 5. Specimen page — pick with eyes, give feedback per section
 
-Generate the specimen as an **interactive feedback board** (forge suite's
-`references/design-feedback-board.md`) at `wiki/.forge/specimen.html` from the
-template — real text, no lorem. One `data-feedback` section per part of the
-system so the user reacts to each independently: **Typography** (roles +
-weights), **Color** (palette as swatches *and* in use — a card, a button row, a
-data row, an empty state), **Spacing**, **Radius**, **Motion**, **Voice** (the
-empty-state example). If the type/color choice was genuinely close, render the
-2–3 finalists side-by-side (`<main class="cols">`). Open it via the
-generate-and-open contract — serve it and report a clickable URL, don't just
-point at the path — have the user react per section and hit **Copy feedback**,
-then paste it back. Fold objective fixes in and iterate until it reads as "yes,
-that's the thing". Don't skip this — adjectives lie, specimens don't.
+Generate the specimen as an **HTML file with a feedback system** (forge suite's
+`references/design-feedback-board.md`) at `wiki/.forge/specimen.html` — real text,
+no lorem. It must render the locked system, take feedback per section, and copy it
+back out; the layout is up to you (a ready template exists). Give the user
+something to react to for each part — typography, color (swatches *and* in use:
+a card, a button row, a data row, an empty state), spacing, radius, motion, voice.
+If the type/color choice was genuinely close, show the 2–3 finalists side-by-side.
+Open it via the generate-and-open contract — serve it and report a clickable URL,
+don't just point at the path — have the user react per section and copy the
+feedback back. Fold objective fixes in and iterate until it reads as "yes, that's
+the thing". Don't skip this — adjectives lie, specimens don't.
 
 ### 6. Write it down
 

@@ -51,10 +51,10 @@ For each variant, produce:
 
 - **Name** — one or two words that capture the shape (`compact-table`,
   `card-grid`, `terminal-first`, `chat-stream`).
-- **Mockup** — the **interactive feedback board is the default for any visual
-  surface** (forge suite's `references/design-feedback-board.md`): render each
-  variant as a real HTML/CSS block inside its own `data-feedback` section,
-  `<main class="cols">` for side-by-side. ASCII layout is the fallback only for
+- **Mockup** — for any visual surface, the **default is an HTML file with a
+  feedback system** (forge suite's `references/design-feedback-board.md`): renders
+  the variants, takes per-variant feedback, copies it back. Structure/layout is up
+  to you (a ready template exists). ASCII layout is the fallback only for
   terminal/CLI surfaces or when no browser is reachable. Real layout, real text —
   no lorem ipsum, no "[chart here]" placeholders.
 - **What it optimizes for** — one sentence tying back to the brief's
@@ -67,13 +67,14 @@ For each variant, produce:
 
 ### 3. Present the variants
 
-**Default — the interactive board.** Write the variants into
-`wiki/.forge/explore-<surface>.html` from the template and open it (the
-generate-and-open contract in `references/design-feedback-board.md`): variants
-side-by-side, a feedback control per variant, one **Copy feedback** button. Lead
-with your recommendation and *why* — anti-sycophantic; take a position. The user
-reacts per variant and pastes their feedback back; fold objective fixes in and,
-if they want changes before choosing, iterate the board.
+**Default — an HTML file with a feedback system.** Write the variants to
+`wiki/.forge/explore-<surface>.html` and open it (generate-and-open contract in
+`references/design-feedback-board.md`): it must render the variants, take feedback
+per variant, and copy it back out — the exact layout is up to you (a ready
+template exists if you want it). Lead with your recommendation and *why* —
+anti-sycophantic; take a position. The user reacts per variant and pastes their
+feedback back; fold objective fixes in and, if they want changes before choosing,
+iterate.
 
 **Fallback — `AskUserQuestion`** in the **Decision Brief** shape (forge suite's
 `references/question-style.md`), each variant an option with the ASCII mockup in
