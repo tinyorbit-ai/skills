@@ -201,5 +201,8 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 > keeps indexes + links healthy). Charter (relaxed): the only off-limits moves are
 > questioning whether the project should exist or whether the user should build it;
 > all context, business included, is welcome as input. `forge-review` absorbed the
-> old `forge-qa`. Install the whole suite with
-> `npx skills add tinyorbit-ai/skills --skill 'forge*'` (or `--all` for everything).
+> old `forge-qa`. This repo is forge-only, so install the whole suite with
+> `npx skills add tinyorbit-ai/skills --all` (or `--skill '*'`). Note: `--skill`
+> only honors exact names or the literal `*` — there is **no prefix/glob** matching,
+> so `--skill 'forge*'` matches nothing. Run bare `npx skills add tinyorbit-ai/skills`
+> for the interactive picker.
