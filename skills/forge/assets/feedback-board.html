@@ -1,0 +1,235 @@
+<!doctype html>
+<!--
+  forge · interactive design feedback board (template)
+  ─────────────────────────────────────────────────────
+  HOW TO USE (for the agent generating a board):
+    1. Set the <title> and the .board-title / .board-sub text.
+    2. Fill <main id="sections"> with one <section data-feedback="NAME"> per
+       thing the user should react to. NAME is the label that appears in the
+       copied feedback (e.g. "Typography", "Color", "Variant: compact-table").
+       Put the REAL rendered design inside each section (specimen blocks,
+       a variant mockup, an iframe, screenshots — whatever the skill produced).
+       Real content, real text. No lorem, no placeholders.
+    3. For a side-by-side compare (design-explore), give <main> class="cols".
+    4. Leave everything below the `END TEMPLATE CONTENT` marker untouched —
+       the JS auto-attaches a feedback control to every [data-feedback] section,
+       persists to localStorage, and powers the "Copy feedback" button.
+  The file is self-contained: works opened as file:// or served over http.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design feedback — {PROJECT}</title>
+<style>
+  :root {
+    --ink: #16161a; --muted: #6b6b76; --line: #e4e4ea; --bg: #fbfbfd;
+    --surface: #ffffff; --accent: #2f5fe0; --good: #1f8a4c; --warn: #b4690e;
+    --radius: 10px; --pad: 20px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.55 ui-sans-serif, system-ui, sans-serif;
+    padding-bottom: 96px;
+  }
+  /* NOTE: the board chrome uses system-ui deliberately — it is tooling, not the
+     design under review. The design lives inside each <section>. */
+  header.board {
+    position: sticky; top: 0; z-index: 5; background: var(--surface);
+    border-bottom: 1px solid var(--line); padding: 16px 24px;
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  .board-title { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+  .board-sub { color: var(--muted); font-size: 13px; }
+  .board-spacer { flex: 1; }
+  .count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  main { max-width: 1100px; margin: 28px auto; padding: 0 24px; display: grid; gap: 28px; }
+  main.cols { max-width: 1500px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); align-items: start; }
+  section[data-feedback] {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  section[data-feedback] > .sec-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; border-bottom: 1px solid var(--line); background: #fcfcfe;
+  }
+  .sec-name { font-weight: 600; font-size: 14px; }
+  .sec-body { padding: var(--pad); }
+  /* feedback control (injected) */
+  .fb { border-top: 1px dashed var(--line); padding: 14px 16px; background: #fafafc; }
+  .fb-chips { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .chip {
+    font: inherit; font-size: 12px; cursor: pointer; user-select: none;
+    border: 1px solid var(--line); background: #fff; color: var(--muted);
+    border-radius: 999px; padding: 3px 11px;
+  }
+  .chip[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: #f0f4ff; }
+  .chip.love[aria-pressed="true"] { border-color: var(--good); color: var(--good); background: #eef8f1; }
+  .chip.fix[aria-pressed="true"]  { border-color: var(--warn); color: var(--warn); background: #fdf5ea; }
+  .fb textarea {
+    width: 100%; min-height: 54px; resize: vertical; font: inherit; font-size: 13.5px;
+    border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: #fff;
+    color: var(--ink);
+  }
+  .fb textarea:focus, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .fb .has-note { color: var(--accent); }
+  /* copy bar */
+  .copybar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 14px 24px; display: flex; align-items: center; gap: 14px;
+  }
+  .copybar .summary { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .copybar .grow { flex: 1; }
+  button.copy {
+    font: inherit; font-weight: 600; font-size: 14px; cursor: pointer;
+    background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 10px 18px;
+  }
+  button.ghost {
+    font: inherit; font-size: 13px; cursor: pointer; color: var(--muted);
+    background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px;
+  }
+  button.copy:active { transform: translateY(1px); }
+  .copied { color: var(--good); font-weight: 600; font-size: 13px; }
+</style>
+</head>
+<body>
+<header class="board">
+  <span class="board-title">Design feedback — {PROJECT}</span>
+  <span class="board-sub">{WHAT_THIS_IS — e.g. "Pick a direction" / "React to the system"}</span>
+  <span class="board-spacer"></span>
+  <span class="count" id="count"></span>
+</header>
+
+<!-- ───────────────────────── TEMPLATE CONTENT ─────────────────────────
+     Replace everything inside <main> with the real design sections.
+     Example shape (delete these and author your own):
+-->
+<main id="sections">
+
+  <section data-feedback="Typography">
+    <div class="sec-head"><span class="sec-name">Typography</span></div>
+    <div class="sec-body">
+      <!-- real type specimen goes here: display / body / mono rows, real text -->
+    </div>
+  </section>
+
+  <section data-feedback="Color">
+    <div class="sec-head"><span class="sec-name">Color</span></div>
+    <div class="sec-body">
+      <!-- real palette: swatches AND in-use (a card, a button row, a data row) -->
+    </div>
+  </section>
+
+</main>
+<!-- ─────────────────────── END TEMPLATE CONTENT ───────────────────────
+     Do not edit below this line. -->
+
+<div class="copybar">
+  <span class="summary" id="summary">No feedback yet</span>
+  <span class="grow"></span>
+  <button class="ghost" id="clear" type="button">Clear</button>
+  <button class="copy" id="copyBtn" type="button">Copy feedback</button>
+  <span class="copied" id="copied" hidden>Copied ✓ — paste it back to the agent</span>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var KEY = "forge-feedback:" + (location.pathname || "board");
+  var store = loadStore();
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section[data-feedback]"));
+
+  sections.forEach(function (sec) {
+    var name = sec.getAttribute("data-feedback") || "Section";
+    var saved = store[name] || { verdict: "", note: "" };
+    var fb = document.createElement("div");
+    fb.className = "fb";
+    fb.innerHTML =
+      '<div class="fb-chips">' +
+      '  <button type="button" class="chip love" data-v="love">Love it</button>' +
+      '  <button type="button" class="chip" data-v="ok">It\'s fine</button>' +
+      '  <button type="button" class="chip fix" data-v="fix">Needs work</button>' +
+      '</div>' +
+      '<textarea placeholder="What works, what doesn\'t, what to change for &quot;' + esc(name) + '&quot;…"></textarea>';
+    sec.appendChild(fb);
+
+    var chips = fb.querySelectorAll(".chip");
+    var ta = fb.querySelector("textarea");
+    ta.value = saved.note || "";
+    chips.forEach(function (c) {
+      c.setAttribute("aria-pressed", String(c.getAttribute("data-v") === saved.verdict));
+      c.addEventListener("click", function () {
+        var v = c.getAttribute("data-v");
+        saved.verdict = (saved.verdict === v) ? "" : v;
+        chips.forEach(function (x) { x.setAttribute("aria-pressed", String(x.getAttribute("data-v") === saved.verdict)); });
+        commit(name, saved); refresh();
+      });
+    });
+    ta.addEventListener("input", function () { saved.note = ta.value; commit(name, saved); refresh(); });
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var md = buildMarkdown();
+    copy(md).then(function () {
+      var c = document.getElementById("copied");
+      c.hidden = false; setTimeout(function () { c.hidden = true; }, 4000);
+    });
+  });
+  document.getElementById("clear").addEventListener("click", function () {
+    if (!confirmCleared()) return;
+    store = {}; saveStore();
+    sections.forEach(function (sec) {
+      var ta = sec.querySelector(".fb textarea"); if (ta) ta.value = "";
+      sec.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+    });
+    refresh();
+  });
+
+  refresh();
+
+  function refresh() {
+    var n = 0;
+    Object.keys(store).forEach(function (k) {
+      var s = store[k]; if (s && (s.verdict || (s.note && s.note.trim()))) n++;
+    });
+    document.getElementById("count").textContent = n + " of " + sections.length + " sections marked";
+    document.getElementById("summary").textContent = n ? (n + " section" + (n === 1 ? "" : "s") + " with feedback") : "No feedback yet";
+  }
+  function buildMarkdown() {
+    var title = document.querySelector(".board-title");
+    var lines = ["## Design feedback — " + (title ? title.textContent.replace(/^Design feedback — /, "") : ""), ""];
+    var any = false;
+    sections.forEach(function (sec) {
+      var name = sec.getAttribute("data-feedback");
+      var s = store[name]; if (!s || (!s.verdict && !(s.note && s.note.trim()))) return;
+      any = true;
+      var verdict = { love: "👍 Love it", ok: "• It's fine", fix: "🔧 Needs work" }[s.verdict] || "";
+      lines.push("### " + name + (verdict ? "  —  " + verdict : ""));
+      if (s.note && s.note.trim()) lines.push(s.note.trim());
+      lines.push("");
+    });
+    if (!any) lines.push("_(no per-section feedback entered)_");
+    return lines.join("\n").trim() + "\n";
+  }
+  function commit(name, val) {
+    if (!val.verdict && !(val.note && val.note.trim())) delete store[name];
+    else store[name] = val;
+    saveStore();
+  }
+  function loadStore() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+  function saveStore() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+  function confirmCleared() { return true; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function copy(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+    return new Promise(function (res) {
+      var t = document.createElement("textarea"); t.value = text; document.body.appendChild(t);
+      t.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(t); res();
+    });
+  }
+})();
+</script>
+</body>
+</html>

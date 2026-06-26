@@ -35,7 +35,7 @@ You are here ──────────────────────�
   ▶ Next: <the exact next command, e.g. `/forge` → build phase 3>
 
 Full map ─────────────────────────────────────
-  PLAN   init · discovery (+ambition) · plan · harden
+  PLAN   init · discovery (+ambition) · plan (+design-system/-explore if UI) · harden
   BUILD  build · review (+polish +dx) · ship   ·· one phase per /forge run
   LOOK   debug (root-cause) · retro (synthesis, auto at Done)
   WIKI   wiki (ask · ingest context) · wiki-maintain (index · health) ·· any time
@@ -79,8 +79,10 @@ Derive **next action** from this ladder (first unmet wins):
 | `wiki/brief.md` missing/stub | Discovery | `forge-discovery` |
 | `wiki/plan.md` missing/stub | Planning | `forge-plan` |
 | plan has no `## Review` (not hardened) | Hardening | `forge-harden` |
-| plan locked, unbuilt phase exists | Build loop | see below |
-| every plan phase has a build-log entry | Done | invoke `forge-retro`, then report + `improvements.md` |
+| plan has `## Review` but `Lock status:` ≠ `locked` | Lock | present the lock gate (Step 2), then mark locked |
+| plan locked (`Lock status: locked`), unbuilt phase exists | Build loop | see below |
+| every plan phase has a build-log entry **and the latest is covered by a `wiki/retro.md` entry** | Done | report complete + open `improvements.md` |
+| every plan phase has a build-log entry, **no retro covers the latest** | Wrap-up | invoke `forge-retro`, then report |
 
 ## Step 2 — run exactly the next thing, then stop
 
@@ -92,16 +94,28 @@ user what's done and that the next `/forge` continues. (Exception: a fresh proje
 with nothing — offer, via AskUserQuestion, to run setup→discovery→plan→harden in
 sequence so first-time setup isn't four invocations.)
 
-When `forge-harden` finishes, present the final lock gate (AskUserQuestion): phase
-list with each phase's verifiable gate, open taste decisions, which reviewer
-ran, and any unreconciled reviewer disagreement. On confirm, the plan is
-**locked** and the build loop is unlocked.
+When `forge-harden` finishes — or when state detection lands on **Lock** (a
+`## Review` block exists with `Lock status:` not yet `locked`, e.g. a prior run
+hardened but the user never confirmed) — present the final lock gate
+(AskUserQuestion): phase list with each phase's verifiable gate, open taste
+decisions, which reviewer ran, and any unreconciled reviewer disagreement. On
+confirm, **write `**Lock status:** locked` into the plan's `## Review` block** —
+that persisted marker is the build loop's unlock; without it the next `/forge`
+would re-present the gate. The build loop is now unlocked.
 
 ### Build loop (plan locked, phases remain) — ONE phase per run
 
-1. **Pick the phase.** First phase in `wiki/plan.md` with no `wiki/build-log.md`
-   entry. If on a `phase/<k>-…` branch with work already in progress, resume *that*
-   phase instead of starting a new one.
+1. **Pick the phase, and enter at the right step.** The phase is the first in
+   `wiki/plan.md` with no `wiki/build-log.md` entry (if on a `phase/<k>-…` branch
+   with work in progress, that's the phase — don't start a new one). Then enter the
+   loop at the *furthest step whose output isn't yet present*, not blindly at build:
+   - phase branch missing / no commits → start at **Build** (step 3).
+   - branch has commits but the gate isn't green / review not done → resume at
+     **Build/Review** (forge-build continues in-progress work; it won't re-scaffold).
+   - gate green and review evidence exists but no build-log entry → go straight to
+     **Ship** (step 5).
+   Each sub-skill also guards its own entry (build continues, review re-runs
+   idempotently, ship checks branch position), so re-entry is always safe.
 2. **Announce it.** Phase number, title, its branch, its verifiable gate. One line.
 3. **Build.** Invoke `forge-build` for this phase (staff-engineer build of the best
    version of the phase, on its `phase/<n>-<slug>` branch).
@@ -110,8 +124,9 @@ ran, and any unreconciled reviewer disagreement. On confirm, the plan is
    runtime verification of gate + goal). Review auto-invokes `forge-polish` (if the
    phase touched UI) and `forge-dx` (if the build is developer-facing); both are
    also runnable standalone any time.
-5. **Ship.** Invoke `forge-ship` (verify gate green → exactly one squashed commit on
-   base → one `wiki/build-log.md` entry).
+5. **Ship.** Invoke `forge-ship` (verify gate green → one squashed commit on base,
+   plus an optional `docs:` commit if `forge-docs` changed docs → one
+   `wiki/build-log.md` entry).
 6. **Stop and report.** State: phase N landed, the commit, the gate that passed,
    what's next (phase N+1 + its branch + gate). **Do not** auto-continue to N+1 —
    the user runs `/forge` again to take the next phase. If any step fails (red gate,

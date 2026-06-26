@@ -23,8 +23,8 @@ never "rank for SEO" or "convert".
 - **Standalone:** invoke any time on demand. Scoped to "since last
   build-log entry" by default; broader on explicit request.
 
-If the project has no docs and no doc directory, say so and exit (offer
-`forge-docs --generate` later if `forge-docs-generate` lands).
+If the project has no docs and no doc directory, say so and exit — generating
+docs from scratch is out of scope for this drift check.
 
 ## Diataxis quadrants (the lens)
 

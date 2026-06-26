@@ -42,9 +42,9 @@ ask in one Decision Brief: which lens?
 
 Prereq: `wiki/plan.md` exists. Read it, `wiki/brief.md` (especially "How
 it should feel", "The hard/interesting part", "Smallest useful version",
-"Three-year fit"), and `wiki/architecture.md`. Read `forge-ambition`'s
-brief-time output if it ran — don't re-litigate decisions already made
-there; build on them.
+"Three-year fit"), and `wiki/architecture.md`. Check the brief for an
+`**Ambition check (...):**` marker — `forge-ambition`'s brief-time outcome. If
+present, don't re-litigate what it already settled; build on it.
 
 ### 1. Find the drift
 

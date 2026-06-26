@@ -19,8 +19,9 @@ does the *user* want to build, given what the brief said it should feel like?
 
 - **Standalone.** Most common. Invoke when staring at a phase that says
   "build the UI for X" and you don't yet know the shape.
-- **Suggested.** `forge-discovery` and `forge-plan` may suggest this if the
-  brief's "How it should feel" is firm but the shape is genuinely open.
+- **Suggested.** `forge-plan` recommends this at hand-off when a phase's UI shape
+  is genuinely open (and `forge-harden-design` may flag it during hardening) — the
+  brief's "How it should feel" is firm but the layout isn't settled yet.
 
 If the brief / plan already fixes the shape (e.g. "follow DESIGN.md
 exactly"), say so and exit — exploration would be re-litigation.
@@ -50,10 +51,12 @@ For each variant, produce:
 
 - **Name** — one or two words that capture the shape (`compact-table`,
   `card-grid`, `terminal-first`, `chat-stream`).
-- **Mockup** — ASCII layout for terminal/CLI surfaces, or an HTML/CSS
-  snippet for web. Real layout, real text. No lorem ipsum, no
-  "[chart here]" placeholders. (For a richer HTML pass, hand off to a
-  HTML-generation tool — but the variant itself must be concrete.)
+- **Mockup** — the **interactive feedback board is the default for any visual
+  surface** (forge suite's `references/design-feedback-board.md`): render each
+  variant as a real HTML/CSS block inside its own `data-feedback` section,
+  `<main class="cols">` for side-by-side. ASCII layout is the fallback only for
+  terminal/CLI surfaces or when no browser is reachable. Real layout, real text —
+  no lorem ipsum, no "[chart here]" placeholders.
 - **What it optimizes for** — one sentence tying back to the brief's
   "How it should feel".
 - **What it costs** — concrete tradeoffs in craft terms (effort,
@@ -64,16 +67,25 @@ For each variant, produce:
 
 ### 3. Present the variants
 
-`AskUserQuestion` in the **Decision Brief** shape (forge suite's
-`references/question-style.md`). Each variant becomes an option; use
-the `preview` field with the ASCII mockup. Lead with your recommendation
-and *why* — anti-sycophantic; take a position.
+**Default — the interactive board.** Write the variants into
+`wiki/.forge/explore-<surface>.html` from the template and open it (the
+generate-and-open contract in `references/design-feedback-board.md`): variants
+side-by-side, a feedback control per variant, one **Copy feedback** button. Lead
+with your recommendation and *why* — anti-sycophantic; take a position. The user
+reacts per variant and pastes their feedback back; fold objective fixes in and,
+if they want changes before choosing, iterate the board.
 
-Three or four options max. If five, you haven't picked a clear axis.
+**Fallback — `AskUserQuestion`** in the **Decision Brief** shape (forge suite's
+`references/question-style.md`), each variant an option with the ASCII mockup in
+the `preview` field. Use this for CLI/terminal surfaces or when no browser is
+reachable.
+
+Three or four variants max. If five, you haven't picked a clear axis.
 
 ### 4. Lock the choice
 
-Once the user picks:
+Once the user picks (if the board feedback didn't make the choice unambiguous,
+confirm it with one quick `AskUserQuestion`):
 
 - Write an ADR (`wiki/decisions/NNNN-design-<surface>.md`) — Context ·
   Decision · Why · Alternatives considered (the *other* variants, in
@@ -106,4 +118,5 @@ piece, or `forge` to resume the pipeline.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format
+- forge suite's `references/design-feedback-board.md` — the interactive board (default presentation) + generate-and-open contract
+- forge suite's `references/question-style.md` — Decision Brief format (the fallback path)
