@@ -11,7 +11,7 @@ in the forge orchestrator's `references/wiki.md` — read it before writing anyt
 
 ## Charter
 
-Context is welcome — **more is better than less** (`references/charter.md`). Ingest
+Context is welcome — **more is better than less** (forge suite's `references/charter.md`). Ingest
 business rationale, market/competitive notes, demand signals, stakeholder email,
 user research, conversations — all of it. The one thing you may never do with
 ingested context: turn it into a verdict on whether the project should exist or

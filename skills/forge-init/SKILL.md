@@ -15,7 +15,7 @@ The project is worth building because you chose to, and you're the right person 
 build it — both settled, never questioned. Context, on the other hand, is welcome:
 more is better than less. This skill builds the scaffolding that captures the *why*
 as you go — including a knowledge base that can ingest any context the build rests on
-(`references/charter.md`).
+(forge suite's `references/charter.md`).
 
 ## What it does
 

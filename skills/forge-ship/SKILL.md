@@ -102,8 +102,10 @@ offer to create the next phase branch.
 ## Rules
 
 - No green gate, no merge. No exceptions — escalate to the user instead.
-- Exactly one commit per phase on the base branch. If a squash would lose important
-  message detail, put it in the build-log entry, not in extra base commits.
+- One squashed phase commit on the base branch — plus, **only when `forge-docs`
+  actually changed docs**, one optional follow-up `docs:` commit (§5). No other
+  commits on base. If a squash would lose important message detail, put it in the
+  build-log entry, not in extra base commits.
 - Never push or open a PR unless explicitly asked; never commit on base outside the
   squash-merge commit.
 - Don't skip the build-log entry — an unlogged phase is an incomplete phase.

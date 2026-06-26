@@ -17,8 +17,10 @@ improve. Never about speed, output volume, "shipping faster", or business value.
 
 ## When it runs
 
-- **Auto:** `forge` invokes this at the **Done** state — every plan phase has a
-  build-log entry. (Also fine to run at any milestone.)
+- **Auto:** `forge` invokes this at **Done** — every plan phase has a build-log
+  entry **and no `wiki/retro.md` entry yet covers the latest landed phase**.
+  `forge` skips the call when the latest phase is already retro'd, so a repeated
+  `/forge` at Done doesn't re-run it. (Also fine to run at any milestone.)
 - **Standalone:** on demand, scoped to "since the last `wiki/retro.md` entry" (or
   all history if none).
 

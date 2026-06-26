@@ -81,8 +81,11 @@ From `wiki/brief.md` + `wiki/plan.md`:
 - Does the plan ship a UI? → run `forge-harden-design`.
 - Is the plan developer-facing (library / API / CLI / SDK)? → run
   `forge-harden-dx`.
-- Did the user request a scope check (arg or AskUserQuestion answer)? →
-  run `forge-harden-scope`.
+- Scope rethink (`forge-harden-scope`) is opt-in. Run it if a `scope` arg/flag
+  was passed. Otherwise, in **interactive** mode, ask once (AskUserQuestion):
+  *"Also rethink scope/ambition, or take the plan's scope as settled?"* —
+  default "settled". In **`--auto`** mode, skip it unless the arg was given
+  (auto never pauses to ask).
 
 State plainly which personas are running and why before invoking any.
 
@@ -129,6 +132,7 @@ Append (or replace) the `## Review` section in `wiki/plan.md`:
 ```markdown
 ## Review
 
+**Lock status:** pending
 **Mode:** interactive | --auto
 **Personas run:** forge-harden-eng, forge-harden-security[, -design][, -dx][, -scope]
 **Adversarial reviewer:** <codex | gemini | claude | none — reason>
@@ -154,12 +158,19 @@ Append (or replace) the `## Review` section in `wiki/plan.md`:
 
 ### 6. Hand off — final lock gate
 
-If invoked by `forge`: return so `forge` can run its lock gate.
+Always write `**Lock status:** pending` into the `## Review` block (step 5).
+**Never set it to `locked` yourself** — locking is the user's confirmation, owned
+by the lock gate. This marker is what makes hardening resumable: a `## Review`
+with `pending` means "hardened, awaiting the user's lock", not "ready to build".
+
+If invoked by `forge`: return so `forge` can run its lock gate (it flips
+`Lock status` to `locked` on the user's confirm).
 
 If invoked standalone: present the open taste decisions and reviewer
 disagreements directly as one `AskUserQuestion` batch in the **Decision
-Brief** shape (forge suite's `references/question-style.md`). When the
-user has answered, declare the plan locked.
+Brief** shape (forge suite's `references/question-style.md`). When the user
+confirms, set `**Lock status:** locked` in the plan's `## Review` block and tell
+them the plan is locked and the build loop is unlocked.
 
 ## Rules
 

@@ -99,8 +99,19 @@ reflects it's filled and list the new ADRs under the Decisions section.
 
 ### 6. Hand off
 
-State the phase count and phase 1's branch + gate. Recommend `forge-harden` to
-harden the plan before building (or return to `forge`).
+If the plan ships UI surfaces, surface design **before** hardening:
+
+- **2+ UI surfaces and no `DESIGN.md`** → recommend `forge-design-system` first
+  (it locks the shared type/color/space system so phases don't each invent one).
+- **A phase whose UI shape is genuinely open** ("build the UI for X" with no
+  settled layout) → recommend `forge-design-explore` for that surface.
+
+Both present their work as an interactive feedback board (forge suite's
+`references/design-feedback-board.md`) and lock the outcome as an ADR the phases
+reference. Skip when the shape is already fixed (e.g. "follow `DESIGN.md`").
+
+Then state the phase count and phase 1's branch + gate, and recommend
+`forge-harden` to harden the plan before building (or return to `forge`).
 
 ## Rules
 

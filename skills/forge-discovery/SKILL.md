@@ -45,7 +45,7 @@ the idea from directory names, stop and ask the user instead (§1b).
 #### 1a. Document seed — ingest, then ask only the gaps
 
 Read the doc in full. Map what it already answers onto the **base seven** (§2) and
-the **sharpening five** (§2b). Then:
+the **sharpening six** (§2b). Then:
 
 1. Reflect back, compactly: "Here's what I extracted from your doc" (the filled
    sections) and "Here's what it doesn't pin down yet" (the gaps).
@@ -61,7 +61,7 @@ it. Do not scan-and-guess a hypothesis from the repo's structure.
 
 ### 2. Discovery — ask in small batches via AskUserQuestion
 
-Cover the **base seven** below, then the **sharpening five** in §2b. Lead each
+Cover the **base seven** below, then the **sharpening six** in §2b. Lead each
 with your best guess from the **seed** (§1 — the user's sentence or doc) so the user
 corrects rather than writes essays. One or two questions per round, never the whole
 list at once.

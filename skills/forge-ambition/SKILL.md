@@ -21,7 +21,7 @@ for is about craft and intent, never about market upside.
 ## What it does
 
 Run after a brief is drafted (or on demand against brief/plan). Read
-`references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it exists.
+forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it exists.
 
 1. **Find the timid premises.** Where has the user unconsciously shrunk the idea?
    Look for: "just a simple…", "only…", "for now…", "v1 is minimal", defaults
@@ -65,10 +65,13 @@ Run after a brief is drafted (or on demand against brief/plan). Read
    Take a position on both — but the timid version is a fully legitimate
    choice. "I want it small" ends it.
 
-6. **Record the outcome.** If ambition changed: update `wiki/brief.md` (and the
-   relevant ADR / `wiki/plan.md` if it exists) and tell the user. If unchanged,
-   note that the scope was deliberately held — that's a decision worth recording
-   too, so it isn't re-litigated later.
+6. **Record the outcome — with a named marker.** Always write a one-line
+   `**Ambition check (YYYY-MM-DD):** <held as-is | raised — what changed>` into
+   `wiki/brief.md` (a stable, greppable marker `forge-harden-scope` reads so it
+   doesn't re-litigate this). If ambition changed: also update the relevant body
+   sections of the brief (and the relevant ADR / `wiki/plan.md` if it exists) and
+   tell the user. If unchanged, the marker records that scope was deliberately
+   held — a decision worth keeping so it isn't reopened later.
 
 ## Rules
 

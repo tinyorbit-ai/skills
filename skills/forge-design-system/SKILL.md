@@ -84,16 +84,19 @@ vocabulary:
 - **Voice.** Three adjectives for microcopy and one empty-state example in
   that voice (empty states are features).
 
-### 5. Specimen page — pick with eyes, not adjectives
+### 5. Specimen page — pick with eyes, give feedback per section
 
-Generate a single self-contained HTML file (`wiki/.forge/specimen.html`,
-real text, no lorem) rendering the locked system: type roles and weights,
-the palette as swatches *and* in use (a card, a button row, a data row,
-an empty state), the spacing scale, radius and motion samples. If the
-type/color choice was genuinely close, render the 2–3 finalists
-side-by-side in the same file. Have the user open it and react; iterate
-until it reads as "yes, that's the thing". Don't skip this — adjectives
-lie, specimens don't.
+Generate the specimen as an **HTML file with a feedback system** (forge suite's
+`references/design-feedback-board.md`) at `wiki/.forge/specimen.html` — real text,
+no lorem. It must render the locked system, take feedback per section, and copy it
+back out; the layout is up to you (a ready template exists). Give the user
+something to react to for each part — typography, color (swatches *and* in use:
+a card, a button row, a data row, an empty state), spacing, radius, motion, voice.
+If the type/color choice was genuinely close, show the 2–3 finalists side-by-side.
+Open it via the generate-and-open contract — serve it and report a clickable URL,
+don't just point at the path — have the user react per section and copy the
+feedback back. Fold objective fixes in and iterate until it reads as "yes, that's
+the thing". Don't skip this — adjectives lie, specimens don't.
 
 ### 6. Write it down
 
@@ -131,6 +134,7 @@ font) now has an objective finding waiting in `forge-polish`.
 ## References
 
 - `references/design-md.md` — DESIGN.md structure + a worked example
+- forge suite's `references/design-feedback-board.md` — the interactive specimen board + generate-and-open contract
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — used by harden-design when auditing against this
 - forge suite's `references/voice.md` — the push on vibe-answers
