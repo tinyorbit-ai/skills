@@ -53,17 +53,19 @@ order. Skip a principle that doesn't bear on the question; never bend one.
 
 1. **Charter holds.** Never produce an outcome that questions whether the
    project should exist. The user's choice to build is settled.
-2. **Bias to the bolder version of what the user already chose.** If the
-   decision is about ambition within the chosen intent, prefer the more
-   excellent realization. (Same as `forge-ambition`'s posture.)
+2. **Bias to the bolder outcome with the most economical means.** Prefer the
+   more excellent realization of what the user chose — reached with the fewest
+   parts. Ambition is about how good the result is, not how heavy the system
+   is. (`references/simplicity.md`; same posture as `forge-ambition`.)
 3. **Bias to a falsifiable gate.** Where two options differ on whether a
    phase's gate would catch a regression, pick the stronger gate every
    time.
 4. **Bias to security on tied craft cost.** When two options have
    equivalent effort and clarity, pick the more secure shape. Severity
    tags from `forge-harden-security` carry.
-5. **Bias to fewer phases.** If work could land in phase N or N+1 and
-   nothing forces the later one, pick the earlier — keep phase count tight.
+5. **Bias to economy of means.** Fewer phases, fewer dependencies and
+   abstractions, established tech over novel, no new service the brief doesn't
+   demand. If work could land in phase N or N+1, pick the earlier.
 6. **Surface, don't decide, the irreversible-feeling ones.** Framework
    choice, language choice, persistence model, public API shape — these
    reach the user even in `--auto`. The bar for "reach the user" is "the
@@ -179,6 +181,9 @@ them the plan is locked and the build loop is unlocked.
   job. Keep the orchestrator thin.
 - A persona's auto-fix is non-negotiable; the orchestrator doesn't
   re-litigate persona fixes, only consolidates them.
+- Subtraction is the default fix. For every finding the first candidate is
+  collapse / delete / reuse; adding a part must justify why it beat subtraction —
+  more rigor is not automatically more machinery (`references/simplicity.md`).
 - Run personas sequentially so later passes see the cumulative plan.
 - Anti-sycophantic throughout: take positions, state what evidence would
   flip them, don't hedge.
@@ -189,5 +194,6 @@ them the plan is locked and the build loop is unlocked.
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
 - forge suite's `references/scoring.md` — the personas' rating loop + trend lines
 - forge suite's `references/craft-patterns.md` — the thinking moves the personas cite
+- forge suite's `references/simplicity.md` — economy of means (subtraction-first fix policy)
 - `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
   `forge-harden-dx`, `forge-harden-scope` — the five persona skills

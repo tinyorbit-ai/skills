@@ -45,6 +45,11 @@ Build the phase's work to a standard you'd defend in review:
   `wiki/improvements.md` and leave it — do not pull it forward.
 - **Match the codebase.** Read neighboring code first; follow its patterns, naming,
   and idioms. New code should read like the surrounding code.
+- **Default-deny before adding.** A new dependency, config surface, wrapper,
+  abstraction, or service boundary needs the phase's work to demand it — otherwise
+  prefer the existing path, and inline over abstract until a second caller exists.
+  Keep functions small and performant: reach for the straightforward algorithm
+  before the clever one, and never an accidental quadratic (`references/simplicity.md`).
 - **Honor the ADRs.** Build along the recorded decisions. If a decision turns out
   wrong while building, stop, write/update the ADR with what you learned, and raise
   it — don't silently diverge.

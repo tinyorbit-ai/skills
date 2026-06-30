@@ -37,16 +37,24 @@ APPROACH C — <name>        (optional: the CREATIVE/LATERAL — a different fra
 ```
 
 For each: a 1–2 sentence summary, effort (S/M/L), what it reuses from existing
-code, two pros, two cons. **Minimal and ideal carry equal weight** — never
-default to minimal because it's smaller. If the right answer is the ambitious
-one, say so; the brief's ambition (locked at discovery) is the tiebreaker, not
-shippability. Present as one Decision Brief and lock the choice as ADR 0001.
+code, two pros, two cons. **Default to the simplest approach that fully delivers
+the brief's outcome** — the fewest moving parts, not the fewest features. An
+approach with more parts earns each one against the brief; the burden is on
+adding, not on cutting. The brief's ambition (locked at discovery) is the
+tiebreaker on *outcome* — how excellent the result is — never a licence for
+heavier means (`references/simplicity.md`). Present as one Decision Brief and lock
+the choice as ADR 0001.
 
 ### 2b. Draft the architecture
 
 Sketch the chosen approach: components, data flow, storage, external dependencies,
 the key modules and their boundaries. Render it as a small ASCII or mermaid diagram.
 Write the 30-second version into `wiki/architecture.md` (replace its stub).
+
+Then write the **parts list**: every component, dependency, and abstraction on one
+line each with the single reason it's load-bearing for the brief. A part with no
+reason gets cut before the plan is written — the plan doesn't lock while one part
+sits unjustified. Prefer reusing an existing path over introducing a new one.
 
 ### 3. Surface and lock every real decision
 
@@ -72,6 +80,10 @@ Break the build into ordered phases. Hard rules:
 - Each later phase is a vertical slice that leaves the project in a working state.
 - Each phase is small enough to hold in your head and complete on one branch.
 - Phases are ordered; mark any two as explicitly parallel only if truly independent.
+- **Each phase is self-contained.** A builder who reads only this phase plus its
+  linked ADRs — with no other context — has everything needed to crack on. Spell out
+  the goal, the work, and the decisions inline; richness in the spec is welcome (the
+  economy you protect is the software's parts, not the plan's words).
 
 For **every phase**, specify:
 
@@ -124,3 +136,6 @@ Then state the phase count and phase 1's branch + gate, and recommend
   `references/question-style.md`).
 - Don't reduce scope to make it "more shippable" — that's the gatekeeping forge
   rejects. Reorder and slice for soundness; keep the ambition the brief set.
+- And don't add parts the brief doesn't demand. Economy of means keeps the ambition
+  while removing machinery; it applies to the software, not to the plan — which
+  should be as thorough as the build needs (`references/simplicity.md`).
