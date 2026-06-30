@@ -6,7 +6,8 @@ description: Discovery conversation that turns a raw idea into a precise brief â
 # forge-discovery
 
 Pins a fuzzy idea into a precise brief. Output: `wiki/brief.md`. This is the
-"figure out exactly what we're building" stage.
+"figure out exactly what we're building" stage â€” pin the outcome we want so the
+rest of forge can build it as high-quality software that's simple and performant.
 
 ## Charter
 

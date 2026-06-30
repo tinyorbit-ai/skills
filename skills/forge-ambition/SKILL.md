@@ -28,11 +28,13 @@ forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it
    chosen for ease not for the vision, a hard part avoided rather than embraced.
    List them plainly.
 
-2. **Describe the bolder version.** For the same intent and audience, what's the
-   version that fully honors what makes this interesting — the harder/cleaner/more
-   complete realization? Be concrete. Tie it to *their* stated goal and the feel
-   they wanted, never to reach/scale/revenue. One or two vivid paragraphs, not a
-   roadmap.
+2. **Describe the bolder version — maximal outcome, minimal machinery.** For the
+   same intent and audience, what's the version that fully honors what makes this
+   interesting — the harder/cleaner/more complete realization? The boldest version
+   does the most with the *fewest* parts; a "bolder" idea that needs a heavier
+   system is usually a weaker idea wearing ambition. Push the outcome, not the part
+   count. Be concrete. Tie it to *their* stated goal and the feel they wanted, never
+   to reach/scale/revenue. One or two vivid paragraphs, not a roadmap.
 
 3. **Stack the small unlocks.** Separate from the one bolder version: rapid-fire
    **2–4 small ideas**, each independently adoptable and cheap relative to the

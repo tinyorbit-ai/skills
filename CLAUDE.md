@@ -200,7 +200,10 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 > Timeline-based living articles (`forge-wiki` ingests/asks, `forge-wiki-maintain`
 > keeps indexes + links healthy). Charter (relaxed): the only off-limits moves are
 > questioning whether the project should exist or whether the user should build it;
-> all context, business included, is welcome as input. `forge-review` absorbed the
+> all context, business included, is welcome as input. **Economy of means** is a
+> first-class principle across the suite (`forge/references/simplicity.md`): two
+> axes both maximized — ambition of *outcome*, economy of *means* — with
+> subtraction as the default fix. `forge-review` absorbed the
 > old `forge-qa`. This repo is forge-only, so install the whole suite with
 > `npx skills add tinyorbit-ai/skills --all` (or `--skill '*'`). Note: `--skill`
 > only honors exact names or the literal `*` — there is **no prefix/glob** matching,

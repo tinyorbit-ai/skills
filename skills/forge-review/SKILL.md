@@ -53,7 +53,14 @@ compounding should be legible, not silent.
    `references/strictness.md`. Type check must pass clean.
 4. **Correctness & edges.** Nil/empty/overflow/timeout/concurrent/partial-failure
    paths; idempotency; error propagation at the right layer; resource leaks.
-5. **Runtime verification (was forge-qa).** Actually run it: execute the phase's
+5. **Simplicity & performance (on the diff).** Objective and auto-fixable: collapse
+   pass-through layers, inline premature abstractions (single caller), delete unused
+   extension points, reject speculative config, prefer an existing path over a new
+   parallel one, split giant functions, replace an accidental quadratic with the
+   straightforward algorithm. The phase must be exactly what the plan asked —
+   nothing more, nothing less. A simpler, faster diff that still passes the gate is
+   a fix, not a suggestion (`forge/references/simplicity.md`).
+6. **Runtime verification (was forge-qa).** Actually run it: execute the phase's
    verifiable gate and show it green, then exercise the phase **goal** like a real
    user (UI: drive the flow incl. loading/empty/error states; CLI/lib: real +
    adversarial inputs; data: verify against the real store). A gate that passes
@@ -63,7 +70,7 @@ compounding should be legible, not silent.
    - If the build is **developer-facing** (CLI/API/SDK/lib), invoke **`forge-dx`**
      here (live onboarding/TTHW/error-message audit). Same: objective fixes fold in.
    - Both are scoped to what the phase changed and skip cleanly if out of scope.
-6. **Optional third-party adversarial pass.** Resolve the reviewer per
+7. **Optional third-party adversarial pass.** Resolve the reviewer per
    **`forge/references/reviewer-agents.md`** — explicit `wiki/.forge/config.yaml`,
    then `$FORGE_REVIEWER`, then auto-probe `codex` → `gemini` → `claude`. State
    which one was picked and why. If none available or config says
@@ -152,3 +159,4 @@ any — and hand to **`forge-ship`** to land the phase. Never ship from here.
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
+- forge suite's `references/simplicity.md` — economy of means + the simplicity pass

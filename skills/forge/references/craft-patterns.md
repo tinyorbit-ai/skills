@@ -30,7 +30,9 @@ the reasoning legible.
    *not* do — not for value reasons, for focus reasons. Fewer phases, each
    sharper. (`forge-harden-scope` TRIM's reflex.)
 6. **Subtraction default (design).** If a UI element doesn't earn its pixels, cut
-   it. Feature bloat kills the feel faster than missing features.
+   it. Feature bloat kills the feel faster than missing features. The general
+   discipline behind #5, #6, and #10 — economy of means — lives in
+   `references/simplicity.md`.
 7. **Constraint worship.** If you can only show 3 things on this screen, which 3?
    If the user gets one action, which one? Constraints force hierarchy; unlimited
    space produces undesigned things.
