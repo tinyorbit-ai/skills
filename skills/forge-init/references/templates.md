@@ -22,7 +22,7 @@ Obsidian-style wiki. **Source of truth for the _why_.** Code says what; this say
 
 - [[brief]] — what we're building, for whom, the feel, non-goals
 - [[plan]] — the phased build plan; each phase has a verifiable gate + branch
-- [[architecture]] — the 30-second version (filled in as phases land)
+- [[architecture]] — components & boundaries, central bet, scale assumptions (reconciled by forge-ship each phase)
 - [[build-log]] — one entry per phase: the gate met before merge
 - [[learnings]] — review lessons + the rule-to-remember (running)
 - [[retro]] — build retrospectives, synthesis across phases (running)
@@ -92,10 +92,19 @@ commit after its verifiable gate is green; one [[build-log]] entry per phase.
 ```markdown
 # Architecture — {PROJECT}
 
-Part of [[index]]. Status: **stub — filled in as phases land.**
+Part of [[index]]. Status: **stub — v1 written by `forge-plan`, reconciled by
+`forge-ship` every phase.**
 
-The 30-second version goes here: the components, the data flow, the central bet.
-Keep it short; link to ADRs for the *why*.
+<!-- Required sections (short is the bar; a stub is not):
+## Components & boundaries — each boundary with the one-line *why it's drawn
+   there* (what change it isolates — the maintainability case)
+## Data flow — the 30-second walk-through
+## The central bet — and what evidence would revisit it
+## Scale assumptions — what breaks at 10× / 100× the data or load, and which
+   phase addresses it (or why none needs to)
+## Parts list — every component/dependency/abstraction, one line each, with the
+   brief clause it serves; a part with no reason gets cut
+Link ADRs for the *why*. -->
 ```
 
 ---
@@ -120,11 +129,11 @@ Part of [[index]]. Running log appended by `forge-review`. Newest on top. One en
 per review pass that found something worth remembering. Later builds/reviews read
 and enforce these.
 
-<!-- Entry shape:
-## YYYY-MM-DD — Phase N — <short title>
-- **Found:** <what the review caught>
-- **Fixed:** <how it was resolved>
-- **Rule to remember:** <generalizable lesson, phrased so the next build avoids it> -->
+<!-- Entry shape (one line per lesson; confidence = how generalizable the rule is):
+- **YYYY-MM-DD · phase N · confidence N/10** — found: <what> · fixed: <how> ·
+  **rule:** <generalizable lesson, phrased so the next build avoids it>
+Plus one structured review record line per review pass (what trend lines read):
+> review · phase N · findings high/med/low A/B/C · passes 0–7 run · terminal block green -->
 ```
 
 ---
@@ -162,6 +171,27 @@ Part of [[index]]. Running, honest list. Deliberate scope cuts go here too —
 ## `wiki/decisions/.gitkeep` and `wiki/notes/.gitkeep`
 
 Empty files, just to keep the directories in git.
+
+---
+
+## `wiki/.forge/config.yaml`
+
+```yaml
+# forge per-project configuration. See: forge/references/reviewer-agents.md
+reviewer: auto    # auto | codex | gemini | claude | none
+```
+
+---
+
+## `wiki/.forge/taste.md`
+
+```markdown
+# Taste profile
+
+Append-only design-taste record — approved and rejected directions, read by
+`forge-design-system` and `forge-design-explore` before generating anything.
+Entry format per the forge suite's `references/wiki.md`.
+```
 
 ---
 
@@ -258,7 +288,13 @@ This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for t
   (timeline · root cause · the decision it forced · what it demonstrates). How the
   system fails is stronger signal than the happy path.
 - **Deliberate scope cuts** → record in `wiki/improvements.md` ("deferred X for Y").
-- **Architecture changes** → keep `wiki/architecture.md` honest as phases land.
+- **Architecture changes** → `wiki/architecture.md` is reconciled by `forge-ship`
+  every phase; if you change the system's shape outside a phase, update it in the
+  same change.
+- **Design system** → if `DESIGN.md` exists, all UI code uses its tokens (type,
+  color, spacing scale, radius, motion). An off-system value — raw hex, px off
+  the scale, a font outside the system — is a review finding, the same class as
+  a type error.
 - **External context that informs the build** (business rationale, research,
   email, a decision-driving conversation, competitive or user notes) → ingest it
   into the knowledge base at `wiki/knowledge/` as a living article with a Timeline.

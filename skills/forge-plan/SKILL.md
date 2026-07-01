@@ -49,12 +49,20 @@ the choice as ADR 0001.
 
 Sketch the chosen approach: components, data flow, storage, external dependencies,
 the key modules and their boundaries. Render it as a small ASCII or mermaid diagram.
-Write the 30-second version into `wiki/architecture.md` (replace its stub).
+Write it into `wiki/architecture.md` (replace its stub) with all four sections the
+template names: **components & boundaries** (each boundary with the one-line *why
+it's drawn there* — what change it isolates: the maintainability case), **data
+flow**, **the central bet** (and what evidence would revisit it), and **scale
+assumptions** — what breaks at 10× / 100× the data or load, and which phase
+addresses it (or why none needs to). Short is still the bar; a stub is not.
 
-Then write the **parts list**: every component, dependency, and abstraction on one
-line each with the single reason it's load-bearing for the brief. A part with no
+Then write the **parts list** into `architecture.md` too: every component,
+dependency, and abstraction on one line with the reason it's load-bearing — the
+reason must name the brief clause it serves, not restate the part. A part with no
 reason gets cut before the plan is written — the plan doesn't lock while one part
 sits unjustified. Prefer reusing an existing path over introducing a new one.
+(`forge-ship` reconciles this doc as every phase lands — you're writing v1 of a
+living document, not a plan-time artifact.)
 
 ### 3. Surface and lock every real decision
 
@@ -92,16 +100,37 @@ For **every phase**, specify:
 **Branch:** `phase/<n>-<slug>`
 **Goal:** <the observable end state when this phase is done>
 **Verifiable gate:** <exact command(s) or check whose pass/fail is unambiguous>
+**Design:** none | follow DESIGN.md | explore | locked via [[decisions/NNNN-…]]
 **Work:** <bullets — what gets built>
 **Decisions:** <links to the ADRs this phase depends on / introduces>
 ```
 
-The **verifiable gate** is the contract. It must be concrete and runnable —
-`typecheck && lint && test && build`, a named eval that must PASS, a script with a
-specific expected output, or a precisely described manual check with an observable
-result. "It works" / "looks right" is not a gate. Match gate rigor to the project:
-a prototype's gate can be "the script runs and prints X"; don't over-engineer CI for
-a toy, don't under-specify for something load-bearing.
+The **Design:** marker routes the design cycle: `explore` means the surface's
+shape is open and `forge` will run `forge-design-explore` (which locks an ADR and
+flips the marker) before this phase can build. `none` for phases with no UI.
+
+The **verifiable gate** is the contract, and it must assert the **phase Goal's own
+observable** — name the command and the expected output that only this phase's
+work can produce. `typecheck && lint && test` runs at review and ship on every
+phase anyway; it proves hygiene, **never the goal, so it is never sufficient as
+the gate**.
+
+```
+Bad  (proves hygiene, not the phase):
+  Goal: users can dedupe a folder from the CLI
+  Gate: typecheck && lint && test
+
+Good (proves the goal, observably):
+  Goal: users can dedupe a folder from the CLI
+  Gate: `dedupe ./fixtures/dupes` exits 0 and prints "reclaimed 312 MB";
+        `dedupe ./fixtures/clean` prints "nothing to do"
+```
+
+Self-check before locking each phase: *"if the gate passed but the goal were
+false, what would have caught it?"* — if the answer is nothing, rewrite the gate.
+A precisely described manual check with an observable result is a valid gate; "it
+works" / "looks right" is not. Match rigor to the project (a prototype's gate can
+be "the script runs and prints X"), but the goal-anchor rule holds at every level.
 
 ### 5. Write `wiki/plan.md`
 
@@ -111,19 +140,25 @@ reflects it's filled and list the new ADRs under the Decisions section.
 
 ### 6. Hand off
 
-If the plan ships UI surfaces, surface design **before** hardening:
+Design is a routed stage, not a suggestion. Enumerate every UI surface the plan
+ships and set each phase's **Design:** marker before handing off:
 
-- **2+ UI surfaces and no `DESIGN.md`** → recommend `forge-design-system` first
-  (it locks the shared type/color/space system so phases don't each invent one).
+- **UI phases exist and no `DESIGN.md`** → the design cycle runs next; `forge`
+  routes to `forge-design-system` first (it locks the shared type/color/space
+  system so phases don't each invent one).
 - **A phase whose UI shape is genuinely open** ("build the UI for X" with no
-  settled layout) → recommend `forge-design-explore` for that surface.
+  settled layout) → mark it `Design: explore`. `forge` will not let that phase
+  enter the build loop until `forge-design-explore` locks its direction as an
+  ADR and flips the marker to `locked via [[decisions/NNNN]]`.
+- Shape already fixed → `Design: follow DESIGN.md`. No UI → `Design: none`.
 
-Both present their work as an interactive feedback board (forge suite's
-`references/design-feedback-board.md`) and lock the outcome as an ADR the phases
-reference. Skip when the shape is already fixed (e.g. "follow `DESIGN.md`").
+Both design skills present their work as a **served** interactive feedback board
+(forge suite's `references/design-feedback-board.md`) — the user picks with their
+eyes before any code exists.
 
-Then state the phase count and phase 1's branch + gate, and recommend
-`forge-harden` to harden the plan before building (or return to `forge`).
+Then state the phase count, phase 1's branch + gate, which phases carry
+`Design: explore`, and hand back to `forge` (design cycle if unresolved,
+`forge-harden` otherwise).
 
 ## Rules
 
@@ -134,8 +169,12 @@ Then state the phase count and phase 1's branch + gate, and recommend
 - Every locked decision gets an ADR with a non-empty "Alternatives considered".
 - Every AskUserQuestion call follows the Decision Brief shape (forge suite's
   `references/question-style.md`).
-- Don't reduce scope to make it "more shippable" — that's the gatekeeping forge
-  rejects. Reorder and slice for soundness; keep the ambition the brief set.
+- Don't reduce scope on value judgments ("is this worth it?") — that's the
+  gatekeeping forge rejects. But flagging a plan as **too large to build well**
+  is engineering judgment, and it's required: when the phases exceed what can be
+  built soundly, say so, propose the buildable shape, and record the cut in
+  `improvements.md` as a deliberate scope decision. Reorder and slice for
+  soundness; keep the ambition the brief set.
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
   should be as thorough as the build needs (`references/simplicity.md`).

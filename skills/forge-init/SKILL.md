@@ -40,13 +40,16 @@ wiki/
 │   ── Project record ──
 ├── brief.md          stub — "filled by forge-discovery"
 ├── plan.md           stub — "filled by forge-plan"
-├── architecture.md   stub — 30-second architecture, filled as phases land
+├── architecture.md   stub — components/boundaries · data flow · central bet ·
+│                     scale assumptions; v1 by forge-plan, reconciled by forge-ship
 ├── build-log.md      one entry per landed phase (appended by forge-ship)
 ├── decisions/        ADRs live here (NNNN-slug.md); create with .gitkeep
 ├── notes/            incident notes live here (YYYY-MM-DD-slug.md); .gitkeep
 ├── learnings.md      running review lessons (appended by forge-review)
 ├── retro.md          running build retrospectives (appended by forge-retro)
 ├── improvements.md   running "what I'd do with more time" + scope cuts
+├── .forge/           machine-ish state — config.yaml (reviewer, default auto)
+│                     + taste.md (design-taste record, starts empty)
 │   ── Knowledge base (ingested context) ──
 └── knowledge/        living articles ingested by forge-wiki; maintained by forge-wiki-maintain
     ├── INDEX.md            topic directory (stub — fills as topics form)

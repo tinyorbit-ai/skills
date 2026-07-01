@@ -34,17 +34,25 @@ it's a convenience, not a contract.
 
 1. Write the file under `wiki/.forge/` (e.g. `specimen.html`,
    `explore-<surface>.html`).
-2. **Open it for the user — don't just point at the path.** Per Matt's global
-   rule, prefer spinning up a small static server and reporting a clear, clickable
-   URL (the machine's reachable host, not a raw localhost IP, when one is set up).
-   `python3 -m http.server` from the file's directory is fine. Fall back to opening
-   the file if serving isn't possible.
+2. **Serve it and open it — don't just point at the path.** The default recipe,
+   verbatim (background the server so it survives the turn):
+   ```
+   cd wiki/.forge && python3 -m http.server 4173 &
+   curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:4173/<file>.html   # expect 200
+   open "http://127.0.0.1:4173/<file>.html"    # macOS; xdg-open on Linux
+   ```
+   Report the clickable URL (prefer the machine's reachable host over a raw
+   localhost IP when one is set up); if the port is taken, use the next one.
+   Opening the raw file is the last resort only when no server can run at all —
+   and say so when it happens.
 3. Tell the user: react per section, copy the feedback, paste it back here.
 4. When they paste it back, fold objective fixes in, surface only genuine taste
    calls, iterate until they're happy, then lock.
 
 ## When to skip the HTML entirely
 
-- Pure CLI/terminal surface, or no browser reachable → ASCII mockups in
-  `AskUserQuestion` are the right fallback; say so.
+- The surface itself is a terminal/CLI UI → ASCII mockups in `AskUserQuestion`
+  are the right form; say so. ("No browser reachable" is **not** a skip reason
+  for a visual surface — the *user* opens the served board; the agent never
+  needs a browser.)
 - The shape is already fixed ("follow `DESIGN.md`") → nothing to explore; exit.

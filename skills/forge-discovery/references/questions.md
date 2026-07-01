@@ -92,7 +92,8 @@ Push until: a *part* of the thing, named ("the undo script", "whether the
 hash threshold is tunable").
 Red flags: "all of it equally" — one push: "which part would you demo first?"
 
-**Three-year fit.**
+**Three-year fit.** *(optional color — never a required turn)*
 Push until: a direction with a reason — "more essential: it becomes my photo
 pipeline's front door" / "archived: the itch is the build itself".
-Red flags: none — all answers are valid here; the only failure is skipping it.
+Red flags: none — all answers are valid here, and on a budgeted one-liner run
+(SKILL §1c) skipping it entirely is fine.

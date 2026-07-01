@@ -65,6 +65,10 @@ compounding should be legible, not silent.
    user (UI: drive the flow incl. loading/empty/error states; CLI/lib: real +
    adversarial inputs; data: verify against the real store). A gate that passes
    while the goal is unmet is itself a high-severity finding.
+   - If the phase diff **touched UI** and `DESIGN.md` exists, first run the
+     objective token pass: grep the diff for raw color literals, off-scale px
+     values, and `font-family` declarations outside the system. Each hit is an
+     objective finding — fix to tokens now, don't leave it for polish's visual pass.
    - If the phase diff **touched UI**, invoke **`forge-polish`** here (designer's-eye
      pass on the running screens). Its objective fixes fold into this review.
    - If the build is **developer-facing** (CLI/API/SDK/lib), invoke **`forge-dx`**
@@ -76,39 +80,26 @@ compounding should be legible, not silent.
    which one was picked and why. If none available or config says
    `reviewer: none`, state the pass is skipped and continue (don't block).
 
-   Send the standard prompt envelope from `reviewer-agents.md` with the
-   artifact = phase diff (`git diff <base>...HEAD`) + the phase spec from
-   `wiki/plan.md`. Example invocation when Codex is resolved:
-
-   ```
-   codex exec --skip-git-repo-check "$(cat <<'EOF'
-   You are an adversarial reviewer of a freshly built phase. Find: (1) the
-   weakest point, (2) the most likely missed failure / regression, (3) any test
-   that would PASS through a real regression. Severity-tag each finding
-   (high/med/low) and propose a one-line fix. Be specific. Do not comment on
-   whether the project is worth building.
-
-   <<<
-   $(git diff <base>...HEAD)
-
-   --- PHASE SPEC ---
-   $(sed -n '/^## Phase <n>/,/^## Phase /p' wiki/plan.md)
-   >>>
-   EOF
-   )"
-   ```
-
-   Swap `codex exec --skip-git-repo-check` for `gemini -p` or `claude -p` when
-   the resolver picks those. Reconcile; carry genuine disagreements to the
-   taste batch (don't smooth them).
+   Send the standard prompt envelope from `reviewer-agents.md`: write the
+   artifact (phase diff + the phase spec from `wiki/plan.md`) to a temp file and
+   pass it per the **artifact-passing contract** there — never inline a diff
+   into a double-quoted shell string; real diffs carry backticks, `$`, and
+   quotes that break interpolation silently. Verify the reviewer exited 0 with
+   non-empty output; a silent no-op is a *skipped* pass and is reported as such,
+   not as a clean one. Reconcile; carry genuine disagreements to the taste
+   batch (don't smooth them).
 
 ## Fix policy
 
 - **Objective findings → fix automatically, now.** Security holes, type-safety
   violations, missing/weak tests, failing tests, broken edges, violated past
-  learnings, runtime defects. Fix on the phase branch, commit, and **re-run the
-  affected pass until clean**. Loop until every objective finding is resolved and
-  the full gate + suite are green. Don't ask permission to fix something broken.
+  learnings, runtime defects. Fix on the phase branch, commit, and after **any**
+  fix re-run the phase gate + the scoped checks (typecheck, lint, the tests
+  covering the diff) — never just the pass that raised the finding; a fix in one
+  pass can break a pass that already ran. Don't ask permission to fix something
+  broken. **Escape hatch:** a finding still red after 3 fix attempts stops the
+  loop — invoke `forge-debug` for the root cause and surface it to the user.
+  Never declare green to satisfy the loop.
 - **Subjective findings → one batch at the end.** Genuine tradeoffs with no right
   answer (and any unreconciled reviewer disagreement) go into a single
   AskUserQuestion batch in the **Decision Brief** shape (forge suite's
@@ -127,6 +118,14 @@ finding was a real incident/surprising root cause, also write `wiki/notes/`. If 
 past learning was contradicted this pass, retire it visibly (strike + why) rather
 than silently violating it. **Tell the user what you captured, in the same turn.**
 
+Also prepend one structured **review record** line to `wiki/learnings.md` — this is
+the source the next review's trend line and `forge-retro`'s deltas read; without it
+the trend is unfalsifiable:
+
+```markdown
+> review · phase N · findings high/med/low 2/3/1 · passes 0–7 run · terminal block green
+```
+
 ## Evidence chain
 
 Number every finding (`finding-001`, `finding-002`, …) the moment it's raised, and
@@ -135,20 +134,30 @@ artifacts named by number (`finding-001-before.png` / `finding-001-after.png`;
 command output pasted inline for non-visual ones). "Fixed" without its numbered
 evidence is a claim, not a fix.
 
-## Hand off
+## Hand off — the terminal command block is the pass condition
 
-When every objective finding is fixed, the full gate + test suite are green, types
-are clean, and taste decisions are resolved: report the review summary — scope
-audit verdict, completion checklist, passes run, findings fixed by severity
-(with the trend vs. the previous phase's review where one exists, per forge
-suite's `references/scoring.md`), learnings recorded, open taste decisions if
-any — and hand to **`forge-ship`** to land the phase. Never ship from here.
+Review ends with one final command block, run as-is, **its raw output pasted into
+the review report**:
+
+```
+<phase gate> && <typecheck> && <lint> && <tests scoped to the diff>
+```
+
+Substitute the project's real commands; use the full suite instead of the scoped
+tests when it's fast. **No pasted output, no hand-off** — a described "all green"
+is a claim, not a state. Then report the review summary — scope audit verdict,
+completion checklist, passes run, findings fixed by severity (with the trend vs.
+the previous phase's review record where one exists, per forge suite's
+`references/scoring.md`), learnings recorded, open taste decisions if any — and
+hand to **`forge-ship`** to land the phase. Never ship from here.
 
 ## Rules
 
-- Auto-fix objective; surface only true taste. Loop fixes until clean — a review
-  that lists unfixed objective findings is unfinished.
-- Evidence for every "green": show the command output, not a claim.
+- Auto-fix objective; surface only true taste. Loop fixes until clean or the
+  3-attempt escape fires — unfixed objective findings without an escalation
+  mean the review is unfinished.
+- Evidence for every "green": show the command output, not a claim. The terminal
+  command block's pasted output is the hand-off condition.
 - Strict-types escape hatches are banned, not negotiated.
 - Respect branch discipline: fix on the phase branch, never base; never ship here.
 - Record learnings every pass that found something, and say so.

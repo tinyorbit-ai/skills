@@ -88,7 +88,9 @@ vocabulary:
 
 Generate the specimen as an **HTML file with a feedback system** (forge suite's
 `references/design-feedback-board.md`) at `wiki/.forge/specimen.html` — real text,
-no lorem. It must render the locked system, take feedback per section, and copy it
+no lorem. Before presenting, check every section against forge suite's
+`references/anti-slop.md` and regenerate any that hits the blacklist — the user
+never reacts to slop. It must render the locked system, take feedback per section, and copy it
 back out; the layout is up to you (a ready template exists). Give the user
 something to react to for each part — typography, color (swatches *and* in use:
 a card, a button row, a data row, an empty state), spacing, radius, motion, voice.
@@ -134,6 +136,7 @@ font) now has an objective finding waiting in `forge-polish`.
 ## References
 
 - `references/design-md.md` — DESIGN.md structure + a worked example
+- forge suite's `references/anti-slop.md` — the blacklist the specimen must clear before presentation
 - forge suite's `references/design-feedback-board.md` — the interactive specimen board + generate-and-open contract
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — used by harden-design when auditing against this

@@ -29,9 +29,15 @@ For each dimension the skill owns (its SKILL.md names them):
 - **Never score the premise.** No dimension may be "is this worth building" in
   disguise. If a dimension can't reach 10 without questioning the project's
   existence, the dimension is mis-framed — fix the dimension.
-- **Deltas go in the report.** Every report block carries `before → after` per
-  dimension. That delta is the proof of work — a review whose scores didn't move
-  either found a clean plan (say so) or didn't fix anything (unfinished).
+- **Deltas go in the report — with their edit hunks.** Every report block carries
+  `before → after` per dimension, and **every non-zero delta cites the plan/code
+  edit that earned it** — a delta with no diff behind it is decoration, not proof.
+  An honest **"already sound — no change"** is a first-class outcome; never
+  manufacture movement to look finished.
+- **Deltas get graded.** The independent reviewer receives the before → after
+  diff plus the claimed deltas and upholds or rejects each one
+  (`references/reviewer-agents.md`). A rejected delta goes to the taste batch —
+  self-scoring alone is never the last word.
 
 ## Confidence on findings
 
@@ -46,8 +52,11 @@ tagged separately):
 
 ## Trend — scores compound across runs
 
-Report blocks live in the wiki (`## Review` in `wiki/plan.md`; review summaries
-in `wiki/learnings.md`). Before scoring, read the previous run's block if one
+Report blocks live in the wiki: harden's `## Review` section in `wiki/plan.md`,
+and `forge-review`'s one-line structured review record prepended to
+`wiki/learnings.md` each phase (`> review · phase N · findings high/med/low …`) —
+that record is what makes review-over-review trends readable; without it a trend
+line has no source. Before scoring, read the previous run's block/record if one
 exists and report the trend line: *"Security findings: 5 last harden → 2 now."*
 `forge-retro` reads these trends across the whole arc. A skill that can show its
 finding counts falling phase over phase is demonstrating the loop works; rising
