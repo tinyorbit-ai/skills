@@ -8,24 +8,27 @@ Agent skills for Claude Code, by **tinyorbit**. Distributed via
 
 ## What's here — forge
 
-**forge** exists to do two things, every time:
+The goal, stated plainly:
 
-1. **Create high-quality software.** High quality means three named principles:
-   **simplicity** (economy of means — the fewest parts that fully deliver the
-   outcome), **maintainability** (boundaries drawn where change is isolated,
-   strict types, real tests), and **scalability** (scale assumptions stated in
-   the architecture and checked, not discovered in production).
-2. **Keep an always-up-to-date, comprehensive wiki** alongside the code — not
-   just ADRs: brief, phased plan, a living architecture doc reconciled every
-   phase, build log, learnings, retros, and a knowledge base of ingested
-   context. The wiki is the source of truth for the *why*; every forge skill
-   writes to it as it works, and ship-time upkeep keeps its indexes honest.
+> forge exists to create **high-quality software** and keep an **always
+> up-to-date wiki** that is not just ADRs but a comprehensive record. The
+> principles behind high-quality software are **simplicity, maintainability,
+> and scalability**. It is essentially **gstack without the YC bloat and
+> founder mode**. It starts from a brief or a single sentence and creates a
+> plan split into phases that can be resumed by re-running forge. The plan is
+> hardened so that high-quality software comes out, and each kind of task has
+> its own cycle: **design has a shotgun** — HTML files that set the direction
+> before code — **build has review**, and **harden and ship ensure everything
+> is green before it merges back**.
 
-Think **gstack without the YC bloat and founder mode**: the same end-to-end
-rigor — discovery, hardened plan, gated phases, adversarial review — with zero
-market/monetization gatekeeping. forge never asks whether the project should
-exist or whether you're the right person to build it. Context (business
-included) is welcome as input; it never becomes a verdict.
+That paragraph is the spec. Everything in the suite is wiring to enforce it —
+simplicity as economy of means (the fewest parts that fully deliver the
+outcome), maintainability as boundaries-drawn-where-change-is-isolated plus
+strict types and real tests, scalability as scale assumptions stated in the
+architecture and checked rather than discovered in production. And zero
+gatekeeping: forge never asks whether the project should exist or whether
+you're the right person to build it — context (business included) is welcome
+as input; it never becomes a verdict.
 
 ## How it works
 
