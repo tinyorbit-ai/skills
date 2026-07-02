@@ -19,9 +19,16 @@ Build the phase as written, excellently. Ambition lives in the plan; honor it.
 1. Read `references/charter.md` (suite) and `wiki/learnings.md` — past review
    lessons are rules you build by *now*, so review doesn't have to catch them again.
 2. Read the phase in `wiki/plan.md`: its **goal**, **verifiable gate**, **work**
-   bullets, **branch**, and the ADRs it depends on (`wiki/decisions/`). Read
-   `wiki/architecture.md` for the intended shape.
-3. Identify the phase: first phase with no `wiki/build-log.md` entry. If already on
+   bullets, **branch**, its **Design:** marker, and the ADRs it depends on
+   (`wiki/decisions/`). Read `wiki/architecture.md` for the intended shape.
+3. If the phase touches UI and `DESIGN.md` exists, **read it — it is the design
+   source of truth.** Every surface uses its tokens (type, color, spacing scale,
+   radius, motion); an off-system value (raw hex, px off the scale, a font not in
+   the system) is a defect of the same class as a type error, not a style
+   preference. The phase's locked design ADR binds the same way. If the phase's
+   `Design:` marker is an unlocked `explore`, stop — the design cycle owns it;
+   route to `forge-design-explore` before building.
+4. Identify the phase: first phase with no `wiki/build-log.md` entry. If already on
    that phase's branch with work in progress, continue it; don't restart.
 
 ## Branch

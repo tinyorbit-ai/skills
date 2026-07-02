@@ -1,6 +1,6 @@
 ---
 name: forge-design-explore
-description: Design exploration — generates 3-4 visual/interaction variants for a named UI surface BEFORE implementation. ASCII or HTML mockup variants side-by-side, structured taste feedback, lock the direction as an ADR. Charter-safe — never about market appeal or conversion, only about which shape the user wants to build. Use after the plan names a UI surface, when asked to "explore designs", "show me variants", "design shotgun", "I don't know what this should look like", or any time you want options before committing.
+description: Design exploration — generates 3-4 visual/interaction variants for a named UI surface BEFORE implementation. Rendered HTML variants on a served feedback board (ASCII only when the surface itself is a terminal UI), structured taste feedback, lock the direction as an ADR. Charter-safe — never about market appeal or conversion, only about which shape the user wants to build. Use after the plan names a UI surface or marks a phase Design explore, when asked to "explore designs", "show me variants", "design shotgun", "I don't know what this should look like", or any time you want options before committing.
 ---
 
 # forge-design-explore
@@ -47,16 +47,23 @@ Each variant is a *different shape for the same intent*. Vary one
 high-impact axis per variant — visual language, interaction model,
 density, hierarchy. Don't just restyle the same layout.
 
+Before presenting, run the checks in forge suite's `references/anti-slop.md`:
+a variant that hits any blacklist pattern is **regenerated, not shown** — the
+user never picks from slop. Then the **differentiation check**: if two
+variants share the same layout skeleton, they are one variant — regenerate
+the duplicate on a genuinely different axis.
+
 For each variant, produce:
 
 - **Name** — one or two words that capture the shape (`compact-table`,
   `card-grid`, `terminal-first`, `chat-stream`).
-- **Mockup** — for any visual surface, the **default is an HTML file with a
-  feedback system** (forge suite's `references/design-feedback-board.md`): renders
-  the variants, takes per-variant feedback, copies it back. Structure/layout is up
-  to you (a ready template exists). ASCII layout is the fallback only for
-  terminal/CLI surfaces or when no browser is reachable. Real layout, real text —
-  no lorem ipsum, no "[chart here]" placeholders.
+- **Mockup** — for any visual surface, **rendered HTML on the served feedback
+  board is mandatory** (forge suite's `references/design-feedback-board.md`): it
+  renders the variants, takes per-variant feedback, copies it back. Structure/
+  layout is up to you (a ready template exists). ASCII is legitimate **only when
+  the surface itself is a terminal UI** — "no browser reachable" is never a
+  reason: the *user* opens the served board; the agent doesn't need a browser.
+  Real layout, real text — no lorem ipsum, no "[chart here]" placeholders.
 - **What it optimizes for** — one sentence tying back to the brief's
   "How it should feel".
 - **What it costs** — concrete tradeoffs in craft terms (effort,
@@ -76,10 +83,10 @@ anti-sycophantic; take a position. The user reacts per variant and pastes their
 feedback back; fold objective fixes in and, if they want changes before choosing,
 iterate.
 
-**Fallback — `AskUserQuestion`** in the **Decision Brief** shape (forge suite's
-`references/question-style.md`), each variant an option with the ASCII mockup in
-the `preview` field. Use this for CLI/terminal surfaces or when no browser is
-reachable.
+**Terminal-UI path — `AskUserQuestion`** in the **Decision Brief** shape (forge
+suite's `references/question-style.md`), each variant an option with the ASCII
+mockup in the `preview` field. Only for surfaces that are themselves terminal/CLI
+UIs — never a shortcut for a visual surface.
 
 Three or four variants max. If five, you haven't picked a clear axis.
 
@@ -120,4 +127,5 @@ piece, or `forge` to resume the pipeline.
 ## References
 
 - forge suite's `references/design-feedback-board.md` — the interactive board (default presentation) + generate-and-open contract
-- forge suite's `references/question-style.md` — Decision Brief format (the fallback path)
+- forge suite's `references/anti-slop.md` — generation-time blacklist + differentiation check
+- forge suite's `references/question-style.md` — Decision Brief format (the terminal-UI path)

@@ -56,9 +56,30 @@ fix. No hedging.
 >>>
 ```
 
-- For `forge-harden`: artifact = `wiki/plan.md` + `wiki/architecture.md`.
+- For `forge-harden`: artifact = the **before → after diff** of `wiki/plan.md` +
+  `wiki/architecture.md` across the persona passes, plus each persona's claimed
+  score deltas. Append to the envelope: *"For each claimed score delta, grade
+  it — upheld or rejected, one line why."* The reviewer validates that fixes
+  earned their deltas; it doesn't just re-read the final plan.
 - For `forge-review`: artifact = the phase diff (`git diff <base>...HEAD`) plus
   the phase spec from `wiki/plan.md`.
+
+## Artifact passing — file, never inline
+
+Real artifacts (diffs, plans) carry backticks, `$`, quotes, and long lines that
+break double-quoted shell interpolation silently. Never paste an artifact into
+the prompt string. Contract:
+
+```
+ART=$(mktemp /tmp/forge-artifact-XXXXXX.md)
+git diff <base>...HEAD > "$ART"          # or cat the plan diff into it
+codex exec --skip-git-repo-check "<envelope text> — the artifact is the file
+$ART; read it before answering."
+```
+
+(Same shape for `gemini -p` / `claude -p` — all three can read a file by path.)
+After the call, **verify: exit code 0 AND non-empty output.** Anything else is a
+*skipped* pass — report it as skipped, never as clean.
 
 ## Per-project configuration
 
@@ -70,8 +91,9 @@ fix. No hedging.
 reviewer: auto    # auto | codex | gemini | claude | none
 ```
 
-Create with `mkdir -p wiki/.forge` when you first need it. `forge-init` does
-not create this by default — it's a customization, not a requirement.
+`forge-init` scaffolds this file (with `reviewer: auto`) alongside
+`wiki/.forge/taste.md`. On projects initialized before that, create it by hand
+with `mkdir -p wiki/.forge`.
 
 ## Driver swap (informational)
 

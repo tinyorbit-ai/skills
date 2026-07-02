@@ -54,7 +54,9 @@ improve. Never about speed, output volume, "shipping faster", or business value.
    - Prepend a dated entry to `wiki/retro.md` (the synthesis above, tight).
    - Promote durable lessons into `wiki/learnings.md` (so future builds enforce
      them) and concrete deferrals/action items into `wiki/improvements.md`.
-   - Link from `wiki/index.md`. Tell the user exactly what you filed.
+   - Link from `wiki/index.md`. Then run `forge-wiki-maintain --fix` (indexes
+     regenerated, safe health fixes applied) — a retro leaves the whole wiki
+     consistent, not just its own entry. Tell the user exactly what you filed.
 
 4. **Report.** Present the synthesis to the user directly — this is meant to be
    read, not just stored. Lead with the one pattern most worth acting on.

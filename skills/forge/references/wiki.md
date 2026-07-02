@@ -28,7 +28,7 @@ wiki/
 │   ── Project record ──
 ├── brief.md            What we're building, for whom, the feel, non-goals. (forge-discovery)
 ├── plan.md             Ordered phases, each with its verifiable gate + branch name. (forge-plan/forge-harden)
-├── architecture.md     The 30-second architecture. Stubbed by forge-plan, filled as phases land.
+├── architecture.md     Components/boundaries · data flow · central bet · scale assumptions + parts list. v1 by forge-plan; reconciled by forge-ship every phase.
 ├── build-log.md        One entry per landed phase: the gate that was met. (forge-ship)
 ├── decisions/          ADRs: NNNN-slug.md, zero-padded, sequential. (forge-plan, forge-harden)
 ├── notes/              Incidents & failures: YYYY-MM-DD-slug.md. (forge-debug)

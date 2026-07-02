@@ -36,22 +36,11 @@ If there's no UI in scope, say so and exit — nothing to do.
    - **Hierarchy:** does the eye land on the right thing first? Is emphasis earned?
    - **Rhythm & density:** vertical rhythm, balanced whitespace, no cramped or
      orphaned elements; optical alignment, not just pixel alignment.
-   - **AI-slop tells** — the named blacklist; each hit is a finding:
-     1. Purple/violet/indigo gradients or blue-to-purple schemes as default mood
-     2. The 3-column feature grid — icon-in-colored-circle + bold title +
-        two-line description, repeated symmetrically
-     3. Icons in colored circles as section decoration
-     4. Centered-everything (headings, body, cards all `text-align: center`)
-     5. One uniform bubbly border-radius on every element
-     6. Decorative blobs, floating circles, wavy SVG section dividers
-     7. Emoji as design elements (rockets in headings, emoji bullets)
-     8. Colored left-border accent on cards
-     9. Generic hero copy ("Welcome to X", "Unlock the power of…",
-        "Your all-in-one solution")
-     10. Cookie-cutter section rhythm — hero → 3 features → testimonials → CTA,
-        every section the same height
-     11. `system-ui`/`-apple-system` as the *personality* font — the
-        gave-up-on-typography signal
+   - **AI-slop tells** — the shared 11-pattern blacklist in forge suite's
+     `references/anti-slop.md` (design-explore/design-system enforce it at
+     generation; polish enforces it on the built thing). Run its mechanical
+     sub-check (grep source for the grep-able patterns) plus the visual read,
+     and say which ran; each hit is a finding.
    - **States:** hover/focus/active/disabled/loading/empty/error actually designed,
      not default-browser or missing.
    - **Motion & feel:** interactions snappy; transitions purposeful, not laggy or
@@ -65,12 +54,16 @@ If there's no UI in scope, say so and exit — nothing to do.
    shape (forge suite's `references/question-style.md`): concrete framing, named
    stakes, recommendation with the *why*.
 
-4. **Capture and re-score.** Re-rate both scores after fixes and report the
-   deltas ("design 5→8, slop 6→10") — a polish run whose scores didn't move
-   either found a clean build (say so) or didn't finish. Append a
-   `wiki/learnings.md` entry with the rule-to-remember (e.g. "use the spacing
-   scale token, never raw px") so `forge-build` prevents it next time. Tell the
-   user. Show the numbered before/after evidence.
+4. **Re-score and loop to the bar.** Re-rate both scores after fixes and report
+   the deltas ("design 5→8, slop 6→10"). **Exit bar — slop ≥ 9 AND design
+   coherence ≥ 8.** Below the bar, loop: fix → re-verify → re-score. A single
+   pass that lands under the bar is an unfinished polish, not a result. The only
+   valid ways out under the bar are a genuine taste call (surface it to the user
+   as the named blocker) — or an honest "clean at baseline, nothing to move",
+   stated as such. Then append a `wiki/learnings.md` entry with the
+   rule-to-remember (e.g. "use the spacing scale token, never raw px") so
+   `forge-build` prevents it next time. Tell the user. Show the numbered
+   before/after evidence.
 
 ## Rules
 
@@ -83,6 +76,7 @@ If there's no UI in scope, say so and exit — nothing to do.
 
 ## References
 
+- forge suite's `references/anti-slop.md` — the shared 11-pattern blacklist + mechanical sub-check
 - forge suite's `references/scoring.md` — baseline → final score deltas
 - forge suite's `references/question-style.md` — Decision Brief format
 - `forge-design-system` — the DESIGN.md contract this enforces at runtime

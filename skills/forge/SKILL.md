@@ -35,7 +35,7 @@ You are here ──────────────────────�
   ▶ Next: <the exact next command, e.g. `/forge` → build phase 3>
 
 Full map ─────────────────────────────────────
-  PLAN   init · discovery (+ambition) · plan (+design-system/-explore if UI) · harden
+  PLAN   init · discovery (+ambition) · plan · design (system+explore, if UI) · harden
   BUILD  build · review (+polish +dx) · ship   ·· one phase per /forge run
   LOOK   debug (root-cause) · retro (synthesis, auto at Done)
   WIKI   wiki (ask · ingest context) · wiki-maintain (index · health) ·· any time
@@ -78,6 +78,7 @@ Derive **next action** from this ladder (first unmet wins):
 | no `wiki/` | Setup | `forge-init` |
 | `wiki/brief.md` missing/stub | Discovery | `forge-discovery` |
 | `wiki/plan.md` missing/stub | Planning | `forge-plan` |
+| plan ships UI and design is unresolved — no `DESIGN.md`, or any phase's `Design:` marker is an unlocked `explore` | Design | design cycle (Step 2) |
 | plan has no `## Review` (not hardened) | Hardening | `forge-harden` |
 | plan has `## Review` but `Lock status:` ≠ `locked` | Lock | present the lock gate (Step 2), then mark locked |
 | plan locked (`Lock status: locked`), unbuilt phase exists | Build loop | see below |
@@ -86,13 +87,28 @@ Derive **next action** from this ladder (first unmet wins):
 
 ## Step 2 — run exactly the next thing, then stop
 
-### Planning stages (init / discovery / plan / harden)
+### Planning stages (init / discovery / plan / design / harden)
 
 Invoke the one skill for the unmet stage. Each writes its wiki artifact. After it
 completes, **stop and report** — do not silently chain into the next stage; tell the
 user what's done and that the next `/forge` continues. (Exception: a fresh project
 with nothing — offer, via AskUserQuestion, to run setup→discovery→plan→harden in
 sequence so first-time setup isn't four invocations.)
+
+### Design stage (plan ships UI, direction unresolved)
+
+The shotgun fires **after planning, before hardening** — the user picks with their
+eyes before any code exists and before harden-design audits a guess. In order:
+
+1. **`forge-design-system`** if no `DESIGN.md` — locks the materials
+   (type/color/space/radius/motion) via the served specimen board.
+2. **`forge-design-explore`** for each phase marked `Design: explore` — 3–4
+   rendered variants on the served feedback board; the pick locks as an ADR and
+   the phase's marker flips to `locked via [[decisions/NNNN]]`.
+
+Exit criteria: `DESIGN.md` exists and no phase's `Design:` marker is an unlocked
+`explore`. Like plan-lock, the markers persist in `wiki/plan.md` — a UI phase
+cannot enter the build loop with its direction unlocked.
 
 When `forge-harden` finishes — or when state detection lands on **Lock** (a
 `## Review` block exists with `Lock status:` not yet `locked`, e.g. a prior run
@@ -107,8 +123,11 @@ would re-present the gate. The build loop is now unlocked.
 
 1. **Pick the phase, and enter at the right step.** The phase is the first in
    `wiki/plan.md` with no `wiki/build-log.md` entry (if on a `phase/<k>-…` branch
-   with work in progress, that's the phase — don't start a new one). Then enter the
-   loop at the *furthest step whose output isn't yet present*, not blindly at build:
+   with work in progress, that's the phase — don't start a new one). **Design
+   precondition:** if this phase's `Design:` marker is an unlocked `explore`, run
+   `forge-design-explore` for its surface first — no code before the direction is
+   locked. Then enter the loop at the *furthest step whose output isn't yet
+   present*, not blindly at build:
    - phase branch missing / no commits → start at **Build** (step 3).
    - branch has commits but the gate isn't green / review not done → resume at
      **Build/Review** (forge-build continues in-progress work; it won't re-scaffold).
