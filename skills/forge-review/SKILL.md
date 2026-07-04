@@ -1,17 +1,15 @@
 ---
 name: forge-review
-description: Staff-grade review of a freshly built phase — security, high-quality tests written and all passing, strict type safety with escape hatches banned, runtime verification of the gate and goal, plus an optional third-party adversarial pass (Codex, Gemini, or Claude per config). Auto-fixes every objective finding, surfaces only genuine taste decisions, and records lessons in the wiki. Use after forge-build, when asked to "review this", "review the phase", "security and quality review", or as the review step of the forge loop.
+description: Staff-grade review of a freshly built phase — security, high-quality tests written and all passing, strict type safety with escape hatches banned, runtime verification of the gate and goal, plus a third-party adversarial pass (Codex, Gemini, or Claude per config; required at deep tier). Triages review depth to the diff, fingerprints the phase diff so re-runs audit prior findings and review only the delta, appends an auditable receipts record, and tracks its own misses (shipped phases later hotfixed) as calibration. Auto-fixes every objective finding, surfaces only genuine taste decisions, and records lessons in the wiki. Use after forge-build, when asked to "review this", "review the phase", "security and quality review", or as the review step of the forge loop.
 ---
 
 # forge-review
 
-The quality gate between building a phase and shipping it. Folds in the gstack
-review principles: security, real tests, strict types, third-party eyes — then
-**fixes what it finds** and remembers the lesson. Also does the runtime
-verification step (which a separate QA skill used to own before this skill
-absorbed it). The
-third-party pass is configurable — Codex, Gemini, or Claude — via the shared
-reviewer abstraction (`forge/references/reviewer-agents.md`).
+The quality gate between building a phase and shipping it. Security, real tests,
+strict types, runtime verification, third-party eyes — then **fixes what it
+finds** and remembers the lesson. The third-party pass is configurable — Codex,
+Gemini, or Claude — via the shared reviewer abstraction
+(`forge/references/reviewer-agents.md`).
 
 ## Charter
 
@@ -27,6 +25,20 @@ first — its rules are mandatory and enforced here; a violation of a past learn
 a high-severity finding. When a learning drives a finding or a check, say so
 visibly: `Prior learning applied: <rule> (from <date>, phase <n>)` — the
 compounding should be legible, not silent.
+
+Re-runs are idempotent (`references/re-review.md`): an unchanged fingerprint whose
+record ended green is reported, not replayed; a changed one gets a **re-review** —
+prior findings audited first (resolved / still open), then the delta since the last
+reviewed HEAD. The terminal command block always runs in full either way.
+
+## Triage — scale the machinery, not the bar
+
+Classify the diff first; record the tier in the review record. **light** (docs/copy/
+config only, zero logic — pass 0 plus the terminal block; any hint of logic
+promotes), **standard** (default — all passes, third-party pass per config),
+**deep** (multi-system, schema/auth/payments/public-API surface, or a very large
+diff — third-party pass required, surrounding-source reading widened to every
+touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
 
 ## The passes (run all; details in `references/review-standards.md`)
 
@@ -74,11 +86,13 @@ compounding should be legible, not silent.
    - If the build is **developer-facing** (CLI/API/SDK/lib), invoke **`forge-dx`**
      here (live onboarding/TTHW/error-message audit). Same: objective fixes fold in.
    - Both are scoped to what the phase changed and skip cleanly if out of scope.
-7. **Optional third-party adversarial pass.** Resolve the reviewer per
-   **`forge/references/reviewer-agents.md`** — explicit `wiki/.forge/config.yaml`,
-   then `$FORGE_REVIEWER`, then auto-probe `codex` → `gemini` → `claude`. State
-   which one was picked and why. If none available or config says
-   `reviewer: none`, state the pass is skipped and continue (don't block).
+7. **Third-party adversarial pass (required at deep tier, else per config).**
+   Resolve the reviewer per **`forge/references/reviewer-agents.md`** — explicit
+   `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then auto-probe
+   `codex` → `gemini` → `claude`. State which one was picked and why. If none
+   available or config says `reviewer: none`, state the pass is skipped and
+   continue (don't block) — at deep tier that degradation is disclosed in the
+   receipts, never silent.
 
    Send the standard prompt envelope from `reviewer-agents.md`: write the
    artifact (phase diff + the phase spec from `wiki/plan.md`) to a temp file and
@@ -118,13 +132,26 @@ finding was a real incident/surprising root cause, also write `wiki/notes/`. If 
 past learning was contradicted this pass, retire it visibly (strike + why) rather
 than silently violating it. **Tell the user what you captured, in the same turn.**
 
-Also prepend one structured **review record** line to `wiki/learnings.md` — this is
-the source the next review's trend line and `forge-retro`'s deltas read; without it
-the trend is unfalsifiable:
+Also prepend one structured **review record** to `wiki/learnings.md` — this is
+the source the next review's trend line, re-run fingerprint checks, and
+`forge-retro`'s deltas read; without it the trend is unfalsifiable:
 
 ```markdown
-> review · phase N · findings high/med/low 2/3/1 · passes 0–7 run · terminal block green
+> review · phase N · tier standard · findings high/med/low 2/3/1 · passes 0–7 run · head a1b2c3d · diff patch-id:4f1e9 · terminal block green
 ```
+
+Follow the record line with the compact **receipts block** — the audit trail a
+reader needs to trust "green" without replaying the review: per-pass verdicts,
+files read beyond the diff, context consulted, the pass-7 reviewer identity (or why
+skipped), and on a re-run the prior findings resolved / still open. Template in
+`references/re-review.md`.
+
+**Calibration — the review's own misses.** At review start, check whether any
+previously green-reviewed, shipped phase has since been hotfixed or reverted on the
+base branch (`references/re-review.md`). Each confirmed miss gets a `review-miss`
+learning naming exactly what the review failed to catch — a mandatory check in
+every future review. The review gets measurably better, or the trend line shows it
+isn't.
 
 ## Evidence chain
 
@@ -165,6 +192,7 @@ hand to **`forge-ship`** to land the phase. Never ship from here.
 ## References
 
 - `references/review-standards.md` — what each pass checks, in depth
+- `references/re-review.md` — fingerprints, delta re-review, receipts template, miss detection
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
