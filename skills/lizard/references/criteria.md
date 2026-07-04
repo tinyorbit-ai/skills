@@ -5,7 +5,9 @@ changes how much machinery digs into them. The receipts block records each group
 a pass/fail (e.g. `performance (n+1 ✓, complexity ✓)`).
 
 Apply findings with evidence: cite file:line from the diff, and for convention claims
-cite an in-repo precedent. Do not invent issues — a clean PR gets a clean stamp.
+cite an in-repo precedent. Do not invent issues — a clean PR gets a clean stamp. The
+counterweight (SKILL.md): on high-risk surfaces **absence of proof is itself a
+finding** — not-proven-safe is never converted into a receipts note.
 
 ## 1. Performance
 
@@ -23,8 +25,22 @@ cite an in-repo precedent. Do not invent issues — a clean PR gets a clean stam
 - **Wasted concurrency** — sequential `await`s over independent operations that
   should run in parallel; hot-path allocations inside tight loops.
 
+**Proof obligation — production DB reads.** For every new or materially changed
+query over a collection that grows (polling paths, GraphQL resolvers, workers,
+dashboards, admin endpoints — internal-only included), prove it is bounded and
+index-supported. Acceptable proof: a repo-declared index or migration, a cited
+equivalent query with precedent, or an explain/query-plan claim in the PR body. No
+proof = **major** — "live indexes may exist outside the repo" is residual
+uncertainty, not clearance. For Mongo aggregations, check **stage order**: a
+`$limit` after `$sort`, `$group`, `$lookup`, or any cardinality-changing stage does
+not bound the scan/sort/group work — identify the first indexed `$match` and its
+supporting index. External API calls fanning out from a DB result set are an N+1
+even when cached — cold paths and cache misses count.
+
 Severity guide: an N+1/quadratic on a path fed by user-scale data is **major**; on a
 bounded admin path with a handful of items it is a **minor** with the fix inline.
+Access restriction never downgrades: a superuser-only dashboard polling production
+data melts the same database.
 
 ## 2. Economy of means
 
