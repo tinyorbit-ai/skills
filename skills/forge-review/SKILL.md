@@ -5,13 +5,11 @@ description: Staff-grade review of a freshly built phase — security, high-qual
 
 # forge-review
 
-The quality gate between building a phase and shipping it. Folds in the gstack
-review principles: security, real tests, strict types, third-party eyes — then
-**fixes what it finds** and remembers the lesson. Also does the runtime
-verification step (which a separate QA skill used to own before this skill
-absorbed it). The
-third-party pass is configurable — Codex, Gemini, or Claude — via the shared
-reviewer abstraction (`forge/references/reviewer-agents.md`).
+The quality gate between building a phase and shipping it. Security, real tests,
+strict types, runtime verification, third-party eyes — then **fixes what it
+finds** and remembers the lesson. The third-party pass is configurable — Codex,
+Gemini, or Claude — via the shared reviewer abstraction
+(`forge/references/reviewer-agents.md`).
 
 ## Charter
 
