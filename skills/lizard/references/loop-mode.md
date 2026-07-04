@@ -67,6 +67,27 @@ refs/remotes/origin/pr-<number>:<path>`, `git grep`); the worktree isolates per-
 scratch (`$run`) for payload files. Remove the worktree and `$run` as the last step;
 crashed runs are covered by the startup reap.
 
+**Fetch shape matters.** `--depth=1` with **no partial-clone filter** downloads the
+PR tree's blobs as one pack, so every later `git grep` / `git show` is local and
+instant. Never use `--filter=blob:none` (nor `gh repo clone -- --filter=blob:none`):
+a reviewer's access pattern is "read many files across one tree", and a blobless
+store turns each read into a network round trip — one tree-wide grep can fault
+thousands of blobs one by one. Successive PR fetches into the same store share
+objects, so only the first is big.
+
+**Fast reads.** For repo-wide convention questions on the default branch ("is this
+pattern consumed anywhere?"), prefer server-side search over local grep — instant,
+no blobs:
+
+```bash
+gh search code --repo <owner>/<repo> '<term>' --limit 30 --json path
+```
+
+It indexes the default branch only; search the PR head locally against the fetched
+ref. Scope local greps with pathspecs to the subsystems the diff touches
+(`git grep <pattern> refs/remotes/origin/pr-<n> -- 'services/**'`) before going
+tree-wide.
+
 Do not set EXIT traps for cleanup — the review spans many shell invocations and a
 trap fires when its own invocation exits.
 

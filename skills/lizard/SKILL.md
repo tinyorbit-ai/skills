@@ -76,8 +76,9 @@ itself?". If the argument holds, it becomes a finding; if not, stamp.
 - Flags — `--deep` / `--quick` override triage; `--dry-run` reports the review in the
   session without posting anything.
 
-Session mode may read the repo through the current checkout. Loop mode always uses
-the isolated setup in `references/loop-mode.md`.
+Session mode may read the repo through the current checkout; with no local checkout,
+use the shared object store from `references/loop-mode.md` — depth-1, unfiltered,
+**never a blobless partial clone**. Loop mode always uses that isolated setup.
 
 ## Triage
 
