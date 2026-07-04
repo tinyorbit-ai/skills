@@ -53,10 +53,13 @@ produces no JSON, record `ranOk=false` and keep the last ~800 chars of output fo
 receipts.
 
 **No second brain available** (or `ranOk=false`): run an independent self-refutation
-pass instead — a fresh pass over the diff with the same adversarial instruction — and
-set `adversary=none` in the metadata with the receipts stating
+pass instead — and it is real work, not a receipts annotation. Walk the diff under
+the same adversarial instruction and produce the same findings JSON, or an explicit
+list of the refutations attempted and why each failed. Only then set
+`adversary=none` with the receipts stating
 `T3 deep — adversary unavailable, independent self-refutation pass instead`.
-Degrade, never silently.
+A receipt note without the pass is not degradation, it is omission — no refutation
+pass, no verdict. Degrade, never silently.
 
 ## Stage 3 — synthesis & decision
 
@@ -73,3 +76,22 @@ Degrade, never silently.
 A finding both brains surface independently is high-confidence — say so in its inline
 comment. A finding only one brain surfaced still counts; verify it against the source
 before posting, and drop it if it does not survive a direct look at the code.
+
+## Dependency & runtime upgrades
+
+An upgrade touching DB clients/ORMs, tracing/APM, queue clients, serverless
+packaging, or native modules is always T3 — and changed-hunk review is not enough:
+the risk lives in unchanged consumer code whose runtime assumptions the upgrade
+shifts. Build a **consumer matrix** before judging, and put it in the receipts:
+
+- Which services, Lambdas, workers, scripts, and tests consume the upgraded
+  package? Grep imports repo-wide; list them.
+- Which consumers initialize clients at **module scope**, and what happens to a
+  warm container/worker when that init fails once? A cached connection/client
+  promise that keeps a rejection poisons every later invocation — it must clear on
+  rejection, or the PR needs evidence the failure cannot persist.
+- Do failed connections retry, and with what behavior under the new version?
+- Are native deps still bundled, layered, externalized, or runtime-available?
+- Which library defaults changed between the versions, and is each one explicitly
+  preserved or intentionally adopted? Read the changelog/migration guide — a PR
+  body claiming "no breaking changes" is a claim to verify, not evidence.
