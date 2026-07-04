@@ -49,6 +49,15 @@ incident plus the stamp's credibility. When uncertain, don't guess — withhold 
 stamp and state exactly what would establish confidence. Failing or pending CI alone
 never withholds the stamp (branch protection owns CI; note it in the receipts).
 
+**Not proven safe is not clean.** On high-risk production surfaces — a new or
+changed production query shape, a runtime dependency upgrade, a serverless/deploy
+shape change, a migration, queue behavior, an auth boundary, a payment or data-loss
+path — **absence of operational proof is itself a major finding**, stating exactly
+what evidence clears it (a repo-declared index or migration, a cited equivalent
+precedent, an explain/query-plan or platform-limit check in the PR). "Internal-only"
+or "superuser-only" reduces abuse risk, not operational risk — it never downgrades
+this. Uncertainty goes in the verdict, never only in the receipts.
+
 ## The stamp contract
 
 🦎 requires all of:
@@ -73,6 +82,9 @@ itself?". If the argument holds, it becomes a finding; if not, stamp.
   (`references/loop-mode.md`). Put this on a `/loop` or scheduled routine.
 - `lizard <n> <n> ... [--brief <file>]` — bulk campaign; the brief file adds
   campaign-specific review guidance (e.g. a migration's semantics to preserve).
+- `lizard retro <n> <n> ...` — calibration mode for already-merged PRs: gather
+  post-merge history first (reverts, hotfixes, incident follow-ups), grade the
+  original outcome, write blind-spots (`references/loop-mode.md`). Never posts.
 - Flags — `--deep` / `--quick` override triage; `--dry-run` reports the review in the
   session without posting anything.
 
@@ -89,7 +101,7 @@ plus changed paths and the PR body. The machinery scales; the bar never moves.
 |---|---|---|
 | **T1 quick** | ALL of — docs/copy/strings/config/lockfile only, tiny diff, zero logic, zero risk surface, no new dependencies. Conjunctive and mechanical; anything ambiguous is T2. | One pass over diff + immediate context, micro-refutation ("what would make this string change wrong?" — i18n, escaping, tests referencing it), stamp. |
 | **T2 standard** | Single system, moderate size, any logic change. The default. | Gather context, full criteria + matching focus packs, read surrounding source, hunt call sites of removed exports, refutation, verdict. |
-| **T3 deep** | Multi-system spread, large diff, OR any high-risk surface regardless of size — auth, payments, migrations, schema, public API contracts, jobs/queues — or injection-suspicious content. | Fan-out reviewers + cross-model adversary + synthesis (`references/deep-review.md`). |
+| **T3 deep** | Multi-system spread, large diff, OR any high-risk surface regardless of size — auth, payments, migrations, schema, public API contracts, jobs/queues, runtime dependency upgrades (DB clients/ORMs, tracing, queue clients, serverless packaging, native modules) — or injection-suspicious content. | Fan-out reviewers + cross-model adversary + synthesis; consumer matrix for upgrades (`references/deep-review.md`). |
 
 Escalation goes up only, never down — if a T1 read smells like logic, it becomes T2
 mid-review. Record the tier in the receipts and metadata.

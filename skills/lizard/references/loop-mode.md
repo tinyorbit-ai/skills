@@ -120,6 +120,44 @@ actually corrects something the stamped PR broke. If yes, append a miss record:
 2026-07-04 MISS PR#4242 (stamped 2026-06-28) — reverted by PR#4290. Missed: findOneAndUpdate returned the old doc; review read the write path but not the caller's use of the return value.
 ```
 
-…and distill the lesson into `~/.lizard/blind-spots.md` (one bullet per lesson,
-deduped). **Every review loads blind-spots.md** and checks its lessons against the
-current diff — the stamp gets measurably better, or you find out it isn't.
+…and distill the lesson into a blind-spot entry (below). **Every review loads
+blind-spots.md** and checks its lessons against the current diff — the stamp gets
+measurably better, or you find out it isn't.
+
+## Blind-spot entries
+
+Writing one is **mandatory** on any detected miss, any retro grading below
+near-miss, and any user-provided incident correlation — never optional, never
+deferred. Format for `~/.lizard/blind-spots.md`, one entry per lesson, deduped:
+
+```markdown
+- **missed pattern** — the production failure shape the review didn't catch
+  **why the criteria failed** — which check existed but didn't fire, or didn't exist
+  **trigger signals** — file paths / diff shapes that must raise it next time
+  **required proof** — the evidence that clears it (index, explain plan, limit check…)
+  **example** — repo + path pattern from the miss
+```
+
+## Retro mode
+
+`lizard retro <n> <n> ...` reviews already-merged PRs for calibration, not
+gatekeeping — it never posts to GitHub. The most valuable signal is post-merge
+history, so gather it **before** judging anything:
+
+```bash
+gh search prs --repo <owner>/<repo> '<pr-number>' --merged --json number,title,url
+git log --oneline --grep='<pr-number>' --grep='revert' --grep='hotfix' -i <base-ref>
+```
+
+Per PR:
+
+1. Find reverts, hotfixes, incident/follow-up PRs, deploy fixes, and
+   monitoring references (Datadog/Sentry links) that name the PR or
+   predominantly touch its files.
+2. Run the normal review of the PR as it was merged.
+3. Grade the original outcome against reality: **caught / near miss / wrong
+   mechanism / unrelated / complete miss**. "Wrong mechanism" counts as a miss —
+   flagging the right file for the wrong reason wouldn't have prevented the
+   incident.
+4. Write the blind-spot entries and a calibration summary (grades per PR, the
+   pattern across them).
