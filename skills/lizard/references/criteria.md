@@ -4,10 +4,12 @@ The seven groups behind every verdict. All seven apply at every tier; the tier o
 changes how much machinery digs into them. The receipts block records each group with
 a pass/fail (e.g. `performance (n+1 ✓, complexity ✓)`).
 
-Apply findings with evidence: cite file:line from the diff, and for convention claims
-cite an in-repo precedent. Do not invent issues — a clean PR gets a clean stamp. The
-counterweight (SKILL.md): on high-risk surfaces **absence of proof is itself a
-finding** — not-proven-safe is never converted into a receipts note.
+Apply findings with evidence: cite file:line from the diff, for convention claims cite
+an in-repo precedent, and for behavioral claims cite the code you traced. Do not invent
+issues — a clean PR gets a clean stamp. Two counterweights (SKILL.md): on high-risk
+surfaces **absence of proof is itself a finding**, and on the finding side **not proven
+broken is not broken** — a correctness claim you can't ground in code you read drops to
+a hedged question, never a major.
 
 ## 1. Performance
 
@@ -69,6 +71,10 @@ of an existing subsystem, an abstraction that will force future contortions.
   semantics (e.g. findOneAndUpdate old-vs-new), upsert flags, projection and sort.
 - **Removed or renamed exports** — every call site found and updated. A missed one is
   critical.
+- **Assertions of broken behavior must be grounded, not inferred.** A correctness
+  finding is only as strong as the evidence under it — trace the real behavior (read
+  the helper, follow the value, check the default) instead of inferring it from a name
+  or a plausible story. Ungrounded, it's a question, not a major.
 
 ## 4. Security & safety
 

@@ -44,9 +44,11 @@ no formal review state. Non-approvals post as normal COMMENT/REQUEST_CHANGES rev
   an N+1 or quadratic pattern on a path that will grow.
 - **minor / nit** → inline comments only; never block, never appear in the verdict.
 
-**Asymmetric loss**: a false "not yet" costs one round-trip; a false 🦎 costs an
-incident plus the stamp's credibility. When uncertain, don't guess — withhold the
-stamp and state exactly what would establish confidence. Failing or pending CI alone
+**Asymmetric loss**: a false 🦎 costs an incident plus the stamp's credibility, so
+when uncertain about safety, don't guess — withhold the stamp and state exactly what
+would establish confidence. But findings are not free either: a confident false major
+spends the same credibility and wastes the author's time. The cheap round-trip is an
+honest hedged question, not a wrong confident claim. Failing or pending CI alone
 never withholds the stamp (branch protection owns CI; note it in the receipts).
 
 **Not proven safe is not clean.** On high-risk production surfaces — a new or
@@ -57,6 +59,13 @@ what evidence clears it (a repo-declared index or migration, a cited equivalent
 precedent, an explain/query-plan or platform-limit check in the PR). "Internal-only"
 or "superuser-only" reduces abuse risk, not operational risk — it never downgrades
 this. Uncertainty goes in the verdict, never only in the receipts.
+
+**Not proven broken is not broken.** The mirror, on the finding side. A major or
+critical finding carries the same burden of proof as the stamp: before posting it,
+trace the actual behavior — don't infer it from a name, a default, or how the code
+"probably" works. If the claim isn't grounded in something you read or traced, it's a
+hedged question, not a major with a suggestion block. Severity scales the burden — the
+more you're asking the author to undo, the harder you must have proven it.
 
 ## The stamp contract
 
