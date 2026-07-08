@@ -58,6 +58,19 @@ unchanged.
 Every review (and stamp-as-comment) ends with a collapsed receipts block placed
 immediately before the hidden metadata line. It is the audit trail behind the
 verdict — one click to audit the lizard. Never hide actionable findings inside it.
+Plain `Receipts:` headings or bullet lists are invalid, including for
+stamp-as-comment approvals on self-authored PRs.
+
+Before posting, validate the final body contains this exact structure in this order:
+
+1. Verdict body.
+2. `<details>`
+3. `<summary>...lizard receipts...what was checked...</summary>`
+4. A two-column markdown table with the separator row `|---|---|`.
+5. `</details>`
+6. The hidden `<!-- lizard:v1 ... -->` metadata line.
+
+If any part is missing, rewrite the body before submitting it to GitHub.
 
 Template — include a row only when it has content:
 

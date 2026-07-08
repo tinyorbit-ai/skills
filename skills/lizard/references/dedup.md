@@ -39,9 +39,34 @@ Skip only when all inputs are present and equal and the caller did not explicitl
 request a rerun. If anything is missing, ambiguous, or `unknown`, review — a
 duplicate review is less bad than skipping a genuinely changed PR.
 
-Dedup is best-effort, not a barrier. Under parallel runs two instances can both pass
-the checks and both post; accept it. **Fail open** — never add locking that could
-strand a PR unreviewed.
+## Parallel-run guard — one standing verdict per head
+
+The skip checks alone don't stop a race: two runs (a sweep and a session, overlapping
+crons) can both pass them before either has posted, and both stamp. The invariant is
+**at most one standing lizard verdict per head SHA**, held by three layers — each
+fail-open, so a layer that errors never blocks a review:
+
+1. **Claim before reviewing.** The 👀 reaction is the in-flight claim, not just a
+   cue. Before adding yours, list the PR's reactions: an `eyes` reaction created
+   within the last 30 minutes means another run is in flight — stop without posting
+   anything. Older than 30 minutes is a crashed run's leftover — remove it (best
+   effort) and proceed. An explicit user request to review overrides the claim, like
+   any explicit rerun; layers 2–3 still apply. Commands in
+   `references/github-review-api.md`.
+2. **Re-check before the POST.** A review takes minutes; a claim can be missed in the
+   seconds before it lands. Immediately before submitting, re-run the
+   previous-review lookups (formal reviews AND issue comments). A lizard verdict at
+   the current `headRefOid` that appeared mid-review wins the race — do not post;
+   append a `duplicate-averted` line to the ledger.
+3. **Verify after the POST.** Fetch lizard verdicts at this head once more. If two
+   stand, **the later one yields**: delete your own later stamp-as-comment; a
+   submitted formal review cannot be deleted — dismiss your own later duplicate
+   (write access required), otherwise leave it and record the collision in the
+   ledger. Commands in `references/github-review-api.md`.
+
+Fail open is still the law: no lock files, no hard barriers, a staleness bound on
+every claim. A PR stranded unreviewed is worse than a rare duplicate — the first two
+layers make the duplicate rare, and the third removes it when it happens anyway.
 
 ## Diff fingerprint
 
