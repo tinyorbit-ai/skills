@@ -71,9 +71,24 @@ Inline threads (for the never-repost-open-threads rule):
 gh api "repos/<owner>/<repo>/pulls/<number>/comments" --paginate
 ```
 
-## In-progress reaction
+## In-progress reaction — the in-flight claim
 
-Add 👀 after the exact-head check decides a review might happen; best-effort cue, not
+The 👀 reaction doubles as the parallel-run claim (`references/dedup.md`) — but only
+your own: anyone can react 👀 on a PR, so filter to the authenticated login (the
+same `gh api user --jq .login` already fetched for self-authored detection). Your
+`eyes` fresher than 30 minutes means another run is in flight — stop; older is a
+crashed run's leftover — remove it and proceed (the API only permits deleting your
+own reactions anyway):
+
+```bash
+login="$(gh api user --jq .login)"
+gh api "repos/<owner>/<repo>/issues/<number>/reactions" \
+  -H "Accept: application/vnd.github+json" \
+| jq --arg login "$login" \
+    '[.[] | select(.content == "eyes" and .user.login == $login) | {id, created_at}]'
+```
+
+Add yours after the exact-head check decides a review might happen; best effort, not
 a lock (GitHub dedups identical reactions from the same user — accept it):
 
 ```bash
@@ -137,6 +152,14 @@ Payload rules:
   line. `comments` may still carry nits.
 - `commit_id` = the `headRefOid` actually reviewed, so the review attaches to the
   right head even if the author pushes mid-review.
+- Before any POST, validate the top-level body has a collapsed receipts table:
+  `<details>`, `<summary>...lizard receipts...what was checked...</summary>`,
+  `|---|---|`, and `</details>` must all appear before the hidden metadata line.
+  Plain `Receipts:` bullet lists are invalid. This validation applies equally to
+  stamp-as-comment approvals for self-authored PRs.
+- Also before any POST, re-run the previous-review lookups above: a lizard verdict
+  at the current `headRefOid` that appeared mid-review means this run lost the race
+  — do not post (`references/dedup.md`).
 
 ## Inline comment anchoring
 
@@ -188,3 +211,23 @@ gh api --method POST "repos/<owner>/<repo>/issues/<number>/comments" \
 
 Non-approving verdicts on self-authored PRs post as normal COMMENT /
 REQUEST_CHANGES reviews — only APPROVE is blocked by GitHub.
+
+## After the POST — one standing verdict
+
+Fetch lizard verdicts at the current head once more (formal reviews AND issue
+comments). If a concurrent run double-posted, the later verdict yields
+(`references/dedup.md`). Your own later stamp-as-comment is deleted:
+
+```bash
+gh api --method DELETE "repos/<owner>/<repo>/issues/comments/<comment-id>"
+```
+
+A submitted formal review cannot be deleted — dismiss your own later duplicate
+(write access required); if dismissal fails, leave it and record the collision in
+the ledger:
+
+```bash
+gh api --method PUT \
+  "repos/<owner>/<repo>/pulls/<number>/reviews/<review-id>/dismissals" \
+  -f message="duplicate lizard run — the earlier review stands" -f event="DISMISS"
+```

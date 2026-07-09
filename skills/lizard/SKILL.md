@@ -34,6 +34,10 @@ the authenticated `gh` user, deliver an approval as a plain issue comment whose 
 is `🦎` + receipts + metadata (see `references/github-review-api.md`). Same meaning,
 no formal review state. Non-approvals post as normal COMMENT/REQUEST_CHANGES reviews.
 
+The receipts block is always a collapsed `<details>` block containing a two-column
+markdown table. A plain `Receipts:` heading or bullet list is invalid and must be
+rewritten before posting.
+
 ## Severity → verdict
 
 - **critical** → do not merge. Behaviour change vs. stated intent, data loss or
@@ -122,7 +126,10 @@ mid-review. Record the tier in the receipts and metadata.
    reviewed, stop. If a prior lizard review exists, this run is a **re-review**: audit
    every prior blocking finding (resolved / still open) first, review the delta since
    the last reviewed head, and never repost a still-open inline thread — reference it.
-3. Add the 👀 in-progress reaction (best effort, fail open).
+3. Claim the run — a fresh 👀 reaction **from your own account** on the PR means
+   another lizard run is in flight: stop (anyone else's 👀 is just a reaction, never
+   a claim; an explicit user request to review overrides). Otherwise add yours (best
+   effort, fail open; `references/dedup.md`).
 4. Triage the tier.
 5. Gather linked context and cross-check the PR's claims (`references/context.md`).
 6. Review at tier depth — `references/criteria.md` always (all seven groups); every
@@ -130,9 +137,12 @@ mid-review. Record the tier in the receipts and metadata.
    any repo-local guidance and `--brief` file); `references/deep-review.md` for T3.
 7. Run the pre-stamp refutation if heading toward APPROVE.
 8. Compose — verdict body, inline comments with verified anchors, receipts block,
-   hidden metadata line — and post as ONE review (`references/github-review-api.md`).
-9. Remove the reaction; append the review record to the ledger
-   (`references/loop-mode.md`).
+   hidden metadata line — and post as ONE review (`references/github-review-api.md`),
+   re-checking immediately before the POST that no lizard verdict landed at this
+   head mid-review.
+9. Remove the reaction; verify exactly one lizard verdict stands at this head — the
+   later duplicate yields (`references/dedup.md`); append the review record to the
+   ledger (`references/loop-mode.md`).
 
 ## Core rules
 

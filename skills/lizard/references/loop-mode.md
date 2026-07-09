@@ -91,9 +91,11 @@ tree-wide.
 Do not set EXIT traps for cleanup — the review spans many shell invocations and a
 trap fires when its own invocation exits.
 
-Concurrency stance: **fail open.** Two concurrent runs on the same PR may both post;
-an occasional duplicate beats a lock that strands a PR unreviewed. Retry once on
-`FETCH_HEAD.lock` collisions in the shared store.
+Concurrency stance: **fail open, but guarded.** Concurrent runs on the same PR are
+caught by the parallel-run guard (`references/dedup.md`) — 👀 in-flight claim,
+re-check before the POST, later duplicate yields after it. Never a lock that could
+strand a PR unreviewed. Retry once on `FETCH_HEAD.lock` collisions in the shared
+store.
 
 ## Ledger & calibration
 
