@@ -47,11 +47,14 @@ crons) can both pass them before either has posted, and both stamp. The invarian
 fail-open, so a layer that errors never blocks a review:
 
 1. **Claim before reviewing.** The 👀 reaction is the in-flight claim, not just a
-   cue. Before adding yours, list the PR's reactions: an `eyes` reaction created
-   within the last 30 minutes means another run is in flight — stop without posting
-   anything. Older than 30 minutes is a crashed run's leftover — remove it (best
-   effort) and proceed. An explicit user request to review overrides the claim, like
-   any explicit rerun; layers 2–3 still apply. Commands in
+   cue. Before adding yours, list the PR's reactions **filtered to the account
+   lizard posts as** — anyone can react 👀 on a PR, and a bystander's reaction is
+   never a claim. Your own `eyes` reaction created within the last 30 minutes means
+   another run on this account is in flight — stop without posting anything. Older
+   than 30 minutes is a crashed run's leftover — remove it (best effort) and
+   proceed. An explicit user request to review overrides the claim, like any
+   explicit rerun; layers 2–3 still apply. A race across two different accounts has
+   no claim to see — layers 2–3 catch it. Commands in
    `references/github-review-api.md`.
 2. **Re-check before the POST.** A review takes minutes; a claim can be missed in the
    seconds before it lands. Immediately before submitting, re-run the

@@ -73,14 +73,19 @@ gh api "repos/<owner>/<repo>/pulls/<number>/comments" --paginate
 
 ## In-progress reaction — the in-flight claim
 
-The 👀 reaction doubles as the parallel-run claim (`references/dedup.md`). Check
-before adding: an `eyes` reaction fresher than 30 minutes means another run is in
-flight — stop; older is a crashed run's leftover — remove it and proceed:
+The 👀 reaction doubles as the parallel-run claim (`references/dedup.md`) — but only
+your own: anyone can react 👀 on a PR, so filter to the authenticated login (the
+same `gh api user --jq .login` already fetched for self-authored detection). Your
+`eyes` fresher than 30 minutes means another run is in flight — stop; older is a
+crashed run's leftover — remove it and proceed (the API only permits deleting your
+own reactions anyway):
 
 ```bash
+login="$(gh api user --jq .login)"
 gh api "repos/<owner>/<repo>/issues/<number>/reactions" \
   -H "Accept: application/vnd.github+json" \
-  --jq '[.[] | select(.content == "eyes") | {id, created_at}]'
+| jq --arg login "$login" \
+    '[.[] | select(.content == "eyes" and .user.login == $login) | {id, created_at}]'
 ```
 
 Add yours after the exact-head check decides a review might happen; best effort, not

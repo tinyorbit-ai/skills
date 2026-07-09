@@ -126,9 +126,10 @@ mid-review. Record the tier in the receipts and metadata.
    reviewed, stop. If a prior lizard review exists, this run is a **re-review**: audit
    every prior blocking finding (resolved / still open) first, review the delta since
    the last reviewed head, and never repost a still-open inline thread — reference it.
-3. Claim the run — a fresh 👀 reaction already on the PR means another lizard run is
-   in flight: stop (an explicit user request to review overrides the claim, like any
-   explicit rerun). Otherwise add yours (best effort, fail open; `references/dedup.md`).
+3. Claim the run — a fresh 👀 reaction **from your own account** on the PR means
+   another lizard run is in flight: stop (anyone else's 👀 is just a reaction, never
+   a claim; an explicit user request to review overrides). Otherwise add yours (best
+   effort, fail open; `references/dedup.md`).
 4. Triage the tier.
 5. Gather linked context and cross-check the PR's claims (`references/context.md`).
 6. Review at tier depth — `references/criteria.md` always (all seven groups); every
