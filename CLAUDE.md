@@ -163,10 +163,13 @@ added — every runner takes `--all` to widen). Full docs + add-a-case guide:
    Evals and skills drift apart otherwise — the suite only stays honest if it
    evolves in lockstep.
 
-Behavioral pilot cases: `forge-plan-structural` (brief → plan; gates must prove
-goals, not hygiene) and `forge-review-planted-bugs` (three seeded defects; grades
-recall + the mandated auto-fixes + review-record bookkeeping — validated live at
-3/3 recall, all fixes applied). `_smoke` self-tests the harness plumbing.
+Behavioral cases: `forge-plan-structural` (brief → plan; gates must prove goals,
+not hygiene), `forge-review-planted-bugs` (three seeded defects; recall + mandated
+auto-fixes + review-record bookkeeping — validated live at 3/3), and the wiki
+pair — `forge-wiki-ingest-living-article` (two-source ingest; second source must
+Timeline-merge, not duplicate or overwrite) and `forge-wiki-maintain-planted-rot`
+(six seeded rot items; recall + the --fix boundary: safe fixes applied,
+structural ones reported-never-touched). `_smoke` self-tests the harness.
 
 ## Command reference
 

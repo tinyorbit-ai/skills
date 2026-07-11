@@ -86,7 +86,7 @@ symlinks the skills under test into `.claude/skills/`, runs headless
 Transcripts and verdicts land in `evals/results/<stamp>-<case>/` (gitignored).
 Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
 
-### Pilot cases
+### Cases
 
 - **`forge-plan-structural`** — filled brief in, plan out. Deterministic: phase
   blocks carry Branch/Goal/Verifiable gate/Design markers, gates aren't bare
@@ -97,6 +97,19 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes
   (secret gone, gate output correct, tests green), and the review record +
   learnings bookkeeping.
+- **`forge-wiki-ingest-living-article`** — two client emails about the same
+  evolving fact (offsite Sept 12 → moved to Sept 26) ingested in sequence. The
+  second MUST merge as an append-only Timeline entry (Refined/Contradicted) on
+  the article the first created — no duplicate article, no overwrite. Also
+  grades the full article format, both indexes, the compilation log, flat
+  taxonomy, and that the pre-existing article is untouched.
+- **`forge-wiki-maintain-planted-rot`** — a wiki with six seeded defects: orphan
+  article, stale index entry, missing Summary, missing Timeline, broken
+  wikilink, nested-subfolder flat violation. Grades recall (≥5/6 in the health
+  report), the `--fix` boundary both ways — safe fixes actually applied
+  (indexes regenerated, Summary + retroactive Timeline added) AND structural
+  items reported-but-untouched (nested file not moved, broken link not silently
+  deleted) — plus no collateral damage to healthy articles.
 
 ### Add a case
 
@@ -124,3 +137,9 @@ no network.
 - **2026-07-11** · tier 2 `forge-review-planted-bugs`: PASS — 3/3 planted bugs
   detected, all mandated fixes applied (gate 82.5, tests green, secret gone),
   review record + learnings written.
+- **2026-07-11** · tier 2 `forge-wiki-ingest-living-article`: PASS — one article,
+  second source Timeline-merged (2 dated entries), Sept 26 landed, both sources
+  + compilation log recorded, flat taxonomy held, prior article untouched.
+- **2026-07-11** · tier 2 `forge-wiki-maintain-planted-rot`: PASS — 6/6 rot
+  detected, all four safe fixes applied, both --fix boundaries held (nested file
+  not moved, broken link reported not deleted), no collateral damage.

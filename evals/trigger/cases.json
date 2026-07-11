@@ -35,6 +35,7 @@
     { "utterance": "retro time — what did we ship?", "expect": ["forge-retro"] },
     { "utterance": "ingest this research doc into the wiki", "expect": ["forge-wiki"] },
     { "utterance": "what do we know about the client's deadline?", "expect": ["forge-wiki"] },
+    { "utterance": "remember this — the client wants the demo projected on a big screen", "expect": ["forge-wiki"] },
     { "utterance": "regenerate the wiki index", "expect": ["forge-wiki-maintain"] },
     { "utterance": "check the wiki for broken links", "expect": ["forge-wiki-maintain"] },
     { "utterance": "init forge in this repo", "expect": ["forge-init"] },

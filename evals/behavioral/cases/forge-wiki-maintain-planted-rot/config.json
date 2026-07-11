@@ -1,0 +1,5 @@
+{
+  "_comment": "Planted-rot recall — six seeded defects: (1) orphan article users/beta-feedback.md missing from its indexes, (2) stale index entry [[removed-article]] pointing at a deleted file, (3) screenshot-filename-formats.md missing its Summary line, (4) same article missing its Timeline section, (5) broken wikilink [[knowledge/domain/nonexistent-thing]] in beta-feedback.md, (6) flat-invariant violation domain/research/deep-dive.md. --fix must repair 1-4 (safe) and report-but-not-touch 5-6 (structural).",
+  "skills": ["forge-wiki-maintain", "forge"],
+  "timeoutMinutes": 20
+}
