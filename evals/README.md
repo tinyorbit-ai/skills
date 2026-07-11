@@ -81,7 +81,13 @@ symlinks the skills under test into `.claude/skills/`, runs headless
 - **`check.mjs`** — deterministic assertions on the artifacts (files, formats,
   actual command output). Checks with `required: false` are informational.
 - **`rubric.md`** (optional) — an LLM judge grades `config.judgeFiles` against the
-  rubric and returns `{score, pass, reasons}`.
+  rubric and returns per-dimension scores (`{scores, pass, worst, reasons}`).
+  `config.rubricSources` lists repo files (e.g. forge's own
+  `simplicity.md`) that are inlined verbatim as the standards the judge applies —
+  the judge enforces forge's published quality bar, not a paraphrase.
+- **judge-only cases** — `"agent": false` in config skips the agent run entirely;
+  check.mjs gets a `judgeRaw(prompt)` helper to run its own judge calls (used by
+  the calibration case).
 
 Transcripts and verdicts land in `evals/results/<stamp>-<case>/` (gitignored).
 Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
@@ -90,8 +96,18 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
 
 - **`forge-plan-structural`** — filled brief in, plan out. Deterministic: phase
   blocks carry Branch/Goal/Verifiable gate/Design markers, gates aren't bare
-  hygiene, ADRs have non-empty Alternatives, architecture.md replaced. Judge:
-  gates prove goals, phase 1 is a vertical slice, brief constraints shape phases.
+  hygiene, ADRs have non-empty Alternatives, architecture.md replaced — plus the
+  free economy-of-means script checks (no package installs on a zero-dep brief,
+  anti-pattern sweep from simplicity.md, because-clause on every parts-list
+  entry, phase-count ceiling). Judge: four dimensions (economy_of_means graded
+  against simplicity.md verbatim, gates_prove_goals, phase1_vertical_slice,
+  brief_fidelity), floor ≥ 7 each.
+- **`forge-plan-judge-calibration`** — judge-only, no agent run. A hand-written
+  golden plan vs a degraded twin with seeded bloat (plugin registry, YAML
+  config manager, event bus, abstract base class, deps on a zero-dep brief,
+  hygiene-only gates, a "foundation" phase 1). The judge must pick golden in
+  BOTH presentation orders and cite the seeded junk. If this fails, don't trust
+  any other judge verdict that day.
 - **`forge-review-planted-bugs`** — a phase branch with three seeded defects
   (command injection, committed `sk-live` secret, header-inclusive mean that
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes
@@ -143,3 +159,11 @@ no network.
 - **2026-07-11** · tier 2 `forge-wiki-maintain-planted-rot`: PASS — 6/6 rot
   detected, all four safe fixes applied, both --fix boundaries held (nested file
   not moved, broken link reported not deleted), no collateral damage.
+- **2026-07-11** · tier 2 `forge-plan-judge-calibration`: PASS — golden plan
+  picked in both presentation orders, margin 9 both times, all 7 seeded bloat
+  categories cited (led with the zero-dependency violation).
+- **2026-07-11** · tier 2 `forge-plan-structural` (first full live run, with the
+  economy script checks + rulebook judge): all required checks green, judge
+  9 · 9 · 9 · 10 across the four dimensions. One check initially misfired on a
+  legitimate table-format parts list — a parser bug, fixed and re-verified
+  offline against the same run's captured output.

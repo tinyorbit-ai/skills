@@ -46,5 +46,43 @@ export default async function check({ workdir }) {
   const index = existsSync(join(workdir, 'wiki/index.md')) ? readFileSync(join(workdir, 'wiki/index.md'), 'utf8') : '';
   add('index.md links the new ADRs', adrs.length > 0 && adrs.some((f) => index.includes(f.replace(/\.md$/, ''))), undefined, false);
 
+  // ---- economy-of-means script checks (no AI, no cost) ----
+  const planAndArch = plan + '\n' + arch;
+  const lines = planAndArch.split('\n');
+
+  // the brief demands zero runtime dependencies — the plan must not install any
+  const depHits = lines.filter((l) => /npm i(nstall)? +[a-z@]|pnpm add +[a-z@]|yarn add +[a-z@]/i.test(l));
+  add('zero-dependency constraint honored (no package installs planned)', depHits.length === 0, depHits[0]?.trim());
+
+  // simplicity.md's anti-patterns list, greppable; a line that rejects the
+  // pattern ("no plugin system", "rejected", "out of scope") doesn't count
+  const antiRe = /plugin|registry pattern|adapter layer|event bus|abstract (base )?class|config(uration)? (file|system|manager)|feature.flag|micro-?service/i;
+  const negRe = /\bno\b|\bnot\b|avoid|reject|out of scope|non-goal|denied|deferred|instead of|rather than|without/i;
+  const antiHits = lines.filter((l) => antiRe.test(l) && !negRe.test(l));
+  add('no speculative machinery (simplicity.md anti-pattern sweep)', antiHits.length === 0, antiHits[0]?.trim());
+
+  // every parts-list entry carries a reason (forge-plan §2b: the reason names
+  // the brief clause it serves). Accept either format seen in the wild:
+  //   - bullets:    "- part — reason with several words"
+  //   - table rows: "| part | reason with several words |"
+  const partsSection = arch.split(/#+\s*(?:the\s+)?parts list/i)[1]?.split(/\n#/)[0] ?? '';
+  const sectionLines = partsSection.split('\n');
+  const bullets = sectionLines.filter((l) => /^\s*[-*]\s+\S/.test(l));
+  const tableRows = sectionLines.filter((l) => /^\s*\|.*\|/.test(l) && !/^\s*\|[\s\-:|]+\|\s*$/.test(l)).slice(1); // drop header
+  const entries = bullets.length ? bullets : tableRows;
+  // "reason" bar: at least two words — a verbatim brief-clause quote counts
+  const justified = (l) => bullets.length
+    ? /[—–-]\s+\S+(\s+\S+){1,}/.test(l)
+    : (l.split('|')[2] ?? '').trim().split(/\s+/).filter(Boolean).length >= 2;
+  const unjustified = entries.filter((l) => !justified(l));
+  add(
+    'every parts-list entry carries a because-clause',
+    entries.length > 0 && unjustified.length === 0,
+    entries.length === 0 ? 'no parts-list entries found (bullets or table)' : unjustified[0]?.trim()
+  );
+
+  // a 1-surface CLI brief doesn't need a 7-phase plan
+  add('phase count proportional to the brief (≤ 6)', phases.length > 0 && phases.length <= 6, `found ${phases.length}`);
+
   return checks;
 }

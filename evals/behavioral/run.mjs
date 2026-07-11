@@ -93,25 +93,44 @@ function runAgent(workdir, task, config, transcriptPath) {
   return { transcript: out, agentError };
 }
 
+// One headless model call; returns raw text. Also handed to check.mjs so a case
+// can run its own judge calls (e.g. the judge-calibration case).
+function judgeRaw(prompt) {
+  try {
+    return execFileSync('claude', ['-p', prompt], { timeout: 300_000, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+  } catch (e) {
+    return `judge error: ${e.message?.slice(0, 120)}`;
+  }
+}
+
 function judge(caseDir, config, workdir) {
   const rubricPath = join(caseDir, 'rubric.md');
   if (!existsSync(rubricPath)) return null;
   const rubric = readFileSync(rubricPath, 'utf8');
+  // The project's own quality standards, verbatim — the judge grades against
+  // these, not against a paraphrase (config.rubricSources, repo-relative).
+  const standards = (config.rubricSources || [])
+    .filter((f) => existsSync(join(ROOT, f)))
+    .map((f) => `\n===== ${f} — the project's own standard, verbatim =====\n${readFileSync(join(ROOT, f), 'utf8')}`)
+    .join('\n');
   const artifacts = (config.judgeFiles || [])
     .filter((f) => existsSync(join(workdir, f)))
     .map((f) => `\n===== ${f} =====\n${readFileSync(join(workdir, f), 'utf8')}`)
     .join('\n');
   const prompt = [
-    'You are grading the output of an autonomous agent run against a rubric. Be strict; a generous grade defeats the eval.',
-    '', '## Rubric', rubric, '', '## Artifacts to grade', artifacts || '(expected artifacts are missing — grade accordingly)', '',
-    'Reply with ONLY a JSON object: {"score": <0-10>, "pass": <true|false>, "reasons": ["..."]}',
+    'You are grading the output of an autonomous agent run. Be strict; a generous grade defeats the eval.',
+    ...(standards ? ['', '## Standards to grade against (verbatim from the project — these outrank the rubric)', standards] : []),
+    '', '## Rubric (dimensions and pass floor)', rubric,
+    '', '## Artifacts to grade', artifacts || '(expected artifacts are missing — grade accordingly)', '',
+    'Reply with ONLY a JSON object: {"scores": {"<dimension>": <0-10>, ...}, "pass": <true|false>, "worst": "<dimension>", "reasons": ["..."]}',
+    'pass is true only if EVERY dimension meets the rubric\'s floor.',
   ].join('\n');
   try {
-    const out = execFileSync('claude', ['-p', prompt], { timeout: 300_000, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    const out = judgeRaw(prompt);
     const json = out.match(/\{[\s\S]*\}/)?.[0];
-    return json ? JSON.parse(json) : { score: 0, pass: false, reasons: ['judge returned no JSON'] };
+    return json ? JSON.parse(json) : { scores: {}, pass: false, reasons: ['judge returned no JSON'] };
   } catch (e) {
-    return { score: 0, pass: false, reasons: [`judge error: ${e.message?.slice(0, 100)}`] };
+    return { scores: {}, pass: false, reasons: [`judge error: ${e.message?.slice(0, 100)}`] };
   }
 }
 
@@ -122,7 +141,8 @@ let suiteFailed = false;
 for (const name of caseNames) {
   const caseDir = join(CASES_DIR, name);
   const config = JSON.parse(readFileSync(join(caseDir, 'config.json'), 'utf8'));
-  const task = readFileSync(join(caseDir, 'task.md'), 'utf8');
+  const skipAgent = config.agent === false; // judge-only cases (e.g. calibration) run no agent
+  const task = skipAgent ? '' : readFileSync(join(caseDir, 'task.md'), 'utf8');
   const caseResults = [];
 
   for (let i = 1; i <= runs; i++) {
@@ -132,7 +152,9 @@ for (const name of caseNames) {
     mkdirSync(runDir, { recursive: true });
     console.log(`  workdir: ${workdir}`);
 
-    const { transcript, agentError } = runAgent(workdir, task, config, join(runDir, 'transcript.jsonl'));
+    const { transcript, agentError } = skipAgent
+      ? { transcript: '', agentError: null }
+      : runAgent(workdir, task, config, join(runDir, 'transcript.jsonl'));
     if (agentError) console.log(`  agent: ${agentError}`);
 
     const checkModule = await import(join(caseDir, 'check.mjs'));
@@ -142,7 +164,7 @@ for (const name of caseNames) {
     };
     let checks = [];
     try {
-      checks = await checkModule.default({ workdir, transcript, exec });
+      checks = await checkModule.default({ workdir, transcript, exec, judgeRaw, root: ROOT });
     } catch (e) {
       checks = [{ name: 'check.mjs ran', pass: false, required: true, detail: e.message }];
     }
@@ -151,7 +173,12 @@ for (const name of caseNames) {
     }
 
     const verdict = judge(caseDir, config, workdir);
-    if (verdict) console.log(`  judge: score ${verdict.score}/10 · ${verdict.pass ? 'PASS' : 'FAIL'} · ${verdict.reasons?.join(' · ')}`);
+    if (verdict) {
+      const scores = verdict.scores && Object.keys(verdict.scores).length
+        ? Object.entries(verdict.scores).map(([k, v]) => `${k} ${v}`).join(' · ')
+        : `score ${verdict.score ?? '?'}/10`;
+      console.log(`  judge: ${scores} · ${verdict.pass ? 'PASS' : 'FAIL'} · ${verdict.reasons?.join(' · ')}`);
+    }
 
     const pass = !agentError && checks.every((c) => c.pass || c.required === false) && (verdict ? verdict.pass : true);
     caseResults.push({ run: i, pass, agentError, checks, judge: verdict, workdir: keep ? workdir : undefined });

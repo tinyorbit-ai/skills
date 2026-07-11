@@ -164,11 +164,14 @@ added — every runner takes `--all` to widen). Full docs + add-a-case guide:
    evolves in lockstep.
 
 Behavioral cases: `forge-plan-structural` (brief → plan; gates must prove goals,
-not hygiene), `forge-review-planted-bugs` (three seeded defects; recall + mandated
-auto-fixes + review-record bookkeeping — validated live at 3/3), and the wiki
-pair — `forge-wiki-ingest-living-article` (two-source ingest; second source must
-Timeline-merge, not duplicate or overwrite) and `forge-wiki-maintain-planted-rot`
-(six seeded rot items; recall + the --fix boundary: safe fixes applied,
+not hygiene, plus free economy-of-means script checks; the judge grades against
+forge's own `simplicity.md` verbatim, four dimensions, floor ≥ 7),
+`forge-plan-judge-calibration` (judge-only: golden vs seeded-bloat plan, both
+orders — if the judge can't tell them apart, don't trust its other verdicts),
+`forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
+validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
+(second source must Timeline-merge, not duplicate or overwrite) and
+`forge-wiki-maintain-planted-rot` (six seeded rot items; safe fixes applied,
 structural ones reported-never-touched). `_smoke` self-tests the harness.
 
 ## Command reference
