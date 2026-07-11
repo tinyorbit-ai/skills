@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Tier 0 — static validation of every SKILL.md in the repo.
+// Tier 0 — static validation of SKILL.md files.
+// Scope: the forge suite (forge + forge-*) for now; pass --all to validate every skill.
 // Deterministic, no tokens. Run: node evals/static/validate.mjs
 // Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check mandatory.
 
@@ -23,11 +24,14 @@ function skillDirs(base, internal = false) {
     .map((d) => ({ dir: join(base, d), name: basename(d), internal }));
 }
 
+const allScope = process.argv.includes('--all') || process.env.EVALS_SCOPE === 'all';
+const inScope = (name) => allScope || name === 'forge' || name.startsWith('forge-');
+
 const skills = [
   ...skillDirs(SKILLS_DIR),
   ...skillDirs(join(SKILLS_DIR, '.experimental'), true),
   ...skillDirs(join(SKILLS_DIR, '.system'), true),
-];
+].filter((s) => inScope(s.name));
 
 if (skills.length === 0) {
   console.error('No skills found — is this running from the repo root?');
@@ -122,6 +126,7 @@ for (const s of publicSkills) {
   if (!indexed.has(s.name)) fail(s.name, 'missing from the CLAUDE.md skills index table');
 }
 for (const name of indexed) {
+  if (!inScope(name)) continue;
   if (!publicSkills.some((s) => s.name === name)) fail(name, 'in the CLAUDE.md skills index but has no folder in skills/');
 }
 
@@ -139,7 +144,7 @@ try {
 }
 
 // Report
-console.log(`Checked ${skills.length} skills (${publicSkills.length} public).`);
+console.log(`Checked ${skills.length} skills (${publicSkills.length} public, scope: ${allScope ? 'all' : 'forge suite'}).`);
 for (const w of warnings) console.log(`  WARN  ${w}`);
 for (const f of failures) console.log(`  FAIL  ${f}`);
 if (failures.length === 0) {

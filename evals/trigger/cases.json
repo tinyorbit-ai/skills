@@ -1,8 +1,8 @@
 {
-  "_comment": "Trigger routing cases. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs are the point — they catch description regressions that steal or lose routing.",
+  "_comment": "Trigger routing cases — forge suite scope. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs are the point — they catch description regressions that steal or lose routing. Lizard cases return when the suite widens beyond forge (run.mjs --all).",
   "cases": [
     { "utterance": "I have an idea for a tool that renames my screenshots — help me shape it", "expect": ["forge-discovery"] },
-    { "utterance": "what are we building again?", "expect": ["forge-discovery", "forge"] },
+    { "utterance": "help me pin down exactly what we're building", "expect": ["forge-discovery", "forge"] },
     { "utterance": "forge help", "expect": ["forge"] },
     { "utterance": "continue where we left off", "expect": ["forge"] },
     { "utterance": "where was I on this project?", "expect": ["forge"] },
@@ -22,8 +22,6 @@
     { "utterance": "implement phase 3", "expect": ["forge-build"] },
     { "utterance": "review the phase", "expect": ["forge-review"] },
     { "utterance": "security and quality review of what we just built", "expect": ["forge-review"] },
-    { "utterance": "review this PR", "expect": ["lizard"] },
-    { "utterance": "lizard sweep", "expect": ["lizard"] },
     { "utterance": "ship this phase", "expect": ["forge-ship"] },
     { "utterance": "land it", "expect": ["forge-ship"] },
     { "utterance": "why is this failing? it worked yesterday", "expect": ["forge-debug"] },

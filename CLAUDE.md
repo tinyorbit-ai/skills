@@ -89,15 +89,20 @@ Rules (from the canonical create-skill guide — keep one in this repo as refere
 
 ### Update an existing skill
 
-1. Edit the skill in place. Bump behavior, fix instructions, extend references.
-2. Re-validate: `node evals/static/validate.mjs`; if the `description` changed, also
-   `node evals/trigger/run.mjs`; if the body changed substantively, the matching
-   behavioral case (see **Evals**).
-3. Push. Consumers pull the change with:
+Follow the eval-gated loop (see **Evals**): baseline → implement → re-run → update
+the evals in the same change.
+
+1. **Baseline:** run the relevant eval tiers on the current state, record scores.
+2. Edit the skill in place. Bump behavior, fix instructions, extend references.
+3. **Re-run** the same tiers — equal-or-better than baseline is the bar; a drop is
+   a regression to fix before pushing.
+4. **Update the evals** alongside: new/adjusted trigger cases for description
+   changes, updated behavioral checks (or a new case) for behavior changes.
+5. Push. Consumers pull the change with:
    ```bash
    npx skills update <skill-name>        # or: npx skills update (all)
    ```
-4. Skills are not versioned by the CLI — `update` always pulls latest from `main`.
+6. Skills are not versioned by the CLI — `update` always pulls latest from `main`.
    For breaking changes, note it in the commit message and the index table.
 
 ### Remove a skill
@@ -127,24 +132,41 @@ Two independent mechanisms — use **both** for true WIP:
 Also use `metadata.internal: true` for repo-tooling skills (linting/validating/
 scaffolding skills) so they don't pollute discovery — these can stay in `skills/.system/`.
 
-## Evals
+## Evals — the edit loop for every skill change
 
-Skills are prompts, so `evals/` tests them in three tiers — run the cheap ones
-constantly, the expensive one when a skill's behavior changed. Full docs +
-add-a-case guide: `evals/README.md`.
+Skills are prompts, so `evals/` tests them in three tiers. There is **no CI** —
+the evals are part of *editing skills in this repo*, run by whoever (human or
+agent) is making the change. **Scope: the forge suite only, for now** (`forge` +
+`forge-*`; lizard and future non-forge skills are excluded until deliberately
+added — every runner takes `--all` to widen). Full docs + add-a-case guide:
+`evals/README.md`.
 
-| Tier | Command | Proves | Cost / when |
+| Tier | Command | Proves | Cost |
 |---|---|---|---|
-| 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free — every push (CI) |
-| 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies — after any description edit |
-| 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens — after body changes |
+| 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
+| 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies |
+| 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens, minutes |
+
+**The loop (mandatory when asked to change a forge-suite skill):**
+
+1. **Baseline first.** Before touching anything, run the relevant tiers against
+   the current state and record the scores: tier 0 always; tier 1 if any
+   `description` will change; the touched skill's tier-2 case if one exists
+   (`--runs 3` for anything you'll compare).
+2. **Implement** the change.
+3. **Re-run the same tiers.** Compare against the baseline — any drop is a
+   regression to fix before pushing. Equal-or-better scores are the merge bar.
+4. **Update the evals with the change.** A skill edit that alters behavior must
+   land with its eval delta in the same change: description edits add/adjust
+   trigger cases; body/contract edits update the behavioral case's checks or add
+   a new case; a real-world miss (routing or review) becomes a permanent case.
+   Evals and skills drift apart otherwise — the suite only stays honest if it
+   evolves in lockstep.
 
 Behavioral pilot cases: `forge-plan-structural` (brief → plan; gates must prove
 goals, not hygiene) and `forge-review-planted-bugs` (three seeded defects; grades
-recall + the mandated auto-fixes + review-record bookkeeping). `_smoke` self-tests
-the harness plumbing. When a routing miss or a review miss happens in real use,
-turn it into a case — the eval suites grow like regression tests. CI: static runs
-on every push/PR; tiers 1–2 are `workflow_dispatch` (they spend tokens).
+recall + the mandated auto-fixes + review-record bookkeeping — validated live at
+3/3 recall, all fixes applied). `_smoke` self-tests the harness plumbing.
 
 ## Command reference
 

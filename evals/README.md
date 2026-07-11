@@ -1,20 +1,41 @@
 # Evals — three tiers, each costs more and tells you more
 
 Skills are prompts, so "does it work" means different things at different layers.
-Run the cheap tiers constantly; run the expensive one when a skill's behavior
-changed.
+There is deliberately **no CI**: the evals are part of the skill-editing loop in
+this repo, run by whoever (human or agent) is making the change.
+
+**Scope: the forge suite only, for now** — `forge` + `forge-*`. Lizard and any
+future non-forge skills are excluded until deliberately added; `validate.mjs` and
+`trigger/run.mjs` both accept `--all` (or `EVALS_SCOPE=all`) to widen, and the
+lizard trigger cases return with that widening.
 
 | Tier | What it proves | Cost | When |
 |---|---|---|---|
-| **0 static** | frontmatter parses, discovery works, references resolve, index in sync | free, seconds | every push (CI) |
-| **1 trigger** | user utterances route to the right skill from `description` alone | ~45 haiku calls, pennies | after editing any `description` |
-| **2 behavioral** | the skill, run end-to-end headless, produces its contracted artifacts | real tokens, minutes/case | after editing a skill's body |
+| **0 static** | frontmatter parses, discovery works, references resolve, index in sync | free, seconds | every change, before pushing |
+| **1 trigger** | user utterances route to the right skill from `description` alone | ~45 haiku calls, pennies | when any `description` changes |
+| **2 behavioral** | the skill, run end-to-end headless, produces its contracted artifacts | real tokens, minutes/case | when a skill's body changes |
+
+## The edit loop (how these are actually used)
+
+When changing a skill:
+
+1. **Baseline** — run the relevant tiers on the *current* state and record the
+   scores (tier 0 always; tier 1 for description changes; the touched skill's
+   tier-2 case, `--runs 3` for anything you'll compare — single runs are
+   stochastic).
+2. **Implement** the change.
+3. **Re-run** the same tiers and compare. Equal-or-better than baseline is the
+   bar; any drop is a regression to fix before pushing.
+4. **Update the evals in the same change** — trigger cases for description edits,
+   behavioral checks/cases for contract edits, and every real-world miss becomes
+   a permanent case. The suite only stays honest if it evolves in lockstep with
+   the skills.
 
 ## Tier 0 — static validation
 
 ```bash
-node evals/static/validate.mjs                     # local (CLI discovery check optional)
-EVALS_REQUIRE_CLI=1 node evals/static/validate.mjs # CI mode (discovery check mandatory)
+node evals/static/validate.mjs                     # discovery check skipped if npx fails
+EVALS_REQUIRE_CLI=1 node evals/static/validate.mjs # strict — discovery check mandatory
 ```
 
 Catches the class of failure that has actually shipped: the unquoted `": "` in a
@@ -31,12 +52,14 @@ node evals/trigger/run.mjs --dry-run    # print the assembled prompt, no calls
 node evals/trigger/run.mjs --only lizard
 ```
 
-Reads every live `description` from `skills/*/SKILL.md`, shows a model ONLY that
-catalog plus one utterance, and asserts it names the expected skill (or `none`).
-Defaults to Haiku deliberately — a weak router is a stricter test of description
-quality. Cases live in `trigger/cases.json`; `expect` is a list, so genuinely
-ambiguous routings (e.g. "build the next phase" → forge-build or forge) accept
-either. Threshold: 90% (`EVAL_TRIGGER_THRESHOLD`).
+Reads every live in-scope `description` from `skills/*/SKILL.md`, shows a model
+ONLY that catalog plus one utterance, and asserts it names the expected skill (or
+`none`). Defaults to Haiku deliberately — a weak router is a stricter test of
+description quality. Cases live in `trigger/cases.json`; `expect` is a list, so
+genuinely ambiguous routings (e.g. "build the next phase" → forge-build or forge)
+accept either. Near-miss sibling pairs (harden-design vs polish, harden-scope vs
+ambition, plan-time vs runtime personas) are the highest-value cases. Threshold:
+90% (`EVAL_TRIGGER_THRESHOLD`).
 
 **Add a case** whenever a description edit ships or a routing miss happens in real
 use — the miss becomes a case, like a regression test.
@@ -92,7 +115,12 @@ Hermeticity rules: zero-dependency fixtures (no `npm install`), `reviewer: none`
 in `wiki/.forge/config.yaml` so forge-review doesn't shell out to codex/gemini,
 no network.
 
-## CI
+## Recorded baselines
 
-`.github/workflows/evals.yml` — static on every push/PR; trigger and behavioral
-are `workflow_dispatch` (they spend tokens; needs `ANTHROPIC_API_KEY` secret).
+- **2026-07-11** · tier 1 (forge-only scope, 41 cases): 40/41 (98%) on Haiku —
+  the miss was a deliberately soft utterance since reworded ("what are we
+  building again?" → "help me pin down exactly what we're building", verified
+  routing to forge-discovery).
+- **2026-07-11** · tier 2 `forge-review-planted-bugs`: PASS — 3/3 planted bugs
+  detected, all mandated fixes applied (gate 82.5, tests green, secret gone),
+  review record + learnings written.
