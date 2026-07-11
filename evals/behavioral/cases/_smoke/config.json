@@ -1,0 +1,6 @@
+{
+  "_comment": "Harness plumbing self-test — no skills, cheap model, seconds not minutes. Run this first when the harness misbehaves.",
+  "skills": [],
+  "model": "claude-haiku-4-5-20251001",
+  "timeoutMinutes": 5
+}

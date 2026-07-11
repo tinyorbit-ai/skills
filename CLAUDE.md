@@ -82,7 +82,7 @@ Rules (from the canonical create-skill guide — keep one in this repo as refere
 2. Write the frontmatter `description` first (it's the trigger) then the body.
 3. Keep `SKILL.md` < 200 lines; push detail into `references/`, `scripts/`, `assets/`.
 4. Validate locally before pushing:
-   - `npx skills add . --list` — confirms the skill is discovered & frontmatter parses.
+   - `node evals/static/validate.mjs` — frontmatter, discovery, references, index sync (see **Evals**).
    - Install it locally and dry-run the workflow it describes.
 5. Commit one skill per commit where practical. Push to `main` — it's now live.
 6. Add a row to the **Skills index** table below.
@@ -90,7 +90,9 @@ Rules (from the canonical create-skill guide — keep one in this repo as refere
 ### Update an existing skill
 
 1. Edit the skill in place. Bump behavior, fix instructions, extend references.
-2. Re-validate with `npx skills add . --list` and a local install.
+2. Re-validate: `node evals/static/validate.mjs`; if the `description` changed, also
+   `node evals/trigger/run.mjs`; if the body changed substantively, the matching
+   behavioral case (see **Evals**).
 3. Push. Consumers pull the change with:
    ```bash
    npx skills update <skill-name>        # or: npx skills update (all)
@@ -124,6 +126,25 @@ Two independent mechanisms — use **both** for true WIP:
 
 Also use `metadata.internal: true` for repo-tooling skills (linting/validating/
 scaffolding skills) so they don't pollute discovery — these can stay in `skills/.system/`.
+
+## Evals
+
+Skills are prompts, so `evals/` tests them in three tiers — run the cheap ones
+constantly, the expensive one when a skill's behavior changed. Full docs +
+add-a-case guide: `evals/README.md`.
+
+| Tier | Command | Proves | Cost / when |
+|---|---|---|---|
+| 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free — every push (CI) |
+| 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies — after any description edit |
+| 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens — after body changes |
+
+Behavioral pilot cases: `forge-plan-structural` (brief → plan; gates must prove
+goals, not hygiene) and `forge-review-planted-bugs` (three seeded defects; grades
+recall + the mandated auto-fixes + review-record bookkeeping). `_smoke` self-tests
+the harness plumbing. When a routing miss or a review miss happens in real use,
+turn it into a case — the eval suites grow like regression tests. CI: static runs
+on every push/PR; tiers 1–2 are `workflow_dispatch` (they spend tokens).
 
 ## Command reference
 

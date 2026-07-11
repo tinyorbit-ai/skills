@@ -1,0 +1,6 @@
+{
+  "_comment": "Planted-defect recall — three seeded bugs: (1) command injection via execSync string concat, (2) hardcoded sk-live secret, (3) mean divides by line count including the header (66 instead of 82.5, so the phase gate fails). Detection of ≥2/3 required; the gate-breaking mean bug must be found AND fixed for the review's own terminal block to pass.",
+  "skills": ["forge-review", "forge"],
+  "branch": "phase/1-csv-stats",
+  "timeoutMinutes": 30
+}

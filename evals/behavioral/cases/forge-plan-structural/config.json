@@ -1,0 +1,5 @@
+{
+  "skills": ["forge-plan", "forge"],
+  "judgeFiles": ["wiki/plan.md", "wiki/brief.md"],
+  "timeoutMinutes": 25
+}
