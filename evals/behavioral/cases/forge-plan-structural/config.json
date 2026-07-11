@@ -1,0 +1,6 @@
+{
+  "skills": ["forge-plan", "forge"],
+  "judgeFiles": ["wiki/plan.md", "wiki/architecture.md", "wiki/brief.md"],
+  "rubricSources": ["skills/forge/references/simplicity.md"],
+  "timeoutMinutes": 25
+}

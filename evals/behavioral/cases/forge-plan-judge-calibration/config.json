@@ -1,0 +1,6 @@
+{
+  "_comment": "Judge-only case, no agent run. Two hand-written plans for the same brief: golden (disciplined) vs degraded (seeded bloat: foundation phase with no vertical slice, typecheck/lint/test gates, plugin registry, ConfigManager YAML, EventEmitter bus, abstract FileOperation base class, exifr+commander deps on a zero-dep brief). The judge must pick golden in BOTH presentation orders and cite the seeded bloat. If this fails, no other judge verdict should be trusted.",
+  "agent": false,
+  "skills": [],
+  "timeoutMinutes": 10
+}

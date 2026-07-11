@@ -1,0 +1,3 @@
+# forge config (eval fixture) — third-party reviewer disabled so the eval is
+# hermetic; forge-review must disclose the skipped pass in its receipts.
+reviewer: none

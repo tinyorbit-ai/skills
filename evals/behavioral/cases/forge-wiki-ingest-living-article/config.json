@@ -1,0 +1,5 @@
+{
+  "_comment": "Living-article engine test — source A creates the article (Compiled); source B is a follow-up that changes a fact (offsite Sept 12 → Sept 26) and MUST merge as a Timeline append (Refined/Contradicted), not a duplicate article, not an overwrite.",
+  "skills": ["forge-wiki", "forge"],
+  "timeoutMinutes": 20
+}
