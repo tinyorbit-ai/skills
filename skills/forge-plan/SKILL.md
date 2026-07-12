@@ -132,6 +132,13 @@ A precisely described manual check with an observable result is a valid gate; "i
 works" / "looks right" is not. Match rigor to the project (a prototype's gate can
 be "the script runs and prints X"), but the goal-anchor rule holds at every level.
 
+Second self-check — the parts-list rule (§2b) extended to **behaviors**: every
+behavior a phase's Goal, gate, or Work bullets introduce — an automatic state
+transition, a derived default, a new interface surface or config knob — must
+trace to a brief clause or a linked ADR. A behavior that traces to neither is
+invented scope no matter how helpful it feels: cut it, or record it as an ADR so
+the user owns the decision. "Plausibly what they'd want" is not a trace.
+
 ### 5. Write `wiki/plan.md`
 
 Replace the stub: header (base branch + the discipline reminder from the template),
@@ -178,3 +185,5 @@ Then state the phase count, phase 1's branch + gate, which phases carry
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
   should be as thorough as the build needs (`references/simplicity.md`).
+- Nor behaviors: anything a Goal, gate, or Work bullet *does* that neither the
+  brief nor an ADR asked for is invented scope (§4's traceability self-check).
