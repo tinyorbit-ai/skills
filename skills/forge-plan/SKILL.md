@@ -74,9 +74,11 @@ For each *non-trivial* one:
 - Lock it with AskUserQuestion in the **Decision Brief** shape (forge suite's
   `references/question-style.md`): framing names the concrete tradeoff;
   recommended option carries the *why* and the evidence that would flip it.
-- Write an ADR: `wiki/decisions/NNNN-slug.md` (Context · Decision · Why ·
-  Alternatives · Consequences). Link it from `wiki/index.md`. Trivial choices don't
-  need an ADR — reserve them for decisions a future reader would ask "why?" about.
+- Write an ADR: `wiki/decisions/NNNN-slug.md` with these section headings
+  verbatim — Context · Decision · Why · **Alternatives considered** ·
+  Consequences ("Options weighed" and friends break the wiki's health greps).
+  Link it from `wiki/index.md`. Trivial choices don't need an ADR — reserve them
+  for decisions a future reader would ask "why?" about.
 
 ### 4. Decompose into phases
 
@@ -108,9 +110,10 @@ For **every phase**, specify:
 The **Design:** marker routes the design cycle: `explore` means the surface's
 shape is open and `forge` will run `forge-design-explore` (which locks an ADR and
 flips the marker) before this phase can build. `none` for phases with no UI.
-The marker is machine-read by `forge`'s router, so its value is exactly one of
-the four forms above (`locked via [[decisions/NNNN-…]]` names the ADR); a
-free-text variant ("follow the receipt from phase 4") breaks the design gate.
+The marker is machine-read by `forge`'s router: its value is **exactly one of
+the four forms above — never prose**. "Follow the design an earlier phase
+locked" is spelled `locked via [[decisions/NNNN-…]]`, not "follow the phase-N
+ADR"; there is no fifth form. Free-text here breaks the design gate.
 
 The **verifiable gate** is the contract, and it must assert the **phase Goal's own
 observable** — name the command and the expected output that only this phase's
