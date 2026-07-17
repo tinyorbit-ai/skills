@@ -113,6 +113,16 @@ the evals in the same change.
    npx skills remove <skill-name>
    ```
 
+### Lizard evals
+
+`evals/lizard/` (repo root — never shipped with installs) is the regression suite
+for the lizard skill: planted-defect PRs in `tinyorbit-ai/lizard-fixtures` graded
+against `cases.json`, a deterministic format linter, and a field lint over real
+`~/.lizard` history. **Before pushing any change to `skills/lizard/`, run the
+smoke set** — `evals/lizard/bin/run.sh` then `bin/grade.mjs --run-id <id>` — and
+check the scorecard (false-🦎 must be 0). One-time setup:
+`evals/lizard/fixtures/bootstrap.sh`. Details in `evals/lizard/README.md`.
+
 ### Experimental / work-in-progress skills
 
 Two independent mechanisms — use **both** for true WIP:
