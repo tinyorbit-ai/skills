@@ -99,8 +99,10 @@ itself?". If the argument holds, it becomes a finding; if not, stamp.
   post-merge history first (reverts, hotfixes, incident follow-ups), grade the
   original outcome, write blind-spots (`references/loop-mode.md`). Never posts.
 - Flags — `--deep` / `--quick` override triage; `--dry-run` reports the review in the
-  session, posts nothing, and ends by printing the exact would-be submission as raw
-  JSON between `LIZARD_PAYLOAD_BEGIN` / `LIZARD_PAYLOAD_END` markers
+  session, posts nothing, and ends by printing the would-be submission between
+  `LIZARD_PAYLOAD_BEGIN` / `LIZARD_PAYLOAD_END` marker lines as ONE raw JSON object,
+  always exactly `{"event":"APPROVE|COMMENT|REQUEST_CHANGES","body":"…","comments":[…]}`
+  (plus `"comment": true` on a stamp-as-comment) — never any other shape
   (`references/github-review-api.md`).
 
 Session mode may read the repo through the current checkout; with no local checkout,
