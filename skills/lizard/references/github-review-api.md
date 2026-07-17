@@ -274,3 +274,26 @@ gh api --method PUT \
   "repos/<owner>/<repo>/pulls/<number>/reviews/<review-id>/dismissals" \
   -f message="duplicate lizard run — the earlier review stands" -f event="DISMISS"
 ```
+
+## Dry-run payload
+
+`--dry-run` (`SKILL.md`) reports the review in the session, posts nothing, and ends
+by printing the exact would-be submission as raw JSON between two marker lines:
+
+```text
+LIZARD_PAYLOAD_BEGIN
+{"event":"APPROVE|COMMENT|REQUEST_CHANGES","body":"<review body>","comments":[{"path":"...","line":N,"side":"RIGHT","body":"..."}]}
+LIZARD_PAYLOAD_END
+```
+
+The JSON mirrors the review POST assembled above — `event`, the full `body` (stamp
+or `Why:` block, then receipts and the metadata line), and every inline `comments`
+entry with its verified anchor. For a self-authored stamp-as-comment the `event` is
+`APPROVE` with an added `"comment": true` field, marking that it posts as an issue
+comment rather than a formal review. The two marker lines are the parse contract —
+print nothing between them but the single JSON object.
+
+The envelope never varies. It is not the raw endpoint POST: a stamp-as-comment
+still prints `"event": "APPROVE"` with `"comment": true`, not the bare
+`{"body": …}` an issue-comment create would take, and no other keys or structures
+(`would_post`, `submissions`, `endpoint`, …) are ever valid between the markers.

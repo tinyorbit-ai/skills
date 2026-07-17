@@ -1,0 +1,13 @@
+{
+  "event": "APPROVE",
+  "comment": true,
+  "body": "🦎\n\n<details>\n<summary>🔍 lizard receipts — what was checked</summary>\n\n| | |\n|---|---|\n| depth | T2 standard — full criteria, single brain, refutation run |\n| criteria | correctness ✓ · performance ✓ · security ✓ · tests ✓ · economy ✓ |\n| findings | 1 nit (naming), inline — non-diluting |\n\n</details>\n\n<!-- lizard:v1 verdict=go tier=standard adversary=none head=9fb2ddf1 diff=patch-id:abc123 context=sha256:def456 -->\n",
+  "comments": [
+    {
+      "path": "src/orders.ts",
+      "line": 42,
+      "side": "RIGHT",
+      "body": "**nit — Name reads better as `orderTotal`**\n\n**Why:** `t` is opaque at the call site; a descriptive name saves the next reader a lookup.\n\n**Fix:** rename `t` to `orderTotal`.\n\n```suggestion\nconst orderTotal = sum(order.lineItems)\n```\n"
+    }
+  ]
+}

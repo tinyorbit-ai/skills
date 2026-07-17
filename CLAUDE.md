@@ -137,9 +137,9 @@ scaffolding skills) so they don't pollute discovery — these can stay in `skill
 Skills are prompts, so `evals/` tests them in three tiers. There is **no CI** —
 the evals are part of *editing skills in this repo*, run by whoever (human or
 agent) is making the change. **Scope: the forge suite only, for now** (`forge` +
-`forge-*`; lizard and future non-forge skills are excluded until deliberately
-added — every runner takes `--all` to widen). Full docs + add-a-case guide:
-`evals/README.md`.
+`forge-*`; lizard has its own harness — see **Lizard** below; other non-forge
+skills are excluded until deliberately added — every runner takes `--all` to
+widen). Full docs + add-a-case guide: `evals/README.md`.
 
 | Tier | Command | Proves | Cost |
 |---|---|---|---|
@@ -173,6 +173,17 @@ validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and
 `forge-wiki-maintain-planted-rot` (six seeded rot items; safe fixes applied,
 structural ones reported-never-touched). `_smoke` self-tests the harness.
+
+### Lizard
+
+`evals/lizard/` is lizard's own regression suite (separate machinery — a PR
+reviewer is graded on verdicts, not artifacts): planted-defect PRs in
+`tinyorbit-ai/lizard-fixtures` graded against `cases.json`, a deterministic
+format linter, and a field lint over real `~/.lizard` history. **Before pushing
+any change to `skills/lizard/`, run the smoke set** —
+`evals/lizard/bin/run.sh` then `bin/grade.mjs --run-id <id>` — and check the
+scorecard (false-🦎 must be 0). One-time setup:
+`evals/lizard/fixtures/bootstrap.sh`. Details in `evals/lizard/README.md`.
 
 ## Command reference
 

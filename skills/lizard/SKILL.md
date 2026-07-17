@@ -99,7 +99,11 @@ itself?". If the argument holds, it becomes a finding; if not, stamp.
   post-merge history first (reverts, hotfixes, incident follow-ups), grade the
   original outcome, write blind-spots (`references/loop-mode.md`). Never posts.
 - Flags — `--deep` / `--quick` override triage; `--dry-run` reports the review in the
-  session without posting anything.
+  session, posts nothing, and ends by printing the would-be submission between
+  `LIZARD_PAYLOAD_BEGIN` / `LIZARD_PAYLOAD_END` marker lines as ONE raw JSON object,
+  always exactly `{"event":"APPROVE|COMMENT|REQUEST_CHANGES","body":"…","comments":[…]}`
+  (plus `"comment": true` on a stamp-as-comment) — never any other shape
+  (`references/github-review-api.md`).
 
 Session mode may read the repo through the current checkout; with no local checkout,
 use the shared object store from `references/loop-mode.md` — depth-1, unfiltered,
@@ -166,8 +170,10 @@ mid-review. Record the tier in the receipts and metadata.
 
 ## Home
 
-Durable state lives in `~/.lizard/`, never `/tmp`. Repo keys are lowercase-normalized
-`<host>/<owner>/<repo>` so records never scatter across aliases:
+Durable state lives in `~/.lizard/`, never `/tmp` — unless `LIZARD_HOME` is set, in
+which case that path replaces `~/.lizard` everywhere below. Repo keys are
+lowercase-normalized `<host>/<owner>/<repo>` — the host a full hostname (`github.com`,
+never a bare `github`) — so records never scatter across host spellings or aliases:
 
 ```text
 ~/.lizard/ledger/<host>/<owner>/<repo>.md    # review records + miss records

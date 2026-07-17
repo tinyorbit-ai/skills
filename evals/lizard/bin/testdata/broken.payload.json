@@ -1,0 +1,11 @@
+{
+  "event": "APPROVE",
+  "body": "🦎 looks good to me, shipping!\n\nReceipts:\n- checked the diff\n- ran the tests in my head\n",
+  "comments": [
+    {
+      "path": "src/orders.ts",
+      "side": "RIGHT",
+      "body": "This variable is bad. 🦎 rename it.\n"
+    }
+  ]
+}

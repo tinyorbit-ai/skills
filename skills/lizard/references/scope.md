@@ -86,3 +86,21 @@ surrounding call sites, and existing human/bot review threads. Ask: “What bloc
 already present on this head would otherwise appear only after these fixes?” Verify
 each candidate independently and drop it if it does not survive. This promises
 completeness for the current head, not immunity from bugs introduced by future fixes.
+
+## Author disputes
+
+An author's reply to a finding is evidence, not noise. When the author disputes a
+finding — pre-existing, intended, handled elsewhere — verify the claim before the
+next verdict: run the base branch check for "pre-existing", read the pointed-to code
+for "handled elsewhere".
+
+If the claim holds, concede plainly and reclassify — a blocking `introduced` finding
+the author proves `pre-existing` becomes a non-blocking follow-up — then withdraw the
+blocker in the next review. Never silently re-assert it.
+
+If the claim fails, hold the finding and answer with the specific trace that
+contradicts it. Respond to the author's argument, not past it.
+
+Never repeat a disputed finding verbatim across rounds: each round concedes, narrows,
+or strengthens the proof. Severity never overrides a verified dispute; causality
+still governs.
