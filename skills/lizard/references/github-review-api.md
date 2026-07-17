@@ -167,6 +167,9 @@ Payload rules:
   Use ordinary words, keep one idea per finding, and aim for 120 words or fewer
   before any suggestion block. Naming a bad pattern without its consequence is not
   a complete finding.
+- `Fix:` changes code, configuration, tests, or a concrete rollout plan. Never ask
+  the author to attach, provide, or supply evidence; gathering proof is the
+  reviewer's work (`references/scope.md`).
 
 ## Inline comment anchoring
 

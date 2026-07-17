@@ -132,7 +132,8 @@ When a prior lizard review exists and the diff has genuinely changed:
 
 1. **Audit prior findings first** — for each blocking finding in the last lizard
    review, check the current head: resolved or still open? Record both lists in the
-   receipts. Never repost a still-open inline thread; reference the existing thread.
+   receipts. Label new findings as pre-existing misses, author-fix regressions, or
+   lizard-fix regressions. Never imply that an old miss was caused by the new push.
 2. **Review the delta** — fetch what changed since the last reviewed head:
 
    ```bash
@@ -142,4 +143,10 @@ When a prior lizard review exists and the diff has genuinely changed:
    Review the delta's hunks at full depth; re-read full files only where the delta
    touches them. The full-diff pass is only needed again when the delta itself would
    classify as T3 on its own.
-3. Stamp when every prior blocker is resolved and the delta introduces nothing new.
+3. Apply the scope-ratchet circuit breaker in `scope.md`. If the delta is mostly
+   machinery requested by lizard, first test removing or narrowing that machinery.
+4. If the only result is still-open prior blockers and the delta does not touch their
+   causal path, post nothing on GitHub. Remove the reaction and append an
+   `unchanged-blocked` ledger record. This includes merge-only heads whose feature
+   diff and relevant context are unchanged.
+5. Stamp when every prior blocker is resolved and the delta introduces nothing new.

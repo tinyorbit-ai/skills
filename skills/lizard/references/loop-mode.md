@@ -28,6 +28,9 @@ already-reviewed PR nearly free.
 - **Debounce 10 minutes** — skip a PR whose last push is less than 10 minutes old; a
   flurry of fixup pushes costs one review, not five. (`gh pr view --json
   headRefOid,updatedAt` plus the head commit's date.)
+- After a blocking review, wait for 30 minutes of push quiet before an automated
+  re-review unless a human explicitly requests it. Review the author's completed
+  fix set, not every intermediate commit.
 - **Max 3 full T3 fan-outs per PR per day** — count from today's ledger entries.
   After that, delta-only re-reviews (`references/dedup.md`); the full fan-out returns
   only if the delta itself would classify T3 on its own.
@@ -106,6 +109,13 @@ Confidence is earned, not declared. Two mechanisms:
 
 ```text
 2026-07-04 PR#4242 verdict=go tier=standard adversary=none head=9fb2ddf
+```
+
+When a changed head has only untouched, still-open prior blockers, post nothing and
+record the silent outcome instead:
+
+```text
+2026-07-04 PR#4242 verdict=unchanged-blocked head=9fb2ddf prior=2
 ```
 
 **Miss detection** — once per sweep per repo, check recently merged PRs that lizard

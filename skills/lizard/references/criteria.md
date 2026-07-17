@@ -4,12 +4,10 @@ The seven groups behind every verdict. All seven apply at every tier; the tier o
 changes how much machinery digs into them. The receipts block records each group with
 a pass/fail (e.g. `performance (n+1 ✓, complexity ✓)`).
 
-Apply findings with evidence: cite file:line from the diff, for convention claims cite
-an in-repo precedent, and for behavioral claims cite the code you traced. Do not invent
-issues — a clean PR gets a clean stamp. Two counterweights (SKILL.md): on high-risk
-surfaces **absence of proof is itself a finding**, and on the finding side **not proven
-broken is not broken** — a correctness claim you can't ground in code you read drops to
-a hedged question, never a major.
+Apply `scope.md` before severity. Cite file:line from the diff, an in-repo precedent
+for convention claims, and the code traced for behavior. Do not invent issues — a
+clean PR gets a clean stamp. Evidence gathering belongs to the reviewer. A claim you
+cannot ground drops to a hedged question, never a major or an author evidence chore.
 
 ## 1. Performance
 
@@ -29,15 +27,16 @@ a hedged question, never a major.
 
 **Proof obligation — production DB reads.** For every new or materially changed
 query over a collection that grows (polling paths, GraphQL resolvers, workers,
-dashboards, admin endpoints — internal-only included), prove it is bounded and
-index-supported. Acceptable proof: a repo-declared index or migration, a cited
-equivalent query with precedent, or an explain/query-plan claim in the PR body. No
-proof = **major** — "live indexes may exist outside the repo" is residual
-uncertainty, not clearance. For Mongo aggregations, check **stage order**: a
-`$limit` after `$sort`, `$group`, `$lookup`, or any cardinality-changing stage does
-not bound the scan/sort/group work — identify the first indexed `$match` and its
-supporting index. External API calls fanning out from a DB result set are an N+1
-even when cached — cold paths and cache misses count.
+dashboards, admin endpoints — internal-only included), the reviewer checks whether
+it is bounded and index-supported: repository indexes/migrations, equivalent query
+precedent, and available query-plan context. A proven missing leading index or
+unbounded path is **major**; the concrete fix is to add the matching index or bound
+the path. If support cannot be established either way, ask a non-blocking question —
+never tell the author to attach evidence. For Mongo aggregations, check **stage
+order**: a `$limit` after `$sort`, `$group`, `$lookup`, or any cardinality-changing
+stage does not bound the scan/sort/group work — identify the first indexed `$match`
+and its supporting index. External API calls fanning out from a DB result set are an
+N+1 even when cached — cold paths and cache misses count.
 
 Severity guide: an N+1/quadratic on a path fed by user-scale data is **major**; on a
 bounded admin path with a handful of items it is a **minor** with the fix inline.
@@ -45,6 +44,10 @@ Access restriction never downgrades: a superuser-only dashboard polling producti
 data melts the same database.
 
 ## 2. Economy of means
+
+This is a hard synthesis gate, not a taste note. New parts are default-denied; apply
+the subtraction order and scope-ratchet circuit breaker in `scope.md` before any
+finding survives.
 
 - **Least means to the stated outcome** — could this diff be meaningfully smaller and
   still do the whole job? Propose the subtraction inline, like any other finding.
@@ -91,6 +94,8 @@ Security regressions are **critical**.
 ## 5. Issue fit & claims
 
 - Does the diff solve the **stated** issue — not a nearby one, not a subset silently.
+- The latest linked issue criteria are authoritative. Removed criteria may inform a
+  follow-up but cannot remain blockers.
 - **Every claim in the PR body is verified** against gathered context
   (`references/context.md`): acceptance criteria in the linked Linear issue become
   individually checkable items; "per the spec" means the spec was read and compared.
