@@ -40,7 +40,7 @@ log() { printf '\033[36m•\033[0m %s\n' "$*"; }
 
 # Copy every file in $1 into tree $2, preserving relative paths.
 copy_tree() {
-  local from="$1" into="$2" src rel
+  local from="${1%/}" into="$2" src rel
   find "$from" -type f -print0 | while IFS= read -r -d '' src; do
     rel="${src#"$from"/}"
     mkdir -p "$into/$(dirname "$rel")"
@@ -51,7 +51,7 @@ copy_tree() {
 # Apply a case overlay ($1) onto tree $2: copy every file except pr.md / _delete,
 # then honour a _delete list of repo-relative paths to remove (blank/# lines skipped).
 apply_overlay() {
-  local case_dir="$1" dest="$2" src rel path
+  local case_dir="${1%/}" dest="$2" src rel path
   find "$case_dir" -type f ! -name 'pr.md' ! -name '_delete' -print0 \
     | while IFS= read -r -d '' src; do
         rel="${src#"$case_dir"/}"

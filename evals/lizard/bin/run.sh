@@ -106,7 +106,8 @@ process_case() {
   local model_args=()
   [ -n "${LIZARD_EVAL_MODEL:-}" ] && model_args=(--model "$LIZARD_EVAL_MODEL")
 
-  local prompt="Use the lizard skill to review this PR: lizard $url --dry-run"
+  local prompt="Use the lizard skill to review this PR: lizard $url --dry-run
+After the dry-run report, you MUST end your output with the exact would-be submission as raw JSON between two lines containing only LIZARD_PAYLOAD_BEGIN and LIZARD_PAYLOAD_END, per the skill's dry-run payload contract in references/github-review-api.md. Output the markers and JSON directly (no code fence)."
 
   # Capture combined stdout+stderr. A non-zero exit (incl. timeout) still lets us
   # try to extract a payload; missing payload is the real error condition.
