@@ -1,26 +1,26 @@
 {
   "t2-clean-logic": {
-    "number": 6,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/6"
+    "number": 12,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/12"
   },
   "t1-docs-only": {
-    "number": 5,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/5"
+    "number": 11,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/11"
   },
   "nit-only": {
-    "number": 4,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/4"
+    "number": 10,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/10"
   },
   "major-n-plus-one": {
-    "number": 3,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/3"
+    "number": 9,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/9"
   },
   "injection": {
-    "number": 2,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/2"
+    "number": 8,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/8"
   },
   "critical-removed-export": {
-    "number": 1,
-    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/1"
+    "number": 7,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/7"
   }
 }
