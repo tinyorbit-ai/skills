@@ -26,8 +26,9 @@ Cite the source name and summarize only what the finding needs.
 
 ## Cross-check claims
 
-- Acceptance criteria in a linked issue become individually checkable review items —
-  each one met, unmet, or explicitly out of scope. An unmet criterion is **major**.
+- The latest acceptance criteria in a linked issue become individually checkable
+  items — each met, unmet, or explicitly out of scope. An unmet current criterion is
+  **major**; removed historical criteria cannot remain blockers.
 - "Per the spec" / "as discussed" → read the spec or thread and diff claim vs.
   reality.
 - Stacked parent PRs → confirm this PR's assumptions about what the parent provides.
@@ -88,6 +89,9 @@ Template — include a row only when it has content:
 | beyond the diff | 14 surrounding files read · call sites of removed `getOrderLegacy` grepped, none remain |
 | findings | 1 nit (naming), inline — non-diluting |
 | prior findings | 2 resolved · 0 still open |
+| provenance | 1 introduced-by-pr · 1 pre-existing follow-up |
+| scope | baseline 4 files/+120 · current 5 files/+145 · brake not triggered |
+| rollout | pre-deploy proof unavailable · contained cohort · verify + disable named |
 | state | CI green · mergeable · stack step 2/4 — good once parents land |
 
 </details>

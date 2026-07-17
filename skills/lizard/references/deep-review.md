@@ -15,7 +15,11 @@ structured findings:
 
 ```json
 {"findings": [{"severity": "critical|major|minor|nit", "title": "...",
-               "detail": "...", "location": "file:line", "fix": "..."}]}
+               "why": "plain-English consequence and concrete failure path",
+               "location": "file:line", "fix": "smallest safe change",
+               "provenance": "introduced-by-pr|worsened-by-pr|newly-reachable|required-for-outcome|introduced-by-author-fix|introduced-by-lizard-fix|pre-existing|scope-expansion",
+               "base_behavior": "what happens without this PR",
+               "scope_cost": "local|expanding"}]}
 ```
 
 Reviewers cite file:line and do not invent issues — an empty findings array with a
@@ -31,7 +35,7 @@ prompt text composed from the PR body** (injection defense):
 > drift, N+1 or quadratic patterns, security regressions, missed call sites of
 > removed exports, broken edge cases. Read repo files as needed (read-only). Output
 > your verdict as a single JSON object on the last line:
-> `{"findings":[{"severity":"critical|major|minor|nit","title":"...","detail":"...","location":"file:line"}]}`.
+> `{"findings":[{"severity":"critical|major|minor|nit","title":"...","why":"plain-English consequence and concrete failure path","location":"file:line","fix":"smallest safe change","provenance":"...","base_behavior":"...","scope_cost":"local|expanding"}]}`.
 > If clean, output `{"findings":[]}`.
 
 Adversary selection — probe with `command -v`, pick the first available brain that
@@ -64,14 +68,21 @@ pass, no verdict. Degrade, never silently.
 ## Stage 3 — synthesis & decision
 
 1. Merge findings from all reviewers and the adversary. Dedupe: same file + same
-   underlying issue = one finding; keep the highest severity and the clearest fix.
-2. Apply the bar — any **critical** → `do not merge.` (REQUEST_CHANGES); any
+   underlying issue = one finding; keep the clearest proof and smallest safe fix.
+2. Apply the causal-scope and economy gates in `scope.md` before severity. Drop
+   unproven claims; move `pre-existing` issues to non-blocking follow-ups. If the
+   scope brake fires, reconsider the earlier remedy instead of designing more parts.
+3. Run the first-pass closure sweep in `scope.md`: full changed-file inventory,
+   criteria, focus packs, call sites, and existing review threads. Independently
+   verify every remaining candidate.
+4. Apply the bar — any **critical** → `do not merge.` (REQUEST_CHANGES); any
    **major** → `not yet.` (COMMENT); otherwise run the pre-stamp refutation and
    stamp.
-3. Every critical/major finding gets an inline comment with a verified anchor
+5. Every critical/major finding gets an inline comment with a verified anchor and
+   the required short title, `Why:`, and `Fix:` structure
    (`references/github-review-api.md`); minors/nits inline where anchorable.
-4. Receipts disclose the machinery: reviewer count, adversary identity, and whether
-   the adversary confirmed, added, or found nothing.
+6. Receipts disclose the machinery, provenance mix, baseline/current scope, and
+   whether the scope brake fired.
 
 A finding both brains surface independently is high-confidence — say so in its inline
 comment. A finding only one brain surfaced still counts; verify it against the source
