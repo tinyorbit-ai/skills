@@ -292,3 +292,8 @@ entry with its verified anchor. For a self-authored stamp-as-comment the `event`
 `APPROVE` with an added `"comment": true` field, marking that it posts as an issue
 comment rather than a formal review. The two marker lines are the parse contract —
 print nothing between them but the single JSON object.
+
+The envelope never varies. It is not the raw endpoint POST: a stamp-as-comment
+still prints `"event": "APPROVE"` with `"comment": true`, not the bare
+`{"body": …}` an issue-comment create would take, and no other keys or structures
+(`would_post`, `submissions`, `endpoint`, …) are ever valid between the markers.

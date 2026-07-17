@@ -107,7 +107,11 @@ process_case() {
   [ -n "${LIZARD_EVAL_MODEL:-}" ] && model_args=(--model "$LIZARD_EVAL_MODEL")
 
   local prompt="Use the lizard skill to review this PR: lizard $url --dry-run
-After the dry-run report, you MUST end your output with the exact would-be submission as raw JSON between two lines containing only LIZARD_PAYLOAD_BEGIN and LIZARD_PAYLOAD_END, per the skill's dry-run payload contract in references/github-review-api.md. Output the markers and JSON directly (no code fence)."
+After the dry-run report, you MUST end your output with this exact structure, filled with your actual values:
+LIZARD_PAYLOAD_BEGIN
+{\"event\":\"APPROVE|COMMENT|REQUEST_CHANGES\",\"body\":\"<the full review body>\",\"comments\":[{\"path\":\"...\",\"line\":1,\"side\":\"RIGHT\",\"body\":\"...\"}]}
+LIZARD_PAYLOAD_END
+One raw JSON object, no code fence, exactly these keys. When the approval would post as a stamp-as-comment (self-authored PR), keep event APPROVE and add \"comment\": true — never emit the raw issue-comment POST shape or any other structure."
 
   # Capture combined stdout+stderr. A non-zero exit (incl. timeout) still lets us
   # try to extract a payload; missing payload is the real error condition.
