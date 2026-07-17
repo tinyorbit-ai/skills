@@ -1,0 +1,4 @@
+# Per-run transcripts, extracted payloads, and scorecards are reproducible from a
+# `run.sh` + `grade.mjs` pass — regenerate them, never commit them. The committed
+# trend lives in snapshots/SCOREBOARD.md, appended by grade.mjs.
+results/
