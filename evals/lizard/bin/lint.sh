@@ -312,6 +312,7 @@ lint_ledgers() {
   local rec_review='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ verdict=(go|wait|block) tier=(quick|standard|deep) adversary=(codex|claude|none) head=[0-9a-fA-F]+'
   local rec_unchanged='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ verdict=unchanged-blocked head=[0-9a-fA-F]+ prior=[0-9]+'
   local rec_dupe='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ .*duplicate-averted'
+  local rec_collision='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ duplicate-collision head=[0-9a-fA-F]+ earlier=[^ ]+ later=[^ ]+'
   local rec_miss='^[0-9]{4}-[0-9]{2}-[0-9]{2} MISS PR#[0-9]+ '
   local total=0 bad=0 f line
   while IFS= read -r f; do
@@ -326,6 +327,7 @@ lint_ledgers() {
       if printf '%s' "$line" | grep -qE "$rec_review" \
         || printf '%s' "$line" | grep -qE "$rec_unchanged" \
         || printf '%s' "$line" | grep -qE "$rec_dupe" \
+        || printf '%s' "$line" | grep -qE "$rec_collision" \
         || printf '%s' "$line" | grep -qE "$rec_miss"; then
         :
       else

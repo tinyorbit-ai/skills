@@ -32,6 +32,17 @@ die() { printf 'run.sh: %s\n' "$*" >&2; exit 1; }
 command -v claude >/dev/null 2>&1 || die "the 'claude' CLI is not on PATH"
 command -v jq >/dev/null 2>&1 || die "jq is required"
 
+# A user-scope lizard install (~/.claude/skills/lizard, typically a COPY made by
+# the skills CLI) SHADOWS the scratch project's working-tree symlink — headless
+# runs would silently test the stale installed copy instead of the code under
+# test. Refuse to run until it matches the working tree.
+INSTALLED_SKILL="$HOME/.claude/skills/lizard"
+if [ -e "$INSTALLED_SKILL" ] && ! diff -rq "$SKILL_SRC" "$INSTALLED_SKILL/" >/dev/null 2>&1; then
+  die "installed user-scope lizard differs from the working tree and would shadow it.
+       Refresh it first:  npx skills add . --skill lizard -g --copy
+       (or remove it:     rm ~/.claude/skills/lizard)"
+fi
+
 # Portable hard timeout: prefer coreutils timeout, else perl's alarm+exec.
 run_with_timeout() {
   local secs="$1"; shift

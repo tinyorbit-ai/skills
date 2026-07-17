@@ -118,6 +118,16 @@ record the silent outcome instead:
 2026-07-04 PR#4242 verdict=unchanged-blocked head=9fb2ddf prior=2
 ```
 
+Race outcomes from the parallel-run guard (`references/dedup.md`) use the same
+dated-record shape: `duplicate-averted` when the pre-POST re-check found a verdict
+already landed and this run posted nothing; `duplicate-collision` when two verdicts
+landed anyway and the later one was recorded as yielding:
+
+```text
+2026-07-04 PR#4242 duplicate-averted head=9fb2ddf winner=<login> review=<url>
+2026-07-04 PR#4242 duplicate-collision head=9fb2ddf earlier=<review-id> later=<review-id> notes="…"
+```
+
 **Miss detection** — once per sweep per repo, check recently merged PRs that lizard
 stamped (`verdict=go` in the ledger, PR now merged):
 

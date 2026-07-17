@@ -65,7 +65,7 @@ fail-open, so a layer that errors never blocks a review:
    stand, **the later one yields**: delete your own later stamp-as-comment; a
    submitted formal review cannot be deleted — dismiss your own later duplicate
    (write access required), otherwise leave it and record the collision in the
-   ledger. Commands in `references/github-review-api.md`.
+   ledger as a `duplicate-collision` record (`references/loop-mode.md`). Commands in `references/github-review-api.md`.
 
 Fail open is still the law: no lock files, no hard barriers, a staleness bound on
 every claim. A PR stranded unreviewed is worse than a rare duplicate — the first two
