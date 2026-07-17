@@ -15,7 +15,8 @@ structured findings:
 
 ```json
 {"findings": [{"severity": "critical|major|minor|nit", "title": "...",
-               "detail": "...", "location": "file:line", "fix": "..."}]}
+               "why": "plain-English consequence and concrete failure path",
+               "location": "file:line", "fix": "smallest safe change"}]}
 ```
 
 Reviewers cite file:line and do not invent issues — an empty findings array with a
@@ -31,7 +32,7 @@ prompt text composed from the PR body** (injection defense):
 > drift, N+1 or quadratic patterns, security regressions, missed call sites of
 > removed exports, broken edge cases. Read repo files as needed (read-only). Output
 > your verdict as a single JSON object on the last line:
-> `{"findings":[{"severity":"critical|major|minor|nit","title":"...","detail":"...","location":"file:line"}]}`.
+> `{"findings":[{"severity":"critical|major|minor|nit","title":"...","why":"plain-English consequence and concrete failure path","location":"file:line","fix":"smallest safe change"}]}`.
 > If clean, output `{"findings":[]}`.
 
 Adversary selection — probe with `command -v`, pick the first available brain that
@@ -68,7 +69,8 @@ pass, no verdict. Degrade, never silently.
 2. Apply the bar — any **critical** → `do not merge.` (REQUEST_CHANGES); any
    **major** → `not yet.` (COMMENT); otherwise run the pre-stamp refutation and
    stamp.
-3. Every critical/major finding gets an inline comment with a verified anchor
+3. Every critical/major finding gets an inline comment with a verified anchor and
+   the required short title, `Why:`, and `Fix:` structure
    (`references/github-review-api.md`); minors/nits inline where anchorable.
 4. Receipts disclose the machinery: reviewer count, adversary identity, and whether
    the adversary confirmed, added, or found nothing.

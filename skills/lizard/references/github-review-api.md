@@ -114,13 +114,13 @@ payload shape:
 {
   "commit_id": "<headRefOid>",
   "event": "COMMENT",
-  "body": "not yet.\n\n1. **major** — `src/api/orders.ts:142` — N+1 ...\n\n<details>...receipts...</details>\n\n<!-- lizard:v1 verdict=wait tier=standard adversary=none head=... diff=... context=... -->",
+  "body": "not yet.\n\nWhy:\n- Loading the order list can issue hundreds of customer queries and slow the page for large accounts. See the inline comment.\n\n<details>...receipts...</details>\n\n<!-- lizard:v1 verdict=wait tier=standard adversary=none head=... diff=... context=... -->",
   "comments": [
     {
       "path": "src/api/orders.ts",
       "line": 142,
       "side": "RIGHT",
-      "body": "**major** — N+1: one query per order.\n\n**Fix:** batch with `$in`.\n\n```suggestion\nconst customers = await getCustomersByIds(orders.map(o => o.customerId))\n```"
+      "body": "**major — Batch customer lookups**\n\n**Why:** This runs one customer query per order. A 500-order page therefore makes 501 queries and can become slow or overload the database.\n\n**Fix:** fetch the customers once with `$in`.\n\n```suggestion\nconst customers = await getCustomersByIds(orders.map(o => o.customerId))\n```"
     }
   ]
 }
@@ -160,6 +160,13 @@ Payload rules:
 - Also before any POST, re-run the previous-review lookups above: a lizard verdict
   at the current `headRefOid` that appeared mid-review means this run lost the race
   — do not post (`references/dedup.md`).
+- Every non-approval has a literal `Why:` section. Each bullet is one or two short
+  sentences: consequence first, then `See the inline comment.` Do not copy the full
+  technical proof into the review body.
+- Every inline body has a short title plus literal `**Why:**` and `**Fix:**` labels.
+  Use ordinary words, keep one idea per finding, and aim for 120 words or fewer
+  before any suggestion block. Naming a bad pattern without its consequence is not
+  a complete finding.
 
 ## Inline comment anchoring
 
@@ -195,8 +202,35 @@ head file, never eyeball them from `@@` hunk headers:
    fence with four backticks if the replacement contains triple backticks.
 
 If the POST fails with 422, the cause is almost always one bad anchor: move that
-finding into the top-level body with the same severity and resubmit. Never drop the
-review or scatter loose comments.
+finding into the top-level body with the same severity and resubmit only when no
+valid changed-line anchor exists. Do not silently drop inline comments. The body
+must say GitHub could not attach it inline and retain its `Why:` and `Fix:`.
+
+## Verify and link inline comments
+
+After posting, fetch the submitted comments using the returned review ID:
+
+```bash
+gh api "repos/<owner>/<repo>/pulls/<number>/reviews/<review-id>/comments"
+```
+
+The count must equal the inline findings sent. Each must have the expected `path`, a
+non-null `line` or `original_line`, and an `html_url`. A mismatch means submission
+failed; never claim the finding was posted inline.
+
+GitHub only returns inline URLs after submission. For non-approvals, replace each
+`See the inline comment.` with `[See the inline comment](<html_url>).`, then update
+the review body once:
+
+```bash
+gh api --method PUT "repos/<owner>/<repo>/pulls/<number>/reviews/<review-id>" \
+  -F body=@"$run/body-with-links.md"
+```
+
+`-F` expands `@file`; `-f` would submit the path literally. As a fallback, assemble
+`{"body": ...}` with `jq` and send it with `--input`. Re-fetch the review and verify
+the links. This keeps findings discoverable from Conversation when GitHub collapses
+or later marks their inline threads outdated.
 
 ## Stamp-as-comment (self-authored PRs)
 
@@ -211,6 +245,12 @@ gh api --method POST "repos/<owner>/<repo>/issues/<number>/comments" \
 
 Non-approving verdicts on self-authored PRs post as normal COMMENT /
 REQUEST_CHANGES reviews — only APPROVE is blocked by GitHub.
+
+If a self-authored approval has nits, submit one formal COMMENT review first with an
+empty body and every nit in its `comments` array. Verify them as above, then post the
+stamp issue comment. This paired COMMENT + stamp is the only exception to the
+one-review-artifact rule. The empty auxiliary review is exempt from verdict-body and
+receipts validation; the stamp carries both. Do not summarize the nits in the stamp.
 
 ## After the POST — one standing verdict
 

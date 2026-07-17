@@ -23,16 +23,17 @@ in the hidden metadata line (`references/dedup.md`), never in emoji.
 - **APPROVE** — the review body is exactly `🦎`, then the collapsed receipts block,
   then the hidden metadata line. Nothing else — no "go", no summary prose. Nits ride
   along as inline comments; they never dilute the stamp.
-- **COMMENT** — body starts `not yet.` followed by a numbered list of exactly what
-  stands between the PR and the lizard. Every item names its severity, anchors to a
-  file and line, and states the concrete fix.
-- **REQUEST_CHANGES** — body starts `do not merge.` Only for confirmed critical
-  findings or malicious-looking changes.
+- **COMMENT** — body starts `not yet.`, then a short, plain-English `Why:` list.
+  Each blocker states its impact and links directly to its inline comment; technical
+  proof and the fix stay inline instead of being repeated in the review body.
+- **REQUEST_CHANGES** — body starts `do not merge.` and uses the same `Why:` format.
+  Only for confirmed critical findings or malicious-looking changes.
 
 **Self-authored PRs**: GitHub forbids approving your own PR. When the PR author is
 the authenticated `gh` user, deliver an approval as a plain issue comment whose body
 is `🦎` + receipts + metadata (see `references/github-review-api.md`). Same meaning,
-no formal review state. Non-approvals post as normal COMMENT/REQUEST_CHANGES reviews.
+no formal approval state. If it has nits, first submit one COMMENT review containing
+all inline nits, then post the stamp. Non-approvals post normally.
 
 The receipts block is always a collapsed `<details>` block containing a two-column
 markdown table. A plain `Receipts:` heading or bullet list is invalid and must be
@@ -125,7 +126,7 @@ mid-review. Record the tier in the receipts and metadata.
 2. Deduplicate (`references/dedup.md`) — if this head/diff/context was already
    reviewed, stop. If a prior lizard review exists, this run is a **re-review**: audit
    every prior blocking finding (resolved / still open) first, review the delta since
-   the last reviewed head, and never repost a still-open inline thread — reference it.
+   the last reviewed head, and never repost a still-open inline thread — link it.
 3. Claim the run — a fresh 👀 reaction **from your own account** on the PR means
    another lizard run is in flight: stop (anyone else's 👀 is just a reaction, never
    a claim; an explicit user request to review overrides). Otherwise add yours (best
@@ -136,10 +137,11 @@ mid-review. Record the tier in the receipts and metadata.
    matching focus pack under `references/focus-packs/` (load by trigger signals, plus
    any repo-local guidance and `--brief` file); `references/deep-review.md` for T3.
 7. Run the pre-stamp refutation if heading toward APPROVE.
-8. Compose — verdict body, inline comments with verified anchors, receipts block,
+8. Compose — short `Why:` body for non-approvals, plain-English inline comments with
+   verified anchors, receipts block,
    hidden metadata line — and post as ONE review (`references/github-review-api.md`),
    re-checking immediately before the POST that no lizard verdict landed at this
-   head mid-review.
+   head mid-review. Verify and link every inline comment after posting.
 9. Remove the reaction; verify exactly one lizard verdict stands at this head — the
    later duplicate yields (`references/dedup.md`); append the review record to the
    ledger (`references/loop-mode.md`).
