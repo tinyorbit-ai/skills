@@ -212,7 +212,19 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **`description` quality is everything.** A vague description means the agent never
   triggers the skill. Lead with the capability, end with "Use when …".
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
-  Split aggressively into `references/`.
+  Split aggressively into `references/`. The validator warns at ≥185 body lines and
+  fails at ≥200.
+  **Four skills are parked in the warning band and will hit the wall on their next
+  growth: `forge-plan` (192), `forge-review`/`forge-harden`/`forge-discovery` (196).**
+  When you next edit one substantively, extract *then* — you're already paying for
+  its behavioral eval re-run, and where a contract lives is behavior-affecting, so
+  it needs the baseline→change→re-run loop either way. Don't do it as standalone
+  churn. Extract only **step-scoped** material (needed at one step of the process);
+  hot-path content used every run belongs in `SKILL.md` — moving it out trades a
+  lint warning for the agent skipping it. Identified candidate: `forge-plan` §4's
+  phase block template + `Design:` marker enum + gate examples
+  (`skills/forge-plan/SKILL.md:98-146`, ~48 lines, all consumed at step 4 of 6)
+  → `references/phase-contract.md`, which would drop it to ~150.
 - **Folder name must equal `name`.** Mismatches break discovery/install.
 - **Experimental needs both** the `.experimental/` location *and* `metadata.internal:
   true` — the dir alone won't gate it once discovery falls back to recursive search.
