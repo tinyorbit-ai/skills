@@ -74,9 +74,11 @@ For each *non-trivial* one:
 - Lock it with AskUserQuestion in the **Decision Brief** shape (forge suite's
   `references/question-style.md`): framing names the concrete tradeoff;
   recommended option carries the *why* and the evidence that would flip it.
-- Write an ADR: `wiki/decisions/NNNN-slug.md` (Context · Decision · Why ·
-  Alternatives · Consequences). Link it from `wiki/index.md`. Trivial choices don't
-  need an ADR — reserve them for decisions a future reader would ask "why?" about.
+- Write an ADR: `wiki/decisions/NNNN-slug.md` with these section headings
+  verbatim — Context · Decision · Why · **Alternatives considered** ·
+  Consequences ("Options weighed" and friends break the wiki's health greps).
+  Link it from `wiki/index.md`. Trivial choices don't need an ADR — reserve them
+  for decisions a future reader would ask "why?" about.
 
 ### 4. Decompose into phases
 
@@ -108,6 +110,10 @@ For **every phase**, specify:
 The **Design:** marker routes the design cycle: `explore` means the surface's
 shape is open and `forge` will run `forge-design-explore` (which locks an ADR and
 flips the marker) before this phase can build. `none` for phases with no UI.
+The marker is machine-read by `forge`'s router: its value is **exactly one of
+the four forms above — never prose**. "Follow the design an earlier phase
+locked" is spelled `locked via [[decisions/NNNN-…]]`, not "follow the phase-N
+ADR"; there is no fifth form. Free-text here breaks the design gate.
 
 The **verifiable gate** is the contract, and it must assert the **phase Goal's own
 observable** — name the command and the expected output that only this phase's
@@ -131,6 +137,13 @@ false, what would have caught it?"* — if the answer is nothing, rewrite the ga
 A precisely described manual check with an observable result is a valid gate; "it
 works" / "looks right" is not. Match rigor to the project (a prototype's gate can
 be "the script runs and prints X"), but the goal-anchor rule holds at every level.
+
+Second self-check — the parts-list rule (§2b) extended to **behaviors**: every
+behavior a phase's Goal, gate, or Work bullets introduce — an automatic state
+transition, a derived default, a new interface surface or config knob — must
+trace to a brief clause or a linked ADR. A behavior that traces to neither is
+invented scope no matter how helpful it feels: cut it, or record it as an ADR so
+the user owns the decision. "Plausibly what they'd want" is not a trace.
 
 ### 5. Write `wiki/plan.md`
 
@@ -178,3 +191,5 @@ Then state the phase count, phase 1's branch + gate, which phases carry
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
   should be as thorough as the build needs (`references/simplicity.md`).
+- Nor behaviors: anything a Goal, gate, or Work bullet *does* that neither the
+  brief nor an ADR asked for is invented scope (§4's traceability self-check).

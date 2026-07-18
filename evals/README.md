@@ -108,6 +108,19 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
   hygiene-only gates, a "foundation" phase 1). The judge must pick golden in
   BOTH presentation orders and cite the seeded junk. If this fails, don't trust
   any other judge verdict that day.
+- **`forge-plan-tripwired-simple`** / **`forge-plan-tripwired-comprehensive`** —
+  scope-fidelity pair born from the 2026-07-12 plan stress test: two briefs whose
+  non-goals ban, by name, the features a scope-inventing planner reaches for
+  (terminal timer: config/flags/stats/notifications/break cycles; self-hosted
+  reading tracker: social/multi-user, ratings, PWA/offline, export APIs,
+  e-books). Deterministic: negation-aware tripwire greps scoped to phase blocks
+  (where build obligations live), phase-count proportionality (≤ 3 / 5–9),
+  design routing present on the UI brief, ADRs with alternatives, env-var drift
+  surfaced (informational). Judge: **behavior_traceability** — every behavior in
+  a phase Goal / gate / Work bullet must trace to a brief clause or an ADR; the
+  dimension exists because the first live run of the comprehensive brief leaked
+  an invented status auto-advance and a 3-env-var config stretch — plus
+  economy_of_means, gates_prove_goals, brief_fidelity, floor ≥ 7 each.
 - **`forge-review-planted-bugs`** — a phase branch with three seeded defects
   (command injection, committed `sk-live` secret, header-inclusive mean that
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes
@@ -167,3 +180,27 @@ no network.
   9 · 9 · 9 · 10 across the four dimensions. One check initially misfired on a
   legitimate table-format parts list — a parser bug, fixed and re-verified
   offline against the same run's captured output.
+- **2026-07-12** · tier 2 `forge-plan-structural` ×3, the behavior-traceability
+  edit loop: baseline 3/3 (judge 9·9·10·9 / 9·8·10·9 / 9·9·10·9); final text
+  3/3 with every run ≥ baseline (9·9·10·10 / 9·9·10·9 / 9·9·10·9).
+  Intermediate attempts hit 2/3 then 1/3 — never on quality (judge ≥ baseline
+  throughout) but on prose drifting off machine-read formats (free-text
+  `Design:` markers, "Options considered" ADR headings); each miss became a
+  contract-pinning line in the skill. A 0/3 batch in between was a usage-cap
+  artifact (all agents 429'd), not evidence.
+- **2026-07-12** · tier 2 `forge-plan-tripwired-simple` (new): 3/3 rolls PASS —
+  judge 8·9·8·9, 8·9·9·9, 9·9·8·9. The behavior_traceability dimension
+  independently re-found the decimal-minutes borderline that manual grading of
+  the original stress test had flagged.
+- **2026-07-12** · tier 2 `forge-plan-tripwired-comprehensive` (new): 2/3 rolls
+  PASS (8·9·9·9 twice). The third roll failed the judge floor as designed —
+  behavior_traceability capped at 6 for an ADR-less `SHELFIE_ADDR` knob
+  ("config for a value that never changes"); the same roll's judge also caught
+  a real arithmetic error in a stats gate (50 asserted, fixture seeds 40).
+  Expected pass rate for this case is high-but-not-certain by construction:
+  the residual leak rate is the thing it measures.
+- **2026-07-12** · harden-confirmation experiment (not a tier): full
+  `forge-harden --auto` over both leaky stress-test plans fixed 29+ real
+  findings but caught **neither** invented-scope leak — the economy sweep's
+  cut authority covers persona additions, not planner-invented scope. That's
+  why the fix lives in forge-plan and this eval, not in hardening.

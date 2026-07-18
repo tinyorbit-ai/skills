@@ -168,6 +168,9 @@ not hygiene, plus free economy-of-means script checks; the judge grades against
 forge's own `simplicity.md` verbatim, four dimensions, floor ≥ 7),
 `forge-plan-judge-calibration` (judge-only: golden vs seeded-bloat plan, both
 orders — if the judge can't tell them apart, don't trust its other verdicts),
+the tripwired pair — `forge-plan-tripwired-simple` / `-comprehensive` (briefs
+whose non-goals ban named features; judge dimension behavior_traceability
+requires every phase behavior to trace to a brief clause or an ADR),
 `forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
 validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and
@@ -222,7 +225,7 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge` | stable | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→design (gated, if UI)→harden→(build→review→ship loop, one phase/run). A UI phase can't build until its `Design:` marker is locked. `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
 | `forge-init` | stable | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base + `.forge/` config & taste profile); injects wiki/ADR/phase/design rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
 | `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six with push-until gates; one-liner runs are budgeted (~6 questions, stop-when-sharp, folded overlaps). Files its source docs into `knowledge/`. Never reopens whether it should exist / who builds it. |
-| `forge-plan` | stable | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each, each with a `Design:` marker) + seed ADRs + a substantive `architecture.md` (boundaries-with-why, scale assumptions, parts list). Gates must prove the phase goal — generic CI is never sufficient. Licensed to flag "too large to build well". |
+| `forge-plan` | stable | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each, each with a `Design:` marker) + seed ADRs + a substantive `architecture.md` (boundaries-with-why, scale assumptions, parts list). Gates must prove the phase goal — generic CI is never sufficient. Phase behaviors carry the parts-list burden — traced to a brief clause or an ADR, never assumed. Licensed to flag "too large to build well". |
 | `forge-harden` | stable | Plan-time hardening orchestrator — persona passes as isolated subagents (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request), an **economy sweep always last** (authority to cut what personas added), persona-conflict reconciliation, then the adversarial reviewer grading the before→after diff + claimed deltas. User Challenge fires on a single objector; `--auto` has a hard always-surface allowlist. |
 | `forge-harden-eng` | stable | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. 0–10 rated dimensions, complexity smells (>8 files), search-before-building gate, and whether each gate actually proves its phase goal. |
 | `forge-harden-design` | stable | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Six rated passes, each fixing-to-10 with an artifact written into the plan (state table, journey storyboard, unresolved-decisions table). |
