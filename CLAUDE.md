@@ -188,6 +188,21 @@ any change to `skills/lizard/`, run the smoke set** —
 scorecard (false-🦎 must be 0). One-time setup:
 `evals/lizard/fixtures/bootstrap.sh`. Details in `evals/lizard/README.md`.
 
+`dispute-measured-scale` is the suite's **two-round** case (`round1/` +
+`thread.json`): bootstrap seeds a prior lizard review and an author dispute reply
+before handing lizard the fixed head, so the delta re-review path is graded on how
+a finding is *disposed of* rather than whether it is found. Golden answer is a
+stamp; restating the residue in future tense is the false-block it exists to catch.
+
+Two traps when running these, both hit for real:
+
+- **`run.sh` symlinks the working-tree skill.** Never edit `skills/lizard/` while a
+  baseline is running — cases after your edit silently test the new prompt. Run the
+  baseline from a `git worktree` pinned to the pre-change commit.
+- **`grade.mjs` grades all of `cases.json`, not just what ran.** A single-case run
+  scores the other cases as errors; read the per-case row, not the pass rate, and
+  annotate the SCOREBOARD row.
+
 ## Command reference
 
 | Action | Command |
@@ -257,7 +272,7 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-retro` | stable | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
 | `forge-wiki` | stable | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
 | `forge-wiki-maintain` | stable | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
-| `lizard` | stable | AI PR reviewer, one binary verdict — an approval's entire body is 🦎 (see a lizard → merge; no other emoji anywhere). Triage tiers (quick / standard / deep with multi-agent fan-out + cross-model adversary via codex/claude; runtime dep upgrades always deep + consumer matrix), "not proven safe ≠ clean" on high-risk surfaces (proof obligations — bounded/index-supported DB reads, aggregation stage order, platform limits) balanced by its mirror "not proven broken ≠ broken" (a finding carries the same proof burden as the stamp — trace broken before you assert it, hedge if you can't), claims cross-checked against linked Linear/Notion/issue context, every finding inline + actionable, collapsed receipts toggle (always a two-column `<details>` table — plain bullet receipts invalid), fingerprint dedup + delta re-review + parallel-run guard (at most one standing verdict per head — own-account 👀 in-flight claim, pre-POST re-check, later duplicate yields), `~/.lizard/` ledger + mandatory blind-spot entries, `lizard retro` for post-merge calibration. Posts as you (self-authored PRs get stamp-as-comment). Session (`lizard <pr>`), loop (`lizard sweep`), or routine; agent-agnostic (git + gh + markdown). Easter egg — "why lizard". |
+| `lizard` | stable | AI PR reviewer, one binary verdict — an approval's entire body is 🦎 (see a lizard → merge; no other emoji anywhere). Triage tiers (quick / standard / deep with multi-agent fan-out + cross-model adversary via codex/claude; runtime dep upgrades always deep + consumer matrix), "not proven safe ≠ clean" on high-risk surfaces (proof obligations — bounded/index-supported DB reads, aggregation stage order, platform limits) balanced by its mirror "not proven broken ≠ broken" (a finding carries the same proof burden as the stamp — trace broken before you assert it, hedge if you can't; the burden is re-charged **every round**, so a finding surviving an author dispute must re-earn its severity on the current head, and a blocker that can only be stated in future tense — "unbounded as it grows" — is a follow-up, not a blocker), a five-kind author-dispute taxonomy each with its own check (a prescribed fix proven impossible **voids** the finding until re-derived), claims cross-checked against linked Linear/Notion/issue context, every finding inline + actionable, collapsed receipts toggle (always a two-column `<details>` table — plain bullet receipts invalid), fingerprint dedup + delta re-review + parallel-run guard (at most one standing verdict per head — own-account 👀 in-flight claim, pre-POST re-check, later duplicate yields), `~/.lizard/` ledger + mandatory blind-spot entries, `lizard retro` for post-merge calibration. Posts as you (self-authored PRs get stamp-as-comment). Session (`lizard <pr>`), loop (`lizard sweep`), or routine; agent-agnostic (git + gh + markdown). Easter egg — "why lizard". |
 
 > **forge suite** (23 skills) is **released** — it lives in `skills/` and is installable
 > by default (no `INSTALL_INTERNAL_SKILLS` flag needed).

@@ -111,6 +111,23 @@ Set `LIZARD_EVAL_MODEL` identically for `run.sh` and `grade.mjs` if you pin a mo
 3. Run just that case: `bin/run.sh --run-id try <case-id>` then `bin/grade.mjs
    --run-id try`.
 
+### Two-round cases (author disputes)
+
+Most cases are a first pass. A case that also carries `round1/` and `thread.json`
+is a **two-round** fixture: bootstrap pushes `round1/` first, opens the PR, posts a
+prior lizard review (body + one inline finding, anchored at the first line matching
+`thread.json`'s `anchor_match`, with `__ROUND1_HEAD__` substituted into the review
+marker), *then* pushes the case's top-level overlay as the author's fix and posts
+`reply_body` on that thread. Lizard therefore reviews round 2 with a real prior
+verdict and a real author dispute in context — the delta re-review path.
+
+Use one when the behaviour under test is *how a finding is disposed of* rather than
+whether it is found. `dispute-measured-scale` is the reference example: the author
+refutes the prescribed fix on mechanism, supplies a measured bound, and the only
+residue is a growth hypothetical — restating it as a blocker is the false-block the
+case exists to catch. Re-run `bootstrap.sh` with `FORCE_REFRESH=1` after editing a
+two-round fixture; the seeding is skipped whenever the branch already exists.
+
 ## Cost
 
 Each case is roughly **one full lizard review** — an agent turn plus its `gh`/context

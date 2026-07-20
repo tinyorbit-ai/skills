@@ -69,7 +69,9 @@ critical finding carries the same burden of proof as the stamp: before posting i
 trace the actual behavior — don't infer it from a name, a default, or how the code
 "probably" works. If the claim isn't grounded in something you read or traced, it's a
 hedged question, not a major with a suggestion block. Severity scales the burden — the
-more you're asking the author to undo, the harder you must have proven it.
+more you're asking the author to undo, the harder you must have proven it. The burden
+is charged **every round, not once**: a finding carried across a push or an author
+reply re-earns it on the current head, or it stops blocking (`references/scope.md`).
 
 ## The stamp contract
 
