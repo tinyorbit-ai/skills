@@ -118,8 +118,35 @@ for (const s of skills) {
   for (const rel of missing) fail(s.name, `references missing file: ${rel}`);
 }
 
+// Forge planning-discipline contracts — deterministic guardrails for the
+// plan-bench regressions. Behavioral fixtures prove these clauses affect plans;
+// this tier catches accidental deletion or weakening at edit time.
+if (!allScope || inScope('forge-plan')) {
+  const contracts = [
+    ['forge-plan', 'references/phase-contract.md', /\*\*Hypothesis:\*\*[\s\S]*\*\*Falsification gate:\*\*[\s\S]*\*\*Fallback:\*\*[\s\S]*\*\*Trigger:\*\*[\s\S]*\*\*Last cheap decision phase:\*\*/i, 'complete material-bet risk contract'],
+    ['forge-plan', 'references/phase-contract.md', /highest-impact[\s\S]*before (?:adding )?feature breadth/i, 'risk-first phase ordering'],
+    ['forge-plan', 'references/phase-contract.md', /Human evidence gate[\s\S]*blocks every billing, scale, or polish phase/i, 'human evidence before billing/scale/polish'],
+    ['forge-plan', 'references/phase-contract.md', /Release closure[\s\S]*security and authz[\s\S]*backup\/restore and upgrade[\s\S]*release smoke/i, 'explicit release closure'],
+    ['forge-discovery', 'references/brief-contract.md', /Human evidence[\s\S]*Unknown[\s\S]*before billing\/scale\/polish/i, 'unknown real-use marker'],
+    ['forge-harden-eng', 'SKILL.md', /Numeric non-functional proof[\s\S]*Load\/latency[\s\S]*Crash\/restart[\s\S]*Backup\/restore[\s\S]*Upgrade/i, 'numeric scale/state proof'],
+    ['forge-harden-eng', 'SKILL.md', /External-reality pass[\s\S]*registries[\s\S]*OS\/CPU\/runtime\/browser platforms[\s\S]*real release path/i, 'external-reality pass'],
+    ['forge-ambition', 'SKILL.md', /Added proof burden[\s\S]*Paired cut or pressure valve/i, 'ambition proof burden and pressure valve'],
+    ['forge-harden-scope', 'SKILL.md', /added proof burden[\s\S]*paired cut or pressure valve/i, 'scope-expansion proof burden and pressure valve'],
+    ['forge-harden-security', 'SKILL.md', /Release-closure audit[\s\S]*authz matrix[\s\S]*packaged-artifact secret scan/i, 'security release closure'],
+  ];
+  for (const [skill, rel, pattern, label] of contracts) {
+    const path = join(SKILLS_DIR, skill, rel);
+    const raw = existsSync(path) ? readFileSync(path, 'utf8') : '';
+    if (!pattern.test(raw)) fail(skill, `missing planning-discipline contract: ${label}`);
+  }
+}
+
 // CLAUDE.md skills-index sync (public skills only)
 const claudeMd = readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8');
+const agentsMd = existsSync(join(ROOT, 'AGENTS.md')) ? readFileSync(join(ROOT, 'AGENTS.md'), 'utf8') : '';
+if (!/CLAUDE\.md/.test(agentsMd) || !/shared source of truth/i.test(agentsMd)) {
+  failures.push('guidance-sync: AGENTS.md must point Codex at the full shared CLAUDE.md guidance');
+}
 const indexed = new Set([...claudeMd.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)].map((m) => m[1]));
 const publicSkills = skills.filter((s) => !s.internal);
 for (const s of publicSkills) {

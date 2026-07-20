@@ -80,76 +80,26 @@ For each *non-trivial* one:
   Link it from `wiki/index.md`. Trivial choices don't need an ADR — reserve them
   for decisions a future reader would ask "why?" about.
 
+For every **material bet** — a decision whose failure would force rework across
+phases (core behavior, external dependency/provider, platform/release path,
+scale/state assumption, or untested real-use assumption) — add a Risk contract
+to `wiki/plan.md`. Use every field and the ordering rules in
+`references/phase-contract.md`; an ADR alone does not retire a bet.
+
 ### 4. Decompose into phases
 
-Break the build into ordered phases. Hard rules:
-
-- **Phase 1 is the thinnest end-to-end thing that runs** — a vertical slice that
-  produces something you can execute and look at, not scaffolding or "set up the
-  project". Prototype-first.
-- Each later phase is a vertical slice that leaves the project in a working state.
-- Each phase is small enough to hold in your head and complete on one branch.
-- Phases are ordered; mark any two as explicitly parallel only if truly independent.
-- **Each phase is self-contained.** A builder who reads only this phase plus its
-  linked ADRs — with no other context — has everything needed to crack on. Spell out
-  the goal, the work, and the decisions inline; richness in the spec is welcome (the
-  economy you protect is the software's parts, not the plan's words).
-
-For **every phase**, specify:
-
-```
-## Phase N — <title>
-**Branch:** `phase/<n>-<slug>`
-**Goal:** <the observable end state when this phase is done>
-**Verifiable gate:** <exact command(s) or check whose pass/fail is unambiguous>
-**Design:** none | follow DESIGN.md | explore | locked via [[decisions/NNNN-…]]
-**Work:** <bullets — what gets built>
-**Decisions:** <links to the ADRs this phase depends on / introduces>
-```
-
-The **Design:** marker routes the design cycle: `explore` means the surface's
-shape is open and `forge` will run `forge-design-explore` (which locks an ADR and
-flips the marker) before this phase can build. `none` for phases with no UI.
-The marker is machine-read by `forge`'s router: its value is **exactly one of
-the four forms above — never prose**. "Follow the design an earlier phase
-locked" is spelled `locked via [[decisions/NNNN-…]]`, not "follow the phase-N
-ADR"; there is no fifth form. Free-text here breaks the design gate.
-
-The **verifiable gate** is the contract, and it must assert the **phase Goal's own
-observable** — name the command and the expected output that only this phase's
-work can produce. `typecheck && lint && test` runs at review and ship on every
-phase anyway; it proves hygiene, **never the goal, so it is never sufficient as
-the gate**.
-
-```
-Bad  (proves hygiene, not the phase):
-  Goal: users can dedupe a folder from the CLI
-  Gate: typecheck && lint && test
-
-Good (proves the goal, observably):
-  Goal: users can dedupe a folder from the CLI
-  Gate: `dedupe ./fixtures/dupes` exits 0 and prints "reclaimed 312 MB";
-        `dedupe ./fixtures/clean` prints "nothing to do"
-```
-
-Self-check before locking each phase: *"if the gate passed but the goal were
-false, what would have caught it?"* — if the answer is nothing, rewrite the gate.
-A precisely described manual check with an observable result is a valid gate; "it
-works" / "looks right" is not. Match rigor to the project (a prototype's gate can
-be "the script runs and prints X"), but the goal-anchor rule holds at every level.
-
-Second self-check — the parts-list rule (§2b) extended to **behaviors**: every
-behavior a phase's Goal, gate, or Work bullets introduce — an automatic state
-transition, a derived default, a new interface surface or config knob — must
-trace to a brief clause or a linked ADR. A behavior that traces to neither is
-invented scope no matter how helpful it feels: cut it, or record it as an ADR so
-the user owns the decision. "Plausibly what they'd want" is not a trace.
+Read and apply `references/phase-contract.md` **in full** before writing phases.
+It defines the exact machine-read block, goal gates, behavior traceability,
+risk-first ordering, the conditional human-evidence stop, and the mandatory
+release-closure phase. A flat feature sequence that leaves a higher-risk bet
+untested while adding breadth is not a valid Forge plan.
 
 ### 5. Write `wiki/plan.md`
 
 Replace the stub: header (base branch + the discipline reminder from the template),
-then the ordered phases. Keep it scannable. Update `wiki/index.md` so [[plan]]
-reflects it's filled and list the new ADRs under the Decisions section.
+then `## Risk contracts`, then the ordered phases. Keep it scannable. Update
+`wiki/index.md` so [[plan]] reflects it's filled and list the new ADRs under the
+Decisions section.
 
 ### 6. Hand off
 
@@ -192,4 +142,8 @@ Then state the phase count, phase 1's branch + gate, which phases carry
   while removing machinery; it applies to the software, not to the plan — which
   should be as thorough as the build needs (`references/simplicity.md`).
 - Nor behaviors: anything a Goal, gate, or Work bullet *does* that neither the
-  brief nor an ADR asked for is invented scope (§4's traceability self-check).
+  brief nor an ADR asked for is invented scope (`references/phase-contract.md`).
+
+## References
+
+- `references/phase-contract.md` — required phase, risk, evidence, and release contracts

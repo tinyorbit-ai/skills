@@ -66,12 +66,12 @@ function setUpWorkdir(caseDir, config) {
   }
 
   // Install the skills under test (untracked on purpose — keeps the phase diff clean)
-  const skillsTarget = join(workdir, '.claude', 'skills');
-  mkdirSync(skillsTarget, { recursive: true });
+  const skillsTargets = [join(workdir, '.claude', 'skills'), join(workdir, '.codex', 'skills')];
+  for (const target of skillsTargets) mkdirSync(target, { recursive: true });
   for (const s of config.skills || []) {
     const src = join(ROOT, 'skills', s);
     if (!existsSync(src)) throw new Error(`skill not found in repo: ${s}`);
-    symlinkSync(src, join(skillsTarget, s));
+    for (const target of skillsTargets) symlinkSync(src, join(target, s));
   }
   return workdir;
 }

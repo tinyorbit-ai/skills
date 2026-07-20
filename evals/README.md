@@ -121,6 +121,13 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
   dimension exists because the first live run of the comprehensive brief leaked
   an invented status auto-advance and a 3-env-var config stretch — plus
   economy_of_means, gates_prove_goals, brief_fidelity, floor ≥ 7 each.
+- **`forge-planning-disciplines-small`** / **`-large`** / **`-product`** — the
+  three plan-bench project shapes promoted into permanent fixtures. They grade
+  complete risk contracts, risk-first phase order, release closure, registry and
+  packaging reality for a CLI, numeric load/resource/crash/restore/upgrade proof
+  for a stateful system, and human evidence plus ambition pressure valves before
+  SaaS billing. Each fixture carries identical `CLAUDE.md` and `AGENTS.md`; the
+  harness mirrors the same skills into both agent paths.
 - **`forge-review-planted-bugs`** — a phase branch with three seeded defects
   (command injection, committed `sk-live` secret, header-inclusive mean that
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes

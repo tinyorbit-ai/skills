@@ -82,6 +82,17 @@ Denial of service / Elevation of privilege against the architecture's
 trust zones. Note any zone that isn't named in the architecture; that's
 a finding.
 
+### 3b. Release-closure audit
+
+Require a final `Release closure` phase; missing it is an objective finding.
+Audit that its Work and gate explicitly close security/authz, abuse controls,
+secret scanning, backup/restore, upgrade, observability, packaging, runbooks,
+and a smoke through the real release artifact/path. Each item needs proved work
+or `n/a — <reason>`. In particular, require an authz matrix at every protected
+boundary, abuse/rate-limit cases for every public or costly action, and a
+repository + packaged-artifact secret scan. A generic "security review" bullet
+or source-tree smoke does not close release risk.
+
 ### 4. Fix policy
 
 Severity-tag every finding (`high` / `med` / `low`).
@@ -102,6 +113,7 @@ forge-harden-security (mode: DAILY | DEEP)
   Findings fixed: <N> (high: <h>, med: <m>, low: <l>; TENTATIVE: <t>)
   Trend: <N> last harden → <N> now | first run
   Trust boundaries named: <list>
+  Release closure: complete | fixed (<missing items>)
   LLM surface review: applied | n/a
   Taste decisions surfaced: <N>
 ```
