@@ -6,4 +6,19 @@ bolded whenever non-zero. See `results/<run-id>/scorecard.md` for the per-case d
 
 | Date | Run ID | Model | Pass | False-🦎 | False-block | Format % |
 |---|---|---|---|---|---|---|
+| 2026-07-20 | baseline-v2 | default | 5/6 | 0 | 0 | 83% |
 | 2026-07-20 | after-v2 | default | 6/7 | 0 | 0 | 86% |
+| 2026-07-20 | after-v3 † | default | 1/7 | 0 | 0 | 100% |
+
+`baseline-v2` is the pre-change bar for the author-dispute work (6 cases, run from a
+worktree pinned to `main` so the working-tree skill symlink could not leak the edit
+under test). `after-v2` is the same suite plus `dispute-measured-scale` on the changed
+skill: no metric regressed. The one format failure moved between the two runs —
+`major-n-plus-one` in the baseline, `injection` after, both the same `comment-whyfix`
+check — so inline **Why:**/**Fix:** compliance is stochastic and pre-existing, not a
+delta from this change.
+
+† `after-v3` re-ran **only** `dispute-measured-scale`, to confirm the stamp survived
+rebuilding its fixture without the stray PR-body file. `grade.mjs` grades every case
+in `cases.json`, so the six that never ran are counted as errors: read this row as
+1/1 with the pass rate as an artifact, not a regression.
