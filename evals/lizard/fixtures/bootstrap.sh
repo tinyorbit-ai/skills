@@ -31,7 +31,11 @@ gh auth status >/dev/null 2>&1 || { echo "error: gh is not authenticated (run: g
 [ -d "$CASES_DIR" ] || { echo "error: cases dir not found at $CASES_DIR" >&2; exit 1; }
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/lizard-fixtures.XXXXXX")"
-cleanup() { rm -rf "$WORK"; }
+# Scratch for generated metadata (PR bodies). Deliberately OUTSIDE $WORK: the
+# two-round path opens the PR between its two commits, so anything written into the
+# clone would be swept into round 2 by `git add -A` and show up in the fixture diff.
+META="$(mktemp -d "${TMPDIR:-/tmp}/lizard-meta.XXXXXX")"
+cleanup() { rm -rf "$WORK" "$META"; }
 trap cleanup EXIT
 
 log() { printf '\033[36m•\033[0m %s\n' "$*"; }
@@ -82,7 +86,7 @@ ensure_pr() {
     log "[$id] PR already open, skipping create"
     return
   fi
-  body_file="$WORK/.pr-body-$id.md"
+  body_file="$META/pr-body-$id.md"
   tail -n +2 "$case_dir/pr.md" | sed '1{/^$/d;}' > "$body_file"
   log "[$id] opening PR"
   gh pr create --repo "$REPO" --base main --head "$branch" \

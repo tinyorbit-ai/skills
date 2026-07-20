@@ -6,3 +6,4 @@ bolded whenever non-zero. See `results/<run-id>/scorecard.md` for the per-case d
 
 | Date | Run ID | Model | Pass | False-🦎 | False-block | Format % |
 |---|---|---|---|---|---|---|
+| 2026-07-20 | after-v2 | default | 6/7 | 0 | 0 | 86% |
