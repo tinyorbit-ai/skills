@@ -131,9 +131,12 @@ skill; arrays stay in API order — `-S` sorts object keys only.
 When a prior lizard review exists and the diff has genuinely changed:
 
 1. **Audit prior findings first** — resolve any prior finding the author disputed per
-   scope.md's author-dispute rule before anything else. Then, for each blocking
-   finding in the last lizard review, check the current head: resolved or still open?
-   Record both lists in the receipts. Label new findings as pre-existing misses,
+   scope.md's author-dispute rule before anything else, including its re-earn and
+   present-tense gates: a prior blocker only stays blocking if it clears the proof bar
+   again on *this* head. A carried-forward finding is a decision, not a default.
+   Then, for each blocking finding in the last lizard review, check the current head:
+   resolved or still open? Record both lists in the receipts — for anything still
+   open, record what re-proved it, not merely that it was reviewed. Label new findings as pre-existing misses,
    author-fix regressions, or lizard-fix regressions. Never imply that an old miss was
    caused by the new push.
 2. **Review the delta** — fetch what changed since the last reviewed head:

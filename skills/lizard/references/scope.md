@@ -90,9 +90,17 @@ completeness for the current head, not immunity from bugs introduced by future f
 ## Author disputes
 
 An author's reply to a finding is evidence, not noise. When the author disputes a
-finding — pre-existing, intended, handled elsewhere — verify the claim before the
-next verdict: run the base branch check for "pre-existing", read the pointed-to code
-for "handled elsewhere".
+finding, verify the claim before the next verdict. Each kind of dispute has its own
+check — find the kind first, because an unrecognised dispute must never fall through
+to "hold by default":
+
+| Dispute | The check |
+|---|---|
+| **Pre-existing** | Run the base-branch check. |
+| **Handled elsewhere** | Read the pointed-to code. |
+| **Intended** | Read the stated intent against the linked issue/PR description. |
+| **Magnitude** — "real, but not at this scale" | Check the cited measurement (row counts, table size, traffic, timings) and whether the bound they claim actually holds in the code. |
+| **Mechanism** — "the fix you asked for cannot work" | Check the mechanism itself. If the prescribed fix is genuinely not implementable, the finding is **void until re-derived** with one that is. |
 
 If the claim holds, concede plainly and reclassify — a blocking `introduced` finding
 the author proves `pre-existing` becomes a non-blocking follow-up — then withdraw the
@@ -101,6 +109,25 @@ blocker in the next review. Never silently re-assert it.
 If the claim fails, hold the finding and answer with the specific trace that
 contradicts it. Respond to the author's argument, not past it.
 
+**A partially-conceded finding must re-earn its severity.** Conceding two of three
+sub-claims and carrying the third forward is not automatic. The surviving remainder
+stands alone now, so charge it the full `SKILL.md` proof burden again, on the current
+head, as if posting it fresh — the original severity does not transfer. If the
+remainder only clears the bar as a hypothetical, it is a non-blocking follow-up.
+
+**Present tense or it does not block.** A blocker must name behaviour provable on
+*this* head. "Unbounded **as the table grows**", "will not scale **once** traffic
+rises", "becomes a problem **when** the collection is large" — a future-tense residue
+is unfalsifiable by construction, and reaching for one is the tell that the finding
+was conceded in substance and kept in form. Note the growth risk as a follow-up, and
+stamp. A measured present-scale bound answers an unmeasured growth claim; if you
+believe the measurement is wrong, refute the number, don't restate the fear.
+
 Never repeat a disputed finding verbatim across rounds: each round concedes, narrows,
-or strengthens the proof. Severity never overrides a verified dispute; causality
-still governs.
+or strengthens the proof. Narrowing is not automatically progress — a finding that
+narrows every round while never gaining proof is being kept alive past its evidence;
+drop it. Severity never overrides a verified dispute; causality still governs.
+
+Receipts record the *disposal*, not the reading. "Author's dispute checked ✓" against
+a still-standing blocker is not a receipt — say which claims were verified, which
+held, and why what remains still blocks.
