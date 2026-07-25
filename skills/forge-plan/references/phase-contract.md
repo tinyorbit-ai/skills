@@ -46,10 +46,27 @@ Use `## Phase N — <title>` exactly — the evals and router machine-read it.
 The `Design:` value is exactly one form above, never prose. `explore` routes to
 forge-design-explore; `none` means no UI.
 
-The gate must assert the Goal's own observable. `typecheck && lint && test` is
-hygiene and never sufficient. Ask: *if this gate passed while the goal were
-false, what would catch it?* Rewrite when the answer is nothing. A precise manual
-check is valid; "works" or "looks right" is not.
+The gate must assert the Goal's own observable — name the command and the expected
+output that only this phase's work can produce. `typecheck && lint && test` runs at
+review and ship on every phase anyway; it proves hygiene, **never the goal, so it is
+never sufficient as the gate**.
+
+```
+Bad  (proves hygiene, not the phase):
+  Goal: users can dedupe a folder from the CLI
+  Gate: typecheck && lint && test
+
+Good (proves the goal, observably):
+  Goal: users can dedupe a folder from the CLI
+  Gate: `dedupe ./fixtures/dupes` exits 0 and prints "reclaimed 312 MB";
+        `dedupe ./fixtures/clean` prints "nothing to do"
+```
+
+Self-check before locking each phase: *if this gate passed while the goal were
+false, what would catch it?* Rewrite when the answer is nothing. A precisely
+described manual check with an observable result is valid; "it works" or "looks
+right" is not. Match rigor to the project (a prototype's gate can be "the script
+runs and prints X"), but the goal-anchor rule holds at every level.
 
 Every behavior introduced by Goal, gate, or Work — state transition, default,
 interface, or config knob — must trace to a brief clause or linked ADR. Otherwise
