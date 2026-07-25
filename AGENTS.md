@@ -2,8 +2,9 @@
 
 Read and follow [`CLAUDE.md`](CLAUDE.md) in full before working in this repo. It
 is the shared source of truth for the architecture, project structure, skill
-format, eval-gated edit loop, commands, gotchas, and skills index. Do not maintain
-a divergent Codex copy of those rules.
+format, eval-gated edit loop, commands, and gotchas. Do not maintain a divergent
+Codex copy of those rules. The per-skill index lives in
+[`skills/INDEX.md`](skills/INDEX.md), linked from there.
 
 Codex-specific mapping: where shared guidance says `AskUserQuestion`, use Codex's
 structured user-input tool when available, otherwise ask one concise plain-text

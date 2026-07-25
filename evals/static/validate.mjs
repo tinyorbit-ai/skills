@@ -141,20 +141,29 @@ if (!allScope || inScope('forge-plan')) {
   }
 }
 
-// CLAUDE.md skills-index sync (public skills only)
+// skills/INDEX.md sync (public skills only). The table lives there rather than in
+// CLAUDE.md: every skill's `description` is already always in the agent's context,
+// so keeping ~2,200 tokens of richer duplicate in the always-loaded file is the
+// "central repository of every practice" that context-engineering guidance warns off.
 const claudeMd = readFileSync(join(ROOT, 'CLAUDE.md'), 'utf8');
+const indexPath = join(ROOT, 'skills/INDEX.md');
+if (!existsSync(indexPath)) failures.push('index-sync: skills/INDEX.md is missing');
+const indexMd = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : '';
+if (!/skills\/INDEX\.md/.test(claudeMd)) {
+  failures.push('index-sync: CLAUDE.md must point at skills/INDEX.md');
+}
 const agentsMd = existsSync(join(ROOT, 'AGENTS.md')) ? readFileSync(join(ROOT, 'AGENTS.md'), 'utf8') : '';
 if (!/CLAUDE\.md/.test(agentsMd) || !/shared source of truth/i.test(agentsMd)) {
   failures.push('guidance-sync: AGENTS.md must point Codex at the full shared CLAUDE.md guidance');
 }
-const indexed = new Set([...claudeMd.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)].map((m) => m[1]));
+const indexed = new Set([...indexMd.matchAll(/^\|\s*`([a-z0-9-]+)`\s*\|/gm)].map((m) => m[1]));
 const publicSkills = skills.filter((s) => !s.internal);
 for (const s of publicSkills) {
-  if (!indexed.has(s.name)) fail(s.name, 'missing from the CLAUDE.md skills index table');
+  if (!indexed.has(s.name)) fail(s.name, 'missing from the skills/INDEX.md table');
 }
 for (const name of indexed) {
   if (!inScope(name)) continue;
-  if (!publicSkills.some((s) => s.name === name)) fail(name, 'in the CLAUDE.md skills index but has no folder in skills/');
+  if (!publicSkills.some((s) => s.name === name)) fail(name, 'in skills/INDEX.md but has no folder in skills/');
 }
 
 // `npx skills add . --list` discovery oracle — the ground truth for "will it install"
