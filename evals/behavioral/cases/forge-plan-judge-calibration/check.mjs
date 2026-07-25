@@ -14,7 +14,7 @@ export default async function check({ workdir, judgeRaw, root }) {
   const degraded = readFileSync(join(workdir, 'degraded-plan.md'), 'utf8');
   const brief = 'A zero-dependency Node CLI that tidies a screenshots folder: YYYY-MM/ subfolders by capture date, honest per-file date-source receipt, dedupe to _dupes/ (never delete), idempotent, --dry-run first-class, 2,000 files < 10 s. Non-goals: no OCR, no GUI, no watching, no cloud.';
 
-  const ask = (a, b) => {
+  const ask = async (a, b) => {
     const prompt = [
       'Two build plans were written for the same brief. Judge which better honors the quality standards below. Be strict and concrete.',
       '', '## The brief', brief,
@@ -22,12 +22,12 @@ export default async function check({ workdir, judgeRaw, root }) {
       '', '## Plan A', a, '', '## Plan B', b, '',
       'Reply with ONLY a JSON object: {"winner": "A" | "B", "margin": <0-10, how much better the winner is>, "reasons": ["concrete, citing specifics from the losing plan"]}',
     ].join('\n');
-    const out = judgeRaw(prompt);
+    const out = await judgeRaw(prompt);
     try { return JSON.parse(out.match(/\{[\s\S]*\}/)?.[0] ?? '{}'); } catch { return {}; }
   };
 
-  const r1 = ask(golden, degraded); // golden is A
-  const r2 = ask(degraded, golden); // golden is B
+  const r1 = await ask(golden, degraded); // golden is A
+  const r2 = await ask(degraded, golden); // golden is B
   add('order 1: judge picked the golden plan', r1.winner === 'A', `winner ${r1.winner}, margin ${r1.margin}`);
   add('order 2 (swapped): judge picked the golden plan — no position bias', r2.winner === 'B', `winner ${r2.winner}, margin ${r2.margin}`);
   const margins = [r1.margin, r2.margin].filter((m) => typeof m === 'number');

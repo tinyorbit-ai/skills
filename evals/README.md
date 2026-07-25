@@ -71,7 +71,27 @@ node evals/behavioral/run.mjs _smoke                          # plumbing self-te
 node evals/behavioral/run.mjs forge-plan-structural --runs 3
 node evals/behavioral/run.mjs forge-review-planted-bugs --runs 3
 node evals/behavioral/run.mjs --all --keep                    # keep workdirs for inspection
+node evals/behavioral/run.mjs forge-plan-structural --runs 3 --jobs 3   # overlap the runs
+node evals/behavioral/run.mjs forge-plan-structural --no-cache          # force a re-measure
 ```
+
+### Why a round used to take 40 minutes
+
+Three structural wastes, all fixed:
+
+- **Runs were sequential.** They're independent, so they now overlap — `--jobs N`
+  (default 3). The ceiling is provider overload, not CPU, so don't crank it far.
+- **An unchanged baseline was re-measured every time.** Each case fingerprints the
+  skills under test + the case dir + the model; an identical fingerprint reuses the
+  stored verdict instead of paying for it again (`evals/results/.cache/`). Comparing
+  a branch against `origin/main` three times in a session re-ran a baseline whose
+  skills never changed — half the wall clock for nothing. Editing any skill under
+  test changes the fingerprint and forces a real run.
+- **A 529 burned a whole run.** `runAgent` now backs off and retries up to 3×; only
+  a run that still fails is reported as errored and excluded.
+
+Cold `--runs 3` is now roughly one run's wall time instead of three, and an
+unchanged side is instant.
 
 Each case copies a fixture repo into a temp dir, git-inits it (optionally with a
 phase branch via the `fixture/base/` + `fixture/phase/` overlay convention),

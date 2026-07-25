@@ -17,9 +17,12 @@
 // Runs are stochastic: use --runs 3 for anything you intend to trust.
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, cpSync, symlinkSync, statSync } from 'node:fs';
-import { execFileSync, execSync } from 'node:child_process';
+import { execFile, execFileSync, execSync } from 'node:child_process';
+import { promisify } from 'node:util';
+const execFileAsync = promisify(execFile);
 import { join, basename } from 'node:path';
 import { tmpdir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { mkdtempSync } from 'node:fs';
 
 const ROOT = new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
@@ -33,6 +36,8 @@ const opt = (name, dflt) => {
   return i !== -1 ? argv[i + 1] : dflt;
 };
 const runs = Number(opt('--runs', 1));
+const jobs = Number(opt('--jobs', 3));      // concurrent runs; provider overload is the real ceiling
+const noCache = flag('--no-cache');         // force re-run even if the inputs are unchanged
 const modelOverride = opt('--model', null);
 const keep = flag('--keep');
 const caseNames = flag('--all')
@@ -44,6 +49,28 @@ if (caseNames.length === 0) {
   console.error(`Cases: ${readdirSync(CASES_DIR).join(', ')}`);
   process.exit(1);
 }
+
+// Fingerprint everything a run's outcome depends on. An unchanged baseline is the
+// single biggest waste in this harness: origin/main was re-run three times in one
+// session while its skills never changed, which is half the wall clock for nothing.
+function fingerprint(caseDir, config) {
+  const h = createHash('sha256');
+  h.update(modelOverride || config.model || 'default');
+  const walk = (dir) => {
+    for (const f of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+      if (f.name === 'node_modules' || f.name.startsWith('.git')) continue;
+      const full = join(dir, f.name);
+      if (f.isDirectory()) walk(full);
+      else { h.update(full.replace(ROOT, '')); h.update(readFileSync(full)); }
+    }
+  };
+  walk(caseDir);
+  for (const sk of config.skills || []) walk(join(ROOT, 'skills', sk));
+  return h.digest('hex').slice(0, 16);
+}
+
+const CACHE = join(RESULTS_DIR, '.cache');
+const cachePath = (name, fp) => join(CACHE, `${name}-${fp}.json`);
 
 const git = (workdir, args) =>
   execFileSync('git', ['-c', 'user.name=forge-eval', '-c', 'user.email=eval@local', ...args], { cwd: workdir, stdio: 'pipe' });
@@ -76,7 +103,10 @@ function setUpWorkdir(caseDir, config) {
   return workdir;
 }
 
-function runAgent(workdir, task, config, transcriptPath) {
+const APIERR = (out) =>
+  out.match(/"terminal_reason":"api_error"[\s\S]{0,400}?"api_error_status":(\d+)/) ?? out.match(/API Error: (5\d\d)/);
+
+async function runAgent(workdir, task, config, transcriptPath, attempt = 1) {
   const timeoutMs = (config.timeoutMinutes || 20) * 60_000;
   const model = modelOverride || config.model;
   const args = ['-p', task, '--dangerously-skip-permissions', '--output-format', 'stream-json', '--verbose'];
@@ -84,33 +114,41 @@ function runAgent(workdir, task, config, transcriptPath) {
   let out = '';
   let agentError = null;
   try {
-    out = execFileSync('claude', args, { cwd: workdir, timeout: timeoutMs, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+    const r = await execFileAsync('claude', args, { cwd: workdir, timeout: timeoutMs, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+    out = r.stdout;
   } catch (e) {
     out = (e.stdout || '') + (e.stderr || '');
-    agentError = e.killed ? `timed out after ${config.timeoutMinutes || 20}m` : `exit ${e.status}`;
+    agentError = e.killed ? `timed out after ${config.timeoutMinutes || 20}m` : `exit ${e.code ?? e.status}`;
   }
-  // A transient provider failure is not a skill failure. The CLI does not always
-  // signal these through the exit code, so read the terminal reason too — an
-  // `API Error: 529 Overloaded` (seen when several headless runs share a machine)
-  // otherwise grades as an empty workdir failing every check.
-  const apiErr = out.match(/"terminal_reason":"api_error"[\s\S]{0,400}?"api_error_status":(\d+)/)
-    ?? out.match(/API Error: (5\d\d)/);
-  if (apiErr) agentError = `API error ${apiErr[1]}${agentError ? ` (${agentError})` : ''}`;
+  // A 529 is the provider asking us to slow down, not a result. Retry with backoff
+  // rather than burning the whole run — losing one run to overload previously cost
+  // a 3-run case a third of its evidence.
+  if (APIERR(out) && attempt <= 3) {
+    const wait = 15_000 * attempt;
+    console.log(`  transient API error (${APIERR(out)[1]}) — retry ${attempt}/3 in ${wait / 1000}s`);
+    await new Promise((r) => setTimeout(r, wait));
+    return runAgent(workdir, task, config, transcriptPath, attempt + 1);
+  }
+  // Still failing after retries: a provider failure is not a skill failure, so it
+  // is reported as an errored run and excluded from grading downstream.
+  const apiErr = APIERR(out);
+  if (apiErr) agentError = `API error ${apiErr[1]} after 3 retries`;
   writeFileSync(transcriptPath, out);
   return { transcript: out, agentError };
 }
 
 // One headless model call; returns raw text. Also handed to check.mjs so a case
 // can run its own judge calls (e.g. the judge-calibration case).
-function judgeRaw(prompt) {
+async function judgeRaw(prompt) {
   try {
-    return execFileSync('claude', ['-p', prompt], { timeout: 300_000, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    const r = await execFileAsync('claude', ['-p', prompt], { timeout: 300_000, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 });
+    return r.stdout;
   } catch (e) {
     return `judge error: ${e.message?.slice(0, 120)}`;
   }
 }
 
-function judge(caseDir, config, workdir) {
+async function judge(caseDir, config, workdir) {
   const rubricPath = join(caseDir, 'rubric.md');
   if (!existsSync(rubricPath)) return null;
   const rubric = readFileSync(rubricPath, 'utf8');
@@ -133,7 +171,7 @@ function judge(caseDir, config, workdir) {
     'pass is true only if EVERY dimension meets the rubric\'s floor.',
   ].join('\n');
   try {
-    const out = judgeRaw(prompt);
+    const out = await judgeRaw(prompt);
     const json = out.match(/\{[\s\S]*\}/)?.[0];
     return json ? JSON.parse(json) : { scores: {}, pass: false, reasons: ['judge returned no JSON'] };
   } catch (e) {
@@ -152,7 +190,19 @@ for (const name of caseNames) {
   const task = skipAgent ? '' : readFileSync(join(caseDir, 'task.md'), 'utf8');
   const caseResults = [];
 
-  for (let i = 1; i <= runs; i++) {
+  // Reuse an identical prior measurement rather than paying for it again.
+  const fp = fingerprint(caseDir, config);
+  const cached = !noCache && existsSync(cachePath(name, fp)) ? JSON.parse(readFileSync(cachePath(name, fp), 'utf8')) : null;
+  if (cached && cached.runs >= runs) {
+    console.log(`\n=== ${name} — cached (fingerprint ${fp}, ${cached.runs} run(s)) ===`);
+    console.log(`  ${cached.casePass ? 'PASS' : cached.inconclusive ? 'INCONCLUSIVE' : 'FAIL'}`
+      + (Object.keys(cached.medians ?? {}).length ? ` · medians ${Object.entries(cached.medians).map(([k, v]) => `${k} ${v}`).join(' · ')}` : '')
+      + `\n  skills and case unchanged since that run — pass --no-cache to force`);
+    if (!cached.casePass) suiteFailed = true;
+    continue;
+  }
+
+  const runOne = async (i) => {
     console.log(`\n=== ${name} · run ${i}/${runs} ===`);
     const workdir = setUpWorkdir(caseDir, config);
     const runDir = join(RESULTS_DIR, `${stamp}-${name}`, `run-${i}`);
@@ -161,7 +211,7 @@ for (const name of caseNames) {
 
     const { transcript, agentError } = skipAgent
       ? { transcript: '', agentError: null }
-      : runAgent(workdir, task, config, join(runDir, 'transcript.jsonl'));
+      : await runAgent(workdir, task, config, join(runDir, 'transcript.jsonl'));
     if (agentError) console.log(`  agent: ${agentError}`);
 
     const checkModule = await import(join(caseDir, 'check.mjs'));
@@ -179,7 +229,7 @@ for (const name of caseNames) {
       console.log(`  ${c.pass ? 'PASS' : c.required === false ? 'info' : 'FAIL'}  ${c.name}${c.detail ? ` — ${c.detail}` : ''}`);
     }
 
-    const verdict = judge(caseDir, config, workdir);
+    const verdict = await judge(caseDir, config, workdir);
     if (verdict) {
       const scores = verdict.scores && Object.keys(verdict.scores).length
         ? Object.entries(verdict.scores).map(([k, v]) => `${k} ${v}`).join(' · ')
@@ -195,7 +245,15 @@ for (const name of caseNames) {
     caseResults.push({ run: i, pass, hardPass, agentError, checks, judge: verdict, workdir: keep ? workdir : undefined });
     console.log(`  run verdict: ${pass ? 'PASS' : 'FAIL'}${pass === hardPass ? '' : ' (deterministic checks green; judge below floor)'}`);
     if (!keep) execSync(`rm -rf ${JSON.stringify(workdir)}`);
-  }
+  };
+
+  // Runs are independent, so overlap them. The ceiling is provider overload, not
+  // CPU — hence a modest default and the 529 backoff in runAgent.
+  const queue = Array.from({ length: runs }, (_, k) => k + 1);
+  await Promise.all(Array.from({ length: Math.min(jobs, runs) }, async () => {
+    for (let i = queue.shift(); i !== undefined; i = queue.shift()) await runOne(i);
+  }));
+  caseResults.sort((a, b) => a.run - b.run);
 
   // ---- case verdict ----
   // A run the agent never completed measures nothing. Observed 2026-07-25: an
@@ -237,6 +295,8 @@ for (const name of caseNames) {
   writeFileSync(join(RESULTS_DIR, `${stamp}-${name}`, 'result.json'),
     JSON.stringify({ case: name, stamp, runs, casePass, inconclusive, errored: errored.length,
       graded: graded.length, hardRate, floor, medians, passRate, results: caseResults }, null, 2));
+  mkdirSync(CACHE, { recursive: true });
+  writeFileSync(cachePath(name, fp), JSON.stringify({ case: name, fingerprint: fp, stamp, runs, casePass, inconclusive, medians, hardRate }, null, 2));
 
   if (Object.keys(medians).length) {
     const line = Object.entries(medians).map(([k, m]) => `${k} ${m}${m >= floor ? '' : ' ✗'}`).join(' · ');

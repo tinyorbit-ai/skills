@@ -12,7 +12,7 @@ export default async function check({ workdir, judgeRaw, root }) {
   const standards = readFileSync(join(root, 'skills/forge/references/simplicity.md'), 'utf8');
   const rubric = readFileSync(join(root, 'evals/behavioral/cases/forge-plan-structural/rubric.md'), 'utf8');
 
-  const score = (plan) => {
+  const score = async (plan) => {
     const prompt = [
       'You are grading the output of an autonomous agent run. Be strict; a generous grade defeats the eval.',
       '', '## Standards to grade against (verbatim from the project — these outrank the rubric)',
@@ -22,11 +22,11 @@ export default async function check({ workdir, judgeRaw, root }) {
       'Reply with ONLY a JSON object: {"scores": {"<dimension>": <0-10>, ...}, "pass": <true|false>, "worst": "<dimension>", "reasons": ["..."]}',
       "pass is true only if EVERY dimension meets the rubric's floor.",
     ].join('\n');
-    try { return JSON.parse(judgeRaw(prompt).match(/\{[\s\S]*\}/)[0]); } catch { return { scores: {} }; }
+    try { return JSON.parse((await judgeRaw(prompt)).match(/\{[\s\S]*\}/)[0]); } catch { return { scores: {} }; }
   };
 
-  const golden = score(readFileSync(join(workdir, 'golden-plan.md'), 'utf8'));
-  const degraded = score(readFileSync(join(workdir, 'degraded-plan.md'), 'utf8'));
+  const golden = await score(readFileSync(join(workdir, 'golden-plan.md'), 'utf8'));
+  const degraded = await score(readFileSync(join(workdir, 'degraded-plan.md'), 'utf8'));
   const vals = (v) => Object.values(v.scores ?? {});
   const gMin = vals(golden).length ? Math.min(...vals(golden)) : -1;
   const dMax = vals(degraded).length ? Math.max(...vals(degraded)) : 99;
