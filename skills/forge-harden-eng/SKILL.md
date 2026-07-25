@@ -98,6 +98,40 @@ spend one search each on:
 Fold what you find into the phase's Work bullets or an ADR. A plan that
 hand-rolls something the framework ships is an objective finding.
 
+### 2d. Numeric non-functional proof
+
+When the architecture implies meaningful load, latency promises, resource
+limits, or durable state, prose like "scales", "fast", or "survives restarts"
+is an objective gap. Add the applicable proof to the earliest risk-retirement
+phase and to Release closure:
+
+- **Load/latency:** named workload and concurrency/data size; p95/p99 ceiling;
+  exact load command and measured pass condition.
+- **Resources:** numeric CPU, memory, disk, connection, queue/backlog, or image
+  ceilings under that workload — only the ceilings this architecture can hit.
+- **Crash/restart:** kill point plus numeric/data invariant after restart (for
+  example 0 lost/duplicated jobs and recovery within N seconds).
+- **Backup/restore:** seeded data size/count, destroy-and-restore command, exact
+  integrity assertions, and maximum recovery time where the brief implies one.
+- **Upgrade:** named oldest supported artifact, real migration path, exact
+  post-upgrade invariants, and rollback/forward-fix decision.
+
+Use `n/a — <reason>` only when the architecture truly does not imply that
+property. Match numbers to the brief/architecture; invented vanity targets are
+not proof. A scale/state plan does not lock with applicable cells left as prose.
+
+### 2e. External-reality pass
+
+Verify every outward assumption against current primary evidence before lock:
+product/package/domain names; registries; dependency existence, maintenance,
+licence, and version support; claimed OS/CPU/runtime/browser platforms; provider
+features/limits; package contents/install behavior; and the real release path.
+Use registry/provider CLIs, manifests, and official docs where possible. Record
+the checked fact, source/command, date, and plan consequence in an ADR or the
+relevant phase. A collision, unsupported platform, unavailable provider feature,
+or package that fails from its tarball/image is an objective finding with a
+fallback — never defer reality to release day.
+
 ### 3. Architecture coherence
 
 Phases should sequence so each leaves the project in a working state.
@@ -124,6 +158,7 @@ forge-harden-eng (mode: LOCK | TRIAGE)
                            economy <a>→<b>
   Findings fixed: <N> (severity breakdown: H/M/L)
   Parts cut: <N> (each tied to a before/after) · Search gates run: <N>
+  Numeric NFR gates: <N> added · External facts checked: <N>
   Taste decisions surfaced: <N>
   Strengthened gates: phase <a>, phase <b>, ...
   Plan diff: <one-line summary>

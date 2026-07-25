@@ -61,7 +61,11 @@ Compare plan to brief. Where does the plan:
 **EXPAND**: list the timid premises with concrete examples from the plan.
 For each, describe the bolder version — same intent, more excellent
 realization. Name the *craft cost* honestly (effort, hard parts, time)
-in the user's currency, never market currency.
+in the user's currency, never market currency. Every expansion must also name
+its **added proof burden** (new observable gate/evidence required) and a
+**paired cut or pressure valve** (what leaves scope, or the explicit trigger +
+fallback that lets the expansion slip without endangering the core). An
+expansion missing either is not ready to present.
 
 Frame each expansion **expansively, then concretely** — lead with what the
 finished thing feels like, close with the shape and cost:
@@ -92,8 +96,9 @@ AskUserQuestion in the **Decision Brief** shape (forge suite's
 
 - For EXPAND findings: **one question per expansion** so the user
   cherry-picks (keep current / adopt bolder / take specific pieces) —
-  never one bundled "expand everything?" question. Rejected expansions go
-  to `wiki/improvements.md` as parked.
+  never one bundled "expand everything?" question. Include proof burden and
+  cut/pressure valve in every option. Rejected expansions go to
+  `wiki/improvements.md` as parked.
 - For HOLD findings: confirm-and-record / re-examine.
 - For TRIM findings: keep phase / move to improvements / delete outright.
 
@@ -104,7 +109,8 @@ Take a position. The user's "I want it small" / "I want it sprawling" /
 
 - Plan changes → edit `wiki/plan.md` in place.
 - Ambition shifts → update `wiki/brief.md` and record an ADR if the shape
-  itself changed.
+  itself changed; record each adopted expansion's proof burden and paired
+  cut/pressure valve in the brief/ADR and its affected plan gate.
 - Trims → move work bullets / phases to `wiki/improvements.md` with the
   user's stated reason.
 - HOLD confirmations → ADR ("Scope held: <what>, because <why>") so it
@@ -118,6 +124,7 @@ forge-harden-scope (mode: EXPAND | HOLD | TRIM)
   Plan changes applied: <list>
   Ambition shift: yes (brief updated) | no
   Trims → improvements.md: <N>
+  Expansion proof burdens + cuts/pressure valves: <N>/<N>
   HOLD ADRs written: <N>
 ```
 

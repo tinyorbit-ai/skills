@@ -4,7 +4,8 @@ This repo is Matt's personal **agent skills marketplace**. Every skill lives her
 self-contained folder and is distributed to any machine/agent via the
 [`skills` CLI](https://skills.sh) (`vercel-labs/skills`, run as `npx skills`).
 
-> CLAUDE.md is the source of truth. Keep this file updated as skills and conventions evolve.
+> CLAUDE.md is the shared source of truth. `AGENTS.md` is Codex's entry point and
+> requires this file in full so both agents use the same workflows and index.
 
 ## How distribution works
 
@@ -141,6 +142,13 @@ agent) is making the change. **Scope: the forge suite only, for now** (`forge` +
 skills are excluded until deliberately added — every runner takes `--all` to
 widen). Full docs + add-a-case guide: `evals/README.md`.
 
+A case passes when **every** run clears the deterministic `check.mjs` assertions
+**and** the **median** judge score per dimension across runs clears the floor —
+not every run's every dimension. Measured: the golden reference plan scores 7–8 on
+its tightest dimension against a floor of 7, so all-runs-must-clear lands ~30% of
+the time regardless of quality. The median measures typical output, which is what
+the rubric always meant; the seeded-degraded plan (0–1) fails either way.
+
 | Tier | Command | Proves | Cost |
 |---|---|---|---|
 | 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
@@ -168,9 +176,19 @@ not hygiene, plus free economy-of-means script checks; the judge grades against
 forge's own `simplicity.md` verbatim, four dimensions, floor ≥ 7),
 `forge-plan-judge-calibration` (judge-only: golden vs seeded-bloat plan, both
 orders — if the judge can't tell them apart, don't trust its other verdicts),
+`forge-plan-rubric-absolute` (judge-only, the same pair scored **one at a time**
+against the floor — the mode every real case uses, and the one that went untested
+until it bit; its headroom check fails by design, standing evidence that golden's
+worst dimension equals the floor),
 the tripwired pair — `forge-plan-tripwired-simple` / `-comprehensive` (briefs
 whose non-goals ban named features; judge dimension behavior_traceability
 requires every phase behavior to trace to a brief clause or an ADR),
+the planning-discipline quartet — `forge-planning-disciplines-small` / `-large` /
+`-product` (risk contracts/order, human evidence, numeric NFRs, external reality,
+ambition pressure valves, and release closure across three project shapes) plus
+`-tiny`, the proportionality floor (one file, one user, nothing published — release
+closure must collapse to one `n/a` line; grades both enumerating the nine items to
+n/a them and, worse, inventing packaging/telemetry/runbook work to fill them),
 `forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
 validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and
@@ -229,17 +247,14 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
   Split aggressively into `references/`. The validator warns at ≥185 body lines and
   fails at ≥200.
-  **Four skills are parked in the warning band and will hit the wall on their next
-  growth: `forge-plan` (192), `forge-review`/`forge-harden`/`forge-discovery` (196).**
+  **Two skills are parked in the warning band and will hit the wall on their next
+  growth: `forge-review` and `forge-harden` (196).**
   When you next edit one substantively, extract *then* — you're already paying for
   its behavioral eval re-run, and where a contract lives is behavior-affecting, so
   it needs the baseline→change→re-run loop either way. Don't do it as standalone
   churn. Extract only **step-scoped** material (needed at one step of the process);
   hot-path content used every run belongs in `SKILL.md` — moving it out trades a
-  lint warning for the agent skipping it. Identified candidate: `forge-plan` §4's
-  phase block template + `Design:` marker enum + gate examples
-  (`skills/forge-plan/SKILL.md:98-146`, ~48 lines, all consumed at step 4 of 6)
-  → `references/phase-contract.md`, which would drop it to ~150.
+  lint warning for the agent skipping it.
 - **Folder name must equal `name`.** Mismatches break discovery/install.
 - **Experimental needs both** the `.experimental/` location *and* `metadata.internal:
   true` — the dir alone won't gate it once discovery falls back to recursive search.
@@ -251,14 +266,14 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 |---|---|---|
 | `forge` | stable | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→design (gated, if UI)→harden→(build→review→ship loop, one phase/run). A UI phase can't build until its `Design:` marker is locked. `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
 | `forge-init` | stable | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base + `.forge/` config & taste profile); injects wiki/ADR/phase/design rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
-| `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six with push-until gates; one-liner runs are budgeted (~6 questions, stop-when-sharp, folded overlaps). Files its source docs into `knowledge/`. Never reopens whether it should exist / who builds it. |
-| `forge-plan` | stable | Brief → `wiki/plan.md` as ordered verifiable phases (one branch each, each with a `Design:` marker) + seed ADRs + a substantive `architecture.md` (boundaries-with-why, scale assumptions, parts list). Gates must prove the phase goal — generic CI is never sufficient. Phase behaviors carry the parts-list burden — traced to a brief clause or an ADR, never assumed. Licensed to flag "too large to build well". |
+| `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six with push-until gates; unknown real use becomes a named human-evidence marker for planning. Files source docs into `knowledge/`. Never reopens whether it should exist / who builds it. |
+| `forge-plan` | stable | Brief → risk-first `wiki/plan.md` with full material-bet contracts, ordered goal gates, conditional human-evidence stop, and a final release-closure phase; plus seed ADRs and substantive `architecture.md`. Behaviors trace to brief/ADR. Licensed to flag "too large to build well". |
 | `forge-harden` | stable | Plan-time hardening orchestrator — persona passes as isolated subagents (-eng / -security always; -design if UI; -dx if dev-facing; -scope on request), an **economy sweep always last** (authority to cut what personas added), persona-conflict reconciliation, then the adversarial reviewer grading the before→after diff + claimed deltas. User Challenge fires on a single objector; `--auto` has a hard always-surface allowlist. |
-| `forge-harden-eng` | stable | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. 0–10 rated dimensions, complexity smells (>8 files), search-before-building gate, and whether each gate actually proves its phase goal. |
+| `forge-harden-eng` | stable | Plan-time eng review (staff eng / EM persona). Modes — LOCK / TRIAGE. Adds numeric load/latency/resource/state proof when implied, an external-reality pass, complexity checks, and goal-proving gates. |
 | `forge-harden-design` | stable | Plan-time design/UX review (if UI). Modes — EXPANSION / POLISH / TRIAGE. Six rated passes, each fixing-to-10 with an artifact written into the plan (state table, journey storyboard, unresolved-decisions table). |
 | `forge-harden-dx` | stable | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Persona-card gate, first-run TTHW bar, magical-moment vehicle, evidence-grounded friction trace — folded into phase work. |
-| `forge-harden-security` | stable | Plan-time security review (CSO persona). Modes — DAILY (confidence ≥8/10, zero noise) / DEEP (≥2/10, TENTATIVE-tagged). OWASP, STRIDE, secrets, supply chain, LLM injection. Severity-tagged + trend line. |
-| `forge-harden-scope` | stable | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Complements forge-ambition (which runs at brief time). |
+| `forge-harden-security` | stable | Plan-time security review (CSO persona). Modes — DAILY / DEEP. OWASP, STRIDE, secrets, supply chain, LLM injection, plus explicit security/authz/abuse/scan closure in the release phase. |
+| `forge-harden-scope` | stable | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Every expansion carries an added proof burden and paired cut/pressure valve. |
 | `forge-build` | stable | Builds the next phase as a staff engineer (best version, in-boundary); reads `DESIGN.md` + the phase's design ADR as binding (off-system values = defects), then → forge-review. |
 | `forge-review` | stable | Staff-grade code review: triage tiers (light/standard/deep — machinery scales, bar doesn't; third-party pass required at deep), scope-drift + plan-completion audit, security, real tests passing, strict types (escape hatches banned), DESIGN.md token pass, runtime verify, third-party pass (temp-file artifact, output verified); auto-fixes with full scoped re-run after every fix, 3-attempt escape to forge-debug, and a **terminal command block whose pasted output is the hand-off condition**. Idempotent re-runs — fingerprints the phase diff (`git patch-id`), audits prior findings, reviews only the delta. Writes learnings + a structured review record **with receipts block** → `wiki/learnings.md`, and self-calibrates via `review-miss` detection (green-reviewed phases later hotfixed/reverted). |
 | `forge-ship` | stable | Lands a phase: fetch + rebase onto latest base → gate + scoped typecheck/lint/tests green on the rebased tree → one squashed commit on base → build-log entry → architecture.md reconciled → `forge-wiki-maintain --fix`; auto-invokes `forge-docs` if the phase touched a doc surface. |
@@ -266,7 +281,7 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-design-system` | stable | DESIGN.md as design source of truth — memorable-thing question, 2–3 named aesthetic directions, anti-default typography, token system (color / 4px spacing / radius / motion), HTML specimen page. Feeds the taste profile. |
 | `forge-design-explore` | stable | Divergent design exploration — 3-4 rendered HTML variants on a served feedback board before implementation (ASCII only for terminal UIs); anti-slop + differentiation checks at generation. Reads/writes the taste profile. Locks the chosen shape as an ADR and flips the phase's `Design:` marker. |
 | `forge-debug` | stable | Root-cause debugging (no fix without root cause); incidents → `wiki/notes/`. |
-| `forge-ambition` | stable | Charter-safe ambition check (boldest version of what you *already chose*; no money/market). Auto in `forge-discovery`; standalone. |
+| `forge-ambition` | stable | Charter-safe ambition check (boldest version of what you already chose; no money/market). Every expansion names its proof burden and paired cut/pressure valve. Auto in discovery; standalone. |
 | `forge-polish` | stable | Designer's-eye QA on the *running* UI: consistency, hierarchy, the shared anti-slop blacklist (mechanical grep + visual read), feel; loops fix→re-score to an exit bar (slop ≥9, design ≥8), numbered before/after evidence. Auto in `forge-review` (if UI); standalone. |
 | `forge-dx` | stable | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
 | `forge-retro` | stable | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |

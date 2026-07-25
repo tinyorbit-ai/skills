@@ -120,8 +120,9 @@ it"* clears any gate. Offer it explicitly, take it at face value, move on.
   phase 1; spend real thought here.
 - **Watched anyone do it the current way?** Have you actually watched the thing
   this replaces being done — yourself included — and what *surprised* you?
-  Surprise is the gate. "Haven't watched" is fine — it becomes a phase-1 note
-  ("do it manually once before automating"), not a blocker.
+  Surprise is the gate. "Haven't watched" is fine — mark real use as unknown and
+  require a scheduled human-evidence gate after the smallest useful workflow
+  exists and before billing, scale, or polish. It is not a discovery blocker.
 - **What you're most drawn to — or most unsure about.** Imagining the finished
   thing, which part are you most excited to use, and which least sure about?
   Whichever pulls hardest often points at the real shape.
@@ -151,32 +152,8 @@ accept). Fold its outcome into the brief. Skip only if the user declines.
 
 ### 4. Write `wiki/brief.md`
 
-Replace the stub. Sections, in this order:
-
-- **What it is** — the paragraph from question 1.
-- **Who & when** — the specific moment from §2b plus the base who/when.
-- **How it should feel** — the experiential target.
-- **The hard/interesting part** — the hunch at what'll be tricky (or "not sure yet").
-- **The friction it replaces** — what the user does without it today, in
-  effort/attention, plus anything observed/surprising from the watched-it-done question.
-- **Smallest useful version** — the seed for phase 1.
-- **Three-year fit** — more essential / less essential / same, and why.
-- **Constraints** — stack, platform, fixed shape.
-- **Non-goals** — what it explicitly is *not*.
-- **Shape chosen** — the picked shape with a one-line *why* over alternatives.
-- **What you're drawn to / unsure about** — the pull or doubt from §2b, captured
-  so later phases honor it. Omit if the answer was "don't know yet".
-
-Keep it tight — a page, not an essay. Every section earns its place.
-
-If any genuine decision was made here (the shape, a fixed constraint), also write an
-ADR per `wiki/` conventions and link it from `wiki/index.md`.
-
-**File the sources into the knowledge base.** A document seed (one-pager, research
-note) and any durable context that surfaced during discovery go into
-`wiki/knowledge/` via `forge-wiki` (nearest-fit topic; `project-genesis` when new) —
-the brief *cites* them with [[wikilinks]] instead of replacing them. The richest
-context a project ever gets arrives here; don't compress it away.
+Read and apply `references/brief-contract.md` in full. It defines the exact
+section order, the unknown-real-use marker, ADR handling, and source filing.
 
 ### 5. Hand off
 
@@ -195,5 +172,6 @@ context a project ever gets arrives here; don't compress it away.
 ## References
 
 - `references/questions.md` — per-question push-until gates and red flags
+- `references/brief-contract.md` — required brief shape and human-evidence marker
 - forge suite's `references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
 - forge suite's `references/question-style.md` — Decision Brief format for the shape lock

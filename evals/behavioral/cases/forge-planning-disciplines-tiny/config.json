@@ -1,0 +1,5 @@
+{
+  "_comment": "Proportionality floor. A genuinely private build — one file, one user, one laptop, explicitly never published (the non-goals ban PyPI, installers, releases, servers, and other users). The release-closure contract must close in a single n/a line here; enumerating the nine items to mark them n/a is the mild failure, and inventing packaging/observability/runbook work to fill the slots is the real one. Every other planning discipline (risk contracts, goal gates, behavior traceability) still applies in full.",
+  "skills": ["forge-plan", "forge-harden-eng", "forge-harden-security", "forge"],
+  "timeoutMinutes": 25
+}

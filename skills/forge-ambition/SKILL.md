@@ -56,7 +56,13 @@ forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it
 4. **Name the cost honestly.** What the bolder version actually takes (effort,
    difficulty, the hard part they'd have to face). No selling. The user decides
    whether the extra ambition is worth *their* time and interest — the only
-   currency here.
+   currency here. For the bolder version and **each** small unlock, also name:
+
+   - **Added proof burden** — the new observable evidence needed to trust or ship
+     it, not merely the implementation work.
+   - **Paired cut or pressure valve** — what existing work leaves scope, or the
+     explicit trigger and fallback that lets this expansion slip without putting
+     the core outcome at risk. "We'll fit it in" is not a pressure valve.
 
 5. **Offer it as choices.** The bolder version: one AskUserQuestion in the
    **Decision Brief** shape (forge suite's `references/question-style.md`) —
@@ -64,6 +70,8 @@ forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it
    The small unlocks: one `multiSelect` AskUserQuestion where each unlock is an
    option the user cherry-picks (with its one-line cost) — adopted ones land in
    the brief, rejected ones go to `wiki/improvements.md` as parked, not deleted.
+   Put each option's proof burden and paired cut/pressure valve in its description;
+   an expansion missing either is not ready to offer.
    Take a position on both — but the timid version is a fully legitimate
    choice. "I want it small" ends it.
 
@@ -72,7 +80,8 @@ forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it
    `wiki/brief.md` (a stable, greppable marker `forge-harden-scope` reads so it
    doesn't re-litigate this). If ambition changed: also update the relevant body
    sections of the brief (and the relevant ADR / `wiki/plan.md` if it exists) and
-   tell the user. If unchanged, the marker records that scope was deliberately
+   record the adopted proof burden plus cut/pressure valve beside it. If unchanged,
+   the marker records that scope was deliberately
    held — a decision worth keeping so it isn't reopened later.
 
 ## Rules

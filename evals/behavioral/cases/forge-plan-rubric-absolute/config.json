@@ -1,0 +1,6 @@
+{
+  "_comment": "Absolute-mode rubric calibration — judge-only, no agent run. forge-plan-judge-calibration proves the judge discriminates COMPARATIVELY (A vs B); every graded case actually scores ABSOLUTELY (one artifact vs a numeric floor), and that mode was never tested. This case scores the same golden/degraded pair one at a time through the real structural rubric. It guards both directions: a rubric so lax the seeded-bloat plan clears the floor, and — the failure that actually bit on 2026-07-25 — a rubric or floor so tight that the hand-written GOLDEN plan cannot clear it, which makes every real case fail on noise rather than on quality.",
+  "agent": false,
+  "judgeFloor": 7,
+  "timeoutMinutes": 15
+}
