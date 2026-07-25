@@ -251,9 +251,10 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
   Split aggressively into `references/`. The validator warns at ≥185 body lines and
   fails at ≥200.
-  **Three skills are parked in the warning band and will hit the wall on their next
-  growth: `forge-plan` (192), `forge-harden`/`forge-discovery` (196), and
-  `forge-review` is now at the line (199) — its next edit must extract first.**
+  **Two skills are in the warning band: `forge-harden` (196) and `forge-review`
+  (199) — forge-review is one line off the wall, so its next edit must extract
+  first.** (forge-plan and forge-discovery left the band when their contracts moved
+  to `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
   its behavioral eval re-run, and where a contract lives is behavior-affecting, so
   it needs the baseline→change→re-run loop either way. Don't do it as standalone
