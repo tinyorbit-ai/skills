@@ -48,12 +48,24 @@ improve. Never about speed, output volume, "shipping faster", or business value.
    - **What to improve** — concretely, as process changes (e.g. "add an explicit
      concurrency check to forge-build's edge list"), not vague aspiration. Honest
      about friction, never framed as "go faster".
+   - **What can now be deleted** — the pass no diff-scoped review can do, because
+     each review only ever sees one phase's diff. Across the whole landed arc, look
+     for: paths a later phase superseded but left alive, abstractions that never got
+     their second caller, config nobody sets, a dependency down to one call site,
+     tests that duplicate each other or outlived the behavior they covered, and
+     anything kept "for compatibility" whose consumer you can no longer name. Name
+     each with the phase that obsoleted it. This is the arc's accumulated cost, and
+     it only ever grows if nobody looks (`forge/references/simplicity.md`).
    - **Open threads** — unresolved taste decisions, deferred items still pending.
 
 3. **File it back into the wiki:**
    - Prepend a dated entry to `wiki/retro.md` (the synthesis above, tight).
    - Promote durable lessons into `wiki/learnings.md` (so future builds enforce
      them) and concrete deferrals/action items into `wiki/improvements.md`.
+   - File the deletion candidates as a **`## Subtract`** section in
+     `wiki/improvements.md`, each with the phase that obsoleted it and the caller
+     check that found it dead — so a later phase can act on them as ordinary work.
+     Retro names them; it doesn't delete code itself.
    - Link from `wiki/index.md`. Then run `forge-wiki-maintain --fix` (indexes
      regenerated, safe health fixes applied) — a retro leaves the whole wiki
      consistent, not just its own entry. Tell the user exactly what you filed.
@@ -66,5 +78,6 @@ improve. Never about speed, output volume, "shipping faster", or business value.
 - Synthesis over enumeration — if it reads like a commit list, it's not done.
 - Charter-safe: craft/process only; never velocity, output count, or business.
 - Evidence-based: every claimed pattern cites the phases/learnings it came from.
-- Read-and-reflect plus wiki writes only — no feature code, no shipping.
+- Read-and-reflect plus wiki writes only — no feature code, no shipping. The
+  subtraction pass *names* what can go; a later phase does the deleting.
 - "Held scope / went slower deliberately" is success, recorded as such.

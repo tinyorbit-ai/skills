@@ -21,6 +21,31 @@ Addition has to beat the subtraction it displaces, and the reason goes on the pa
 Structure gets removed as readily as it gets added — more rigor is not more
 machinery.
 
+## Deleting is a first-class edit
+
+This applies to code that already exists, not only to code being added. An unused
+path is **removed, not deprecated** — git is the archive, and a compat shim with no
+remaining caller is a part you are still paying for. Before keeping something "for
+backwards compatibility" or "for maintainability", **name the caller** that needs
+it; if you can't name one, it is already dead. "Someone might depend on it" is a
+claim to check, not a reason to keep.
+
+Removal earns its place the way addition does: the reason goes on the page. The
+asymmetry to watch for is that adding always looks safe and deleting always looks
+risky, so an unexamined default accumulates forever. Deleting what you superseded
+is finishing the work, not extra scope.
+
+## Tests are means, not outcome
+
+Tests are part of the parts count. The outcome is *behavior that can't silently
+regress*; tests are the means, and the same economy applies — the fewest tests that
+would actually catch the regression. One test crossing the real seam beats five
+mirroring the implementation. Duplicate assertions of an already-covered behavior,
+mocks standing in for an object that could have been real, fixtures larger than
+their assertion, and a suite too slow to run are all costs paid on every future
+change. "More tests" is not more rigor, and coverage is not the outcome. A test
+whose behavior was deleted goes with it.
+
 ## Default-deny on new parts
 
 A new dependency, service, module, abstraction, or config surface is denied until it

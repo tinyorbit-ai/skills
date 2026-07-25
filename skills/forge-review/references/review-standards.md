@@ -54,14 +54,38 @@ specific behavior described must be present.
 
 ## 2. Tests — written and green
 
-- Each behavior the phase added has a test that **fails if that behavior regresses**.
+- Each behavior the phase added is **covered** by a test that fails if it regresses.
   Delete-the-line test: if you delete the implementation line, a test must go red.
-- Error and edge paths are tested, not just the happy path.
+- Error and edge paths are covered where the phase's risk warrants it — pass 4's
+  edge list is a checklist for *thinking*, not a template for generating one test
+  per row. A single test exercising a real error path beats one per enumerated
+  input class.
 - No skipped/`.only`/commented-out/flaky tests sneaking through. Skipped == failing.
 - The **full** suite runs and passes — show the command and the summary line. A
   phase whose suite is red or whose new code is untested does not pass review.
 - Tests assert behavior/outcomes, not implementation detail mirrors. Coverage
   numbers are not the goal; meaningful failure on regression is.
+
+**Cost is part of the bar.** Tests are parts the project pays for on every future
+change, so economy of means applies to them (`forge/references/simplicity.md`):
+
+- **Count** — "covered" is the requirement, not one test per behavior. Two tests
+  that fail together on the same regression are one test and a duplicate; delete
+  the duplicate.
+- **Level** — prefer the test that crosses the real seam over several that mirror
+  the implementation. Implementation-mirror tests fail on refactors that broke
+  nothing, which trains people to ignore red.
+- **Mocks** — a mock standing in for an object that could have been real is a
+  finding. Mock the boundary you don't own, not the code you do.
+- **Fixtures** — no larger than the assertion needs. A 400-row fixture proving a
+  two-row property is dead weight.
+- **Runtime** — the suite's wall time is a reviewable property. A phase that
+  materially slows it is a finding; note the before/after in the receipts.
+- **Lifecycle** — a test whose behavior was deleted goes with it. Tests left behind
+  by removed code are the same debt as the code itself.
+
+These are objective and auto-fixable, and the fix is usually **deletion** — see
+pass 5, which covers the test diff as well as the source.
 
 ## 3. Strict type safety
 

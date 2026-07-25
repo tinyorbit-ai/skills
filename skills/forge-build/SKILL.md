@@ -50,6 +50,13 @@ Build the phase's work to a standard you'd defend in review:
 - **Hit the goal exactly.** Everything the phase's goal/work specifies; nothing from
   later phases. If you discover work that belongs to a later phase, note it in
   `wiki/improvements.md` and leave it — do not pull it forward.
+- **Delete what this phase supersedes.** Code, config, and tests the phase's work
+  replaces get removed *in the same phase* — the old path, the branch that can no
+  longer be reached, the shim whose last caller just went away. That is finishing
+  the work, not scope creep; leaving both paths alive is the phase's own mess, and
+  the next builder inherits it as "legacy". If a removal is genuinely unsafe, name
+  the consumer that needs it and record an ADR — never default to keeping it "for
+  compatibility" without one (`references/simplicity.md`).
 - **Match the codebase.** Read neighboring code first; follow its patterns, naming,
   and idioms. New code should read like the surrounding code.
 - **Default-deny before adding.** A new dependency, config surface, wrapper,
@@ -63,8 +70,13 @@ Build the phase's work to a standard you'd defend in review:
 - **Strict by construction.** Write to the project's strictest setting from the
   start (typed, no escape hatches, no `any`/equivalent — see `forge-review`'s
   `references/strictness.md`). Don't leave it for review to fix.
-- **Tests as you go.** Write the phase's tests with the code, not after — meaningful
-  tests that would fail if the behavior regressed, not coverage theater.
+- **Tests as you go, sized to the risk.** Write the phase's tests with the code, not
+  after. The target is *coverage* — every behavior the phase adds is caught by
+  something that goes red if it regresses — not one test per behavior. Prefer the
+  fewest tests that would actually catch it: one crossing the real seam over five
+  mirroring the implementation, a real object over a mock, a fixture no bigger than
+  its assertion. Tests are parts you pay for on every future change
+  (`references/simplicity.md`), so match the depth to the risk the phase carries.
 - **Handle the edges.** Empty/nil/error/timeout/concurrent paths the phase implies.
 - **Capture the why.** Any non-trivial decision made while building → ADR; any
   surprising failure → `wiki/notes/`. Tell the user in the same turn.
@@ -89,5 +101,6 @@ When the phase's work is complete and committed on its branch:
 - One phase only. Never start the next phase from here.
 - Stay on the phase branch; never commit to base.
 - Build to the strict standard now; review enforces, it shouldn't have to author.
-- No scope creep — the plan sets ambition; later phases own later work.
+- No scope creep — the plan sets ambition; later phases own later work. Removing
+  what *this* phase superseded is not creep; it's the phase finishing its own work.
 - Capture decisions/incidents to the wiki as they happen, and say so.
