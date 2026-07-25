@@ -180,16 +180,54 @@ for (const name of caseNames) {
       console.log(`  judge: ${scores} · ${verdict.pass ? 'PASS' : 'FAIL'} · ${verdict.reasons?.join(' · ')}`);
     }
 
-    const pass = !agentError && checks.every((c) => c.pass || c.required === false) && (verdict ? verdict.pass : true);
-    caseResults.push({ run: i, pass, agentError, checks, judge: verdict, workdir: keep ? workdir : undefined });
-    console.log(`  run verdict: ${pass ? 'PASS' : 'FAIL'}`);
+    // Deterministic checks are objective: an intermittent failure is a real
+    // intermittent contract violation, so every run must pass them. The judge's
+    // scores are a noisy estimate and are aggregated across runs below.
+    const hardPass = !agentError && checks.every((c) => c.pass || c.required === false);
+    const pass = hardPass && (verdict ? verdict.pass : true);
+    caseResults.push({ run: i, pass, hardPass, agentError, checks, judge: verdict, workdir: keep ? workdir : undefined });
+    console.log(`  run verdict: ${pass ? 'PASS' : 'FAIL'}${pass === hardPass ? '' : ' (deterministic checks green; judge below floor)'}`);
     if (!keep) execSync(`rm -rf ${JSON.stringify(workdir)}`);
   }
 
+  // ---- case verdict ----
+  // Deterministic: strict, every run.
+  const hardRate = caseResults.filter((r) => r.hardPass).length / caseResults.length;
+
+  // Judge: MEDIAN score per dimension across runs vs the floor, not every-run-must-clear.
+  // The rubric's "every dimension ≥ N" describes the skill's typical output; with 3
+  // samples, min-across-runs is a far stricter test than the bar actually states.
+  // Measured 2026-07-25: the hand-written GOLDEN reference plan scores gates_prove_goals
+  // 8/7/8 — sitting on a floor of 7 — so requiring 4 dimensions × 3 runs all ≥ 7 gives
+  // zero headroom for noise and lands ~30% of the time regardless of plan quality. The
+  // median keeps the floor honest without measuring luck: the seeded-degraded plan scores
+  // 0-2 on every dimension and fails any aggregation.
+  const rubricFloor = existsSync(join(caseDir, 'rubric.md'))
+    ? Number(readFileSync(join(caseDir, 'rubric.md'), 'utf8').match(/floor[^0-9]{0,20}(\d+)/i)?.[1])
+    : NaN;
+  const floor = config.judgeFloor ?? (Number.isFinite(rubricFloor) ? rubricFloor : 7);
+  const median = (xs) => {
+    const s = [...xs].sort((a, b) => a - b);
+    return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+  };
+  const dims = {};
+  for (const r of caseResults) for (const [k, v] of Object.entries(r.judge?.scores ?? {})) (dims[k] ??= []).push(v);
+  const medians = Object.fromEntries(Object.entries(dims).map(([k, v]) => [k, median(v)]));
+  const judgePass = Object.keys(medians).length === 0 || Object.values(medians).every((m) => m >= floor);
+
+  const casePass = hardRate === 1 && judgePass;
   const passRate = caseResults.filter((r) => r.pass).length / caseResults.length;
-  writeFileSync(join(RESULTS_DIR, `${stamp}-${name}`, 'result.json'), JSON.stringify({ case: name, stamp, runs, passRate, results: caseResults }, null, 2));
-  console.log(`\n${name}: pass rate ${(passRate * 100).toFixed(0)}% over ${runs} run(s) → evals/results/${stamp}-${name}/`);
-  if (passRate < 1) suiteFailed = true;
+  writeFileSync(join(RESULTS_DIR, `${stamp}-${name}`, 'result.json'),
+    JSON.stringify({ case: name, stamp, runs, casePass, hardRate, floor, medians, passRate, results: caseResults }, null, 2));
+
+  if (Object.keys(medians).length) {
+    const line = Object.entries(medians).map(([k, m]) => `${k} ${m}${m >= floor ? '' : ' ✗'}`).join(' · ');
+    console.log(`\n  judge medians (floor ${floor}): ${line}`);
+  }
+  console.log(`${name}: ${casePass ? 'PASS' : 'FAIL'} — deterministic ${(hardRate * 100).toFixed(0)}% of runs`
+    + `, judge ${judgePass ? 'clears' : 'below'} floor · all-run rate ${(passRate * 100).toFixed(0)}%`
+    + ` → evals/results/${stamp}-${name}/`);
+  if (!casePass) suiteFailed = true;
 }
 
 process.exit(suiteFailed ? 1 : 0);

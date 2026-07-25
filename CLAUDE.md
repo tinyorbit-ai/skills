@@ -142,6 +142,13 @@ agent) is making the change. **Scope: the forge suite only, for now** (`forge` +
 skills are excluded until deliberately added — every runner takes `--all` to
 widen). Full docs + add-a-case guide: `evals/README.md`.
 
+A case passes when **every** run clears the deterministic `check.mjs` assertions
+**and** the **median** judge score per dimension across runs clears the floor —
+not every run's every dimension. Measured: the golden reference plan scores 7–8 on
+its tightest dimension against a floor of 7, so all-runs-must-clear lands ~30% of
+the time regardless of quality. The median measures typical output, which is what
+the rubric always meant; the seeded-degraded plan (0–1) fails either way.
+
 | Tier | Command | Proves | Cost |
 |---|---|---|---|
 | 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
@@ -169,12 +176,19 @@ not hygiene, plus free economy-of-means script checks; the judge grades against
 forge's own `simplicity.md` verbatim, four dimensions, floor ≥ 7),
 `forge-plan-judge-calibration` (judge-only: golden vs seeded-bloat plan, both
 orders — if the judge can't tell them apart, don't trust its other verdicts),
+`forge-plan-rubric-absolute` (judge-only, the same pair scored **one at a time**
+against the floor — the mode every real case uses, and the one that went untested
+until it bit; its headroom check fails by design, standing evidence that golden's
+worst dimension equals the floor),
 the tripwired pair — `forge-plan-tripwired-simple` / `-comprehensive` (briefs
 whose non-goals ban named features; judge dimension behavior_traceability
 requires every phase behavior to trace to a brief clause or an ADR),
-the planning-discipline trio — `forge-planning-disciplines-small` / `-large` /
+the planning-discipline quartet — `forge-planning-disciplines-small` / `-large` /
 `-product` (risk contracts/order, human evidence, numeric NFRs, external reality,
-ambition pressure valves, and release closure across three project shapes),
+ambition pressure valves, and release closure across three project shapes) plus
+`-tiny`, the proportionality floor (one file, one user, nothing published — release
+closure must collapse to one `n/a` line; grades both enumerating the nine items to
+n/a them and, worse, inventing packaging/telemetry/runbook work to fill them),
 `forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
 validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and

@@ -92,6 +92,26 @@ symlinks the skills under test into `.claude/skills/`, runs headless
 Transcripts and verdicts land in `evals/results/<stamp>-<case>/` (gitignored).
 Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
 
+### How a case passes
+
+The two halves of a grade are aggregated differently on purpose:
+
+- **Deterministic `check.mjs` assertions — every run must pass.** They're objective
+  contract checks; an intermittent failure is a real intermittent violation.
+- **Judge dimensions — the MEDIAN across runs must clear the floor.** Not every run.
+
+The median rule is not a softened bar, and the arithmetic matters. Measured
+2026-07-25 via `forge-plan-rubric-absolute`: the hand-written **golden** reference
+plan scores `gates_prove_goals` 7–8 against a floor of 7, while the seeded-degraded
+plan scores 0–1. Separation is ~6 points — the rubric discriminates superbly — but
+the golden plan has **zero headroom**. Requiring 4 dimensions × 3 runs to all clear
+7 therefore lands ~30% of the time no matter how good the plan is, which is exactly
+what both sides of a baseline comparison scored. The old rule measured luck; the
+median measures the skill's typical output, which is what the rubric's
+"every dimension ≥ 7" was always describing. The degraded plan fails either way.
+
+Set `judgeFloor` in `config.json` to override the floor parsed from `rubric.md`.
+
 ### Cases
 
 - **`forge-plan-structural`** — filled brief in, plan out. Deterministic: phase
@@ -102,6 +122,16 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
   entry, phase-count ceiling). Judge: four dimensions (economy_of_means graded
   against simplicity.md verbatim, gates_prove_goals, phase1_vertical_slice,
   brief_fidelity), floor ≥ 7 each.
+- **`forge-plan-rubric-absolute`** — judge-only. The case above proves the judge
+  discriminates **comparatively** (A vs B); every graded case actually scores
+  **absolutely** (one artifact vs a numeric floor), and that mode went untested
+  until it bit. Scores the same golden/degraded pair one at a time through the real
+  structural rubric. Guards both directions: a rubric lax enough to let the bloated
+  plan clear the floor, and — the one that actually happened — a rubric or floor
+  tight enough that the *golden* plan can't clear it, which makes every real case
+  turn on noise. Its informational headroom check is currently **failing by design**
+  (golden's worst dimension is 7 against a floor of 7); that's the standing evidence
+  for the median-across-runs rule.
 - **`forge-plan-judge-calibration`** — judge-only, no agent run. A hand-written
   golden plan vs a degraded twin with seeded bloat (plugin registry, YAML
   config manager, event bus, abstract base class, deps on a zero-dep brief,
