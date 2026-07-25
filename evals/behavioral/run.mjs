@@ -89,6 +89,13 @@ function runAgent(workdir, task, config, transcriptPath) {
     out = (e.stdout || '') + (e.stderr || '');
     agentError = e.killed ? `timed out after ${config.timeoutMinutes || 20}m` : `exit ${e.status}`;
   }
+  // A transient provider failure is not a skill failure. The CLI does not always
+  // signal these through the exit code, so read the terminal reason too — an
+  // `API Error: 529 Overloaded` (seen when several headless runs share a machine)
+  // otherwise grades as an empty workdir failing every check.
+  const apiErr = out.match(/"terminal_reason":"api_error"[\s\S]{0,400}?"api_error_status":(\d+)/)
+    ?? out.match(/API Error: (5\d\d)/);
+  if (apiErr) agentError = `API error ${apiErr[1]}${agentError ? ` (${agentError})` : ''}`;
   writeFileSync(transcriptPath, out);
   return { transcript: out, agentError };
 }
@@ -191,8 +198,18 @@ for (const name of caseNames) {
   }
 
   // ---- case verdict ----
-  // Deterministic: strict, every run.
-  const hardRate = caseResults.filter((r) => r.hardPass).length / caseResults.length;
+  // A run the agent never completed measures nothing. Observed 2026-07-25: an
+  // `API Error: 529 Overloaded` — a transient server-side failure caused by running
+  // several headless sessions at once — produced an empty workdir, failed every
+  // deterministic check, and scored as a skill defect. Errored runs are excluded
+  // from grading and reported; too many of them make the case INCONCLUSIVE rather
+  // than failed, because we failed to measure the skill, not the other way round.
+  const errored = caseResults.filter((r) => r.agentError);
+  const graded = caseResults.filter((r) => !r.agentError);
+  const inconclusive = graded.length === 0 || errored.length > caseResults.length / 3;
+
+  // Deterministic: strict, every graded run.
+  const hardRate = graded.length ? graded.filter((r) => r.hardPass).length / graded.length : 0;
 
   // Judge: MEDIAN score per dimension across runs vs the floor, not every-run-must-clear.
   // The rubric's "every dimension ≥ N" describes the skill's typical output; with 3
@@ -211,22 +228,27 @@ for (const name of caseNames) {
     return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
   };
   const dims = {};
-  for (const r of caseResults) for (const [k, v] of Object.entries(r.judge?.scores ?? {})) (dims[k] ??= []).push(v);
+  for (const r of graded) for (const [k, v] of Object.entries(r.judge?.scores ?? {})) (dims[k] ??= []).push(v);
   const medians = Object.fromEntries(Object.entries(dims).map(([k, v]) => [k, median(v)]));
   const judgePass = Object.keys(medians).length === 0 || Object.values(medians).every((m) => m >= floor);
 
-  const casePass = hardRate === 1 && judgePass;
-  const passRate = caseResults.filter((r) => r.pass).length / caseResults.length;
+  const casePass = !inconclusive && hardRate === 1 && judgePass;
+  const passRate = graded.length ? graded.filter((r) => r.pass).length / graded.length : 0;
   writeFileSync(join(RESULTS_DIR, `${stamp}-${name}`, 'result.json'),
-    JSON.stringify({ case: name, stamp, runs, casePass, hardRate, floor, medians, passRate, results: caseResults }, null, 2));
+    JSON.stringify({ case: name, stamp, runs, casePass, inconclusive, errored: errored.length,
+      graded: graded.length, hardRate, floor, medians, passRate, results: caseResults }, null, 2));
 
   if (Object.keys(medians).length) {
     const line = Object.entries(medians).map(([k, m]) => `${k} ${m}${m >= floor ? '' : ' ✗'}`).join(' · ');
     console.log(`\n  judge medians (floor ${floor}): ${line}`);
   }
-  console.log(`${name}: ${casePass ? 'PASS' : 'FAIL'} — deterministic ${(hardRate * 100).toFixed(0)}% of runs`
-    + `, judge ${judgePass ? 'clears' : 'below'} floor · all-run rate ${(passRate * 100).toFixed(0)}%`
-    + ` → evals/results/${stamp}-${name}/`);
+  const errNote = errored.length ? ` · ${errored.length}/${caseResults.length} run(s) errored (${errored[0].agentError}) — excluded` : '';
+  if (inconclusive) {
+    console.log(`${name}: INCONCLUSIVE — only ${graded.length}/${caseResults.length} run(s) completed${errNote}. Re-run; lower concurrency if these are 529s.`);
+  } else {
+    console.log(`${name}: ${casePass ? 'PASS' : 'FAIL'} — deterministic ${(hardRate * 100).toFixed(0)}% of ${graded.length} graded run(s)`
+      + `, judge ${judgePass ? 'clears' : 'below'} floor${errNote} → evals/results/${stamp}-${name}/`);
+  }
   if (!casePass) suiteFailed = true;
 }
 
