@@ -68,9 +68,28 @@ described manual check with an observable result is valid; "it works" or "looks
 right" is not. Match rigor to the project (a prototype's gate can be "the script
 runs and prints X"), but the goal-anchor rule holds at every level.
 
-Every behavior introduced by Goal, gate, or Work — state transition, default,
-interface, or config knob — must trace to a brief clause or linked ADR. Otherwise
-cut it or let the user own it through an ADR.
+Every behavior introduced by Goal, gate, or Work must trace to a brief clause or a
+linked ADR — and the trace goes **at the bullet that introduces it**, not elsewhere
+in the wiki. A config knob listed only in `architecture.md`'s table is untraced.
+
+These are the ones that hide, because a competent implementer adds them without
+noticing they were never asked for:
+
+- **Derived defaults** — "status defaults to `want`", "date defaults to today".
+  The brief naming the *field* is not the brief naming its *default*.
+- **Validation and rejection rules** — "a future date is rejected". Tracing the
+  happy path does not trace the rule that refuses input.
+- **Paired affordances** — a sign-out link because there's a login, an edit
+  because there's a create, a delete because there's a list. The pair feels
+  implied; the brief still has to ask for it.
+- **Gate-support surfaces** — a `--print-today` debug flag added so a gate can be
+  checked. Shipping a surface to test yourself is still shipping a surface.
+- **Config knobs and env vars** — each one is a decision with alternatives.
+
+Each needs a brief clause quoted at the bullet, or a one-line ADR. Writing the ADR
+is cheap and it makes the user the owner of the choice; guessing on their behalf is
+what this rule exists to stop. If neither is worth doing, the behavior isn't worth
+building — cut it.
 
 ## Human evidence gate
 
@@ -83,7 +102,20 @@ it with design review, automated tests, analytics, or the builder's opinion.
 
 ## Release closure
 
-The final phase is explicitly titled `Release closure`. Its Work and gate cover
+Proportional to what the build actually reaches. When nothing leaves the machine —
+one user, run from a clone, nothing published, no deploy — close it in a single
+line and stop:
+
+```
+Release closure: n/a — local, single-user, no release path
+```
+
+Do **not** enumerate the items below to mark them `n/a` one by one; nine `n/a`
+bullets on a weekend script is ceremony, and filling those slots with invented
+packaging, telemetry, or runbook work is worse. Judge by reach, not by ambition.
+
+Otherwise — a published package, a deploy, a hosted service, a second user — the
+final phase is explicitly titled `Release closure`, and its Work and gate cover
 every item below as proved work or `n/a — <reason>`:
 
 - security and authz; abuse controls; secret scanning;
