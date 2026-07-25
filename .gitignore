@@ -4,3 +4,9 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# local scratch — HTML reports, plan-bench clones, throwaway fixtures
+tmp/
+
+# Codex local state (AGENTS.md is the tracked entry point)
+.codex/
