@@ -54,10 +54,15 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
 1. **Security & abuse.** Trust boundaries, input validation, authz, secrets, injection
    (SQL / command / LLM-prompt / path), unsafe deserialization, dependency risk,
    anything touching untrusted input. Severity-tag every finding.
-2. **Tests — written and green.** Every behavior the phase added has a meaningful
-   test that would fail if the behavior regressed (not coverage theater). The full
-   suite **passes** — run it, show it. Missing/weak tests are a finding to fix, not
-   note. Flaky or skipped tests count as failing.
+2. **Tests — covered, green, and no heavier than they need to be.** Every behavior
+   the phase added is **covered** by a test that goes red if it regresses. Covered,
+   not one-test-each: one test crossing the real seam beats five mirroring the
+   implementation, and the bar is the *fewest* tests that would actually catch it.
+   Missing/weak coverage is a finding to fix, not note. The full suite **passes** —
+   run it, show it; flaky or skipped count as failing. Test **cost** is reviewable
+   too: a phase that materially slows the suite, mocks what could have been real,
+   or ships fixtures far larger than their assertions is a finding, same as one
+   that under-tests (`references/review-standards.md`).
 3. **Strict type safety.** Enforce the project's strictest setting; escape hatches
    **banned**. For TypeScript: `strict: true`, no `any` (explicit or implicit), no
    unchecked `as`, no `@ts-ignore`/`@ts-expect-error` without a justified comment, no
@@ -65,13 +70,23 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
    `references/strictness.md`. Type check must pass clean.
 4. **Correctness & edges.** Nil/empty/overflow/timeout/concurrent/partial-failure
    paths; idempotency; error propagation at the right layer; resource leaks.
-5. **Simplicity & performance (on the diff).** Objective and auto-fixable: collapse
-   pass-through layers, inline premature abstractions (single caller), delete unused
-   extension points, reject speculative config, prefer an existing path over a new
-   parallel one, split giant functions, replace an accidental quadratic with the
-   straightforward algorithm. The phase must be exactly what the plan asked —
-   nothing more, nothing less. A simpler, faster diff that still passes the gate is
-   a fix, not a suggestion (`forge/references/simplicity.md`).
+5. **Economy & performance — the whole diff, tests included.** Objective and
+   auto-fixable: collapse pass-through layers, inline premature abstractions
+   (single caller), delete unused extension points, reject speculative config,
+   prefer an existing path over a new parallel one, split giant functions, replace
+   an accidental quadratic with the straightforward algorithm.
+   - **Tests are not exempt.** Duplicate assertions of an already-covered behavior,
+     implementation-mirror tests, mocks standing in for an object that could be
+     real, and oversized fixtures are objective findings whose fix is **deletion**.
+   - **Superseded code.** For every path this diff touched, ask what it made dead:
+     the old branch, the now-unreferenced helper, the compat shim with no caller
+     left, the test whose behavior is gone. Removing it is an objective fix, not a
+     suggestion — and "keep it for compatibility" needs a *named* consumer, else
+     it's an unexamined default (`forge/references/simplicity.md`).
+
+   The phase must be exactly what the plan asked — nothing more, nothing less, and
+   nothing it obsoleted left standing. A simpler, faster, smaller diff that still
+   passes the gate is a fix, not a suggestion.
 6. **Runtime verification (was forge-qa).** Actually run it: execute the phase's
    verifiable gate and show it green, then exercise the phase **goal** like a real
    user (UI: drive the flow incl. loading/empty/error states; CLI/lib: real +
@@ -123,43 +138,32 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
 
 ## Learnings → wiki
 
-For each non-trivial thing found and fixed, append to `wiki/learnings.md`: the date,
-the phase, a **confidence `N/10`** (how generalizable the rule is — structural
-lesson 8–9, one-off quirk 2–3), **what was found**, **how it was fixed**, and the
-**rule-to-remember** (generalizable, phrased so `forge-build` avoids it next time).
-Format per forge suite's `references/wiki.md`. Link from `wiki/index.md`. If a
-finding was a real incident/surprising root cause, also write `wiki/notes/`. If a
-past learning was contradicted this pass, retire it visibly (strike + why) rather
-than silently violating it. **Tell the user what you captured, in the same turn.**
+For each non-trivial thing found and fixed, append to `wiki/learnings.md`: date,
+phase, a **confidence `N/10`** (structural lesson 8–9, one-off quirk 2–3), **what
+was found**, **how it was fixed**, and the **rule-to-remember** (phrased so
+`forge-build` avoids it next time). Format per forge suite's `references/wiki.md`;
+link from `wiki/index.md`. A real incident also gets `wiki/notes/`; a contradicted
+past learning is retired visibly (strike + why), never silently violated. **Tell
+the user what you captured, in the same turn.**
 
-Also prepend one structured **review record** to `wiki/learnings.md` — this is
-the source the next review's trend line, re-run fingerprint checks, and
-`forge-retro`'s deltas read; without it the trend is unfalsifiable:
-
-```markdown
-> review · phase N · tier standard · findings high/med/low 2/3/1 · passes 0–7 run · head a1b2c3d · diff patch-id:4f1e9 · terminal block green
-```
-
-Follow the record line with the compact **receipts block** — the audit trail a
-reader needs to trust "green" without replaying the review: per-pass verdicts,
-files read beyond the diff, context consulted, the pass-7 reviewer identity (or why
-skipped), and on a re-run the prior findings resolved / still open. Template in
-`references/re-review.md`.
+Also prepend the structured **review record** line and its **receipts block** to
+`wiki/learnings.md` — the audit trail that lets a reader trust "green" without
+replaying the review, and the source the next review's trend line, the re-run
+fingerprint check, and `forge-retro`'s deltas all read. Without it the trend is
+unfalsifiable. Exact format and required lines: `references/re-review.md`.
 
 **Calibration — the review's own misses.** At review start, check whether any
 previously green-reviewed, shipped phase has since been hotfixed or reverted on the
-base branch (`references/re-review.md`). Each confirmed miss gets a `review-miss`
-learning naming exactly what the review failed to catch — a mandatory check in
-every future review. The review gets measurably better, or the trend line shows it
-isn't.
+base branch, and append a `review-miss` learning for each confirmed one — a
+mandatory check in every future review (procedure in `references/re-review.md`).
+The review gets measurably better, or the trend line shows it isn't.
 
 ## Evidence chain
 
-Number every finding (`finding-001`, `finding-002`, …) the moment it's raised, and
-keep the number through fix and re-verify. Visual/runtime findings get paired
-artifacts named by number (`finding-001-before.png` / `finding-001-after.png`;
-command output pasted inline for non-visual ones). "Fixed" without its numbered
-evidence is a claim, not a fix.
+Number every finding (`finding-001`, …) when raised and keep the number through fix
+and re-verify. Visual/runtime findings get paired artifacts named by number
+(`finding-001-before.png` / `-after.png`); non-visual ones paste command output
+inline. "Fixed" without its numbered evidence is a claim, not a fix.
 
 ## Hand off — the terminal command block is the pass condition
 
@@ -170,13 +174,12 @@ the review report**:
 <phase gate> && <typecheck> && <lint> && <tests scoped to the diff>
 ```
 
-Substitute the project's real commands; use the full suite instead of the scoped
-tests when it's fast. **No pasted output, no hand-off** — a described "all green"
-is a claim, not a state. Then report the review summary — scope audit verdict,
-completion checklist, passes run, findings fixed by severity (with the trend vs.
-the previous phase's review record where one exists, per forge suite's
-`references/scoring.md`), learnings recorded, open taste decisions if any — and
-hand to **`forge-ship`** to land the phase. Never ship from here.
+Substitute the project's real commands; prefer the full suite — if it's too slow to
+run here, that is itself a pass-2 finding. **No pasted output, no hand-off**: a
+described "all green" is a claim, not a state. Then report the summary — scope
+verdict, completion checklist, passes run, findings fixed by severity (trend vs.
+the previous review record, per forge suite's `references/scoring.md`), learnings
+recorded, open taste decisions — and hand to **`forge-ship`**. Never ship from here.
 
 ## Rules
 

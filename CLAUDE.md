@@ -190,7 +190,11 @@ ambition pressure valves, and release closure across three project shapes) plus
 closure must collapse to one `n/a` line; grades both enumerating the nine items to
 n/a them and, worse, inventing packaging/telemetry/runbook work to fill them),
 `forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
-validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
+validated live at 3/3), its mirror `forge-review-economy` (a **correct, green**
+phase whose defect is what it left behind — superseded parser kept alive behind a
+caller-less compat shim, orphaned test file, 11 tests where two cover it; every
+fix is a deletion, so an add-only review cannot pass), and the wiki pair —
+`forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and
 `forge-wiki-maintain-planted-rot` (six seeded rot items; safe fixes applied,
 structural ones reported-never-touched). `_smoke` self-tests the harness.
@@ -247,8 +251,10 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
   Split aggressively into `references/`. The validator warns at ≥185 body lines and
   fails at ≥200.
-  **Two skills are parked in the warning band and will hit the wall on their next
-  growth: `forge-review` and `forge-harden` (196).**
+  **Two skills are in the warning band: `forge-harden` (196) and `forge-review`
+  (199) — forge-review is one line off the wall, so its next edit must extract
+  first.** (forge-plan and forge-discovery left the band when their contracts moved
+  to `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
   its behavioral eval re-run, and where a contract lives is behavior-affecting, so
   it needs the baseline→change→re-run loop either way. Don't do it as standalone
@@ -274,8 +280,8 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-harden-dx` | stable | Plan-time DX review (if dev-facing). Modes — EXPANSION / POLISH / TRIAGE. Persona-card gate, first-run TTHW bar, magical-moment vehicle, evidence-grounded friction trace — folded into phase work. |
 | `forge-harden-security` | stable | Plan-time security review (CSO persona). Modes — DAILY / DEEP. OWASP, STRIDE, secrets, supply chain, LLM injection, plus explicit security/authz/abuse/scan closure in the release phase. |
 | `forge-harden-scope` | stable | Plan-time scope rethink (charter-safe CEO analogue). Modes — EXPAND / HOLD / TRIM. Every expansion carries an added proof burden and paired cut/pressure valve. |
-| `forge-build` | stable | Builds the next phase as a staff engineer (best version, in-boundary); reads `DESIGN.md` + the phase's design ADR as binding (off-system values = defects), then → forge-review. |
-| `forge-review` | stable | Staff-grade code review: triage tiers (light/standard/deep — machinery scales, bar doesn't; third-party pass required at deep), scope-drift + plan-completion audit, security, real tests passing, strict types (escape hatches banned), DESIGN.md token pass, runtime verify, third-party pass (temp-file artifact, output verified); auto-fixes with full scoped re-run after every fix, 3-attempt escape to forge-debug, and a **terminal command block whose pasted output is the hand-off condition**. Idempotent re-runs — fingerprints the phase diff (`git patch-id`), audits prior findings, reviews only the delta. Writes learnings + a structured review record **with receipts block** → `wiki/learnings.md`, and self-calibrates via `review-miss` detection (green-reviewed phases later hotfixed/reverted). |
+| `forge-build` | stable | Builds the next phase as a staff engineer (best version, in-boundary); reads `DESIGN.md` + the phase's design ADR as binding (off-system values = defects); **deletes what the phase supersedes in the same phase** (that's finishing the work, not scope creep — keeping a path needs a named consumer + an ADR) and sizes tests to risk (coverage, not one-per-behavior), then → forge-review. |
+| `forge-review` | stable | Staff-grade code review: triage tiers (light/standard/deep — machinery scales, bar doesn't; third-party pass required at deep), scope-drift + plan-completion audit, security, tests **covered not one-each** (count/level/mocks/fixtures/runtime/lifecycle are all findings — over-testing costs the same as under-testing), strict types (escape hatches banned), DESIGN.md token pass, runtime verify, third-party pass (temp-file artifact, output verified); the economy pass covers the **whole diff including tests** and the **superseded code** the diff just made dead (deletion is an objective auto-fix; "keep for compatibility" needs a named consumer); auto-fixes with full scoped re-run after every fix, 3-attempt escape to forge-debug, and a **terminal command block whose pasted output is the hand-off condition**. Idempotent re-runs — fingerprints the phase diff (`git patch-id`), audits prior findings, reviews only the delta. Writes learnings + a structured review record **with receipts block** → `wiki/learnings.md`, and self-calibrates via `review-miss` detection (green-reviewed phases later hotfixed/reverted). |
 | `forge-ship` | stable | Lands a phase: fetch + rebase onto latest base → gate + scoped typecheck/lint/tests green on the rebased tree → one squashed commit on base → build-log entry → architecture.md reconciled → `forge-wiki-maintain --fix`; auto-invokes `forge-docs` if the phase touched a doc surface. |
 | `forge-docs` | stable | Post-ship doc-drift check using Diataxis (tutorial / how-to / reference / explanation). Auto-fixes concrete drift; surfaces structural gaps as taste decisions. |
 | `forge-design-system` | stable | DESIGN.md as design source of truth — memorable-thing question, 2–3 named aesthetic directions, anti-default typography, token system (color / 4px spacing / radius / motion), HTML specimen page. Feeds the taste profile. |
@@ -284,7 +290,7 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 | `forge-ambition` | stable | Charter-safe ambition check (boldest version of what you already chose; no money/market). Every expansion names its proof burden and paired cut/pressure valve. Auto in discovery; standalone. |
 | `forge-polish` | stable | Designer's-eye QA on the *running* UI: consistency, hierarchy, the shared anti-slop blacklist (mechanical grep + visual read), feel; loops fix→re-score to an exit bar (slop ≥9, design ≥8), numbered before/after evidence. Auto in `forge-review` (if UI); standalone. |
 | `forge-dx` | stable | Live DX audit for dev-facing builds: TTHW, onboarding, error messages, docs/CLI scorecard. Auto in `forge-review` (if dev-facing); standalone. |
-| `forge-retro` | stable | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements. Auto in `forge` at Done; standalone. |
+| `forge-retro` | stable | Build retrospective: synthesizes build-log + learnings + git into patterns/improvements, plus the **subtraction pass** no diff-scoped review can do — what the whole landed arc made deletable (superseded paths, single-caller abstractions, unset config, orphaned tests), filed as a `## Subtract` list in `wiki/improvements.md` for a later phase to act on. Auto in `forge` at Done; standalone. |
 | `forge-wiki` | stable | Ask anything against the wiki + ingest any context (email/research/business/conversation) into `wiki/knowledge/` as flat, Timeline-based living articles. Plan-first — proposes writes/merges before mutating. |
 | `forge-wiki-maintain` | stable | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
 | `lizard` | stable | AI PR reviewer, one binary verdict — an approval's entire body is 🦎 (see a lizard → merge; no other emoji anywhere). Triage tiers (quick / standard / deep with multi-agent fan-out + cross-model adversary via codex/claude; runtime dep upgrades always deep + consumer matrix), "not proven safe ≠ clean" on high-risk surfaces (proof obligations — bounded/index-supported DB reads, aggregation stage order, platform limits) balanced by its mirror "not proven broken ≠ broken" (a finding carries the same proof burden as the stamp — trace broken before you assert it, hedge if you can't; the burden is re-charged **every round**, so a finding surviving an author dispute must re-earn its severity on the current head, and a blocker that can only be stated in future tense — "unbounded as it grows" — is a follow-up, not a blocker), a five-kind author-dispute taxonomy each with its own check (a prescribed fix proven impossible **voids** the finding until re-derived), claims cross-checked against linked Linear/Notion/issue context, every finding inline + actionable, collapsed receipts toggle (always a two-column `<details>` table — plain bullet receipts invalid), fingerprint dedup + delta re-review + parallel-run guard (at most one standing verdict per head — own-account 👀 in-flight claim, pre-POST re-check, later duplicate yields), `~/.lizard/` ledger + mandatory blind-spot entries, `lizard retro` for post-merge calibration. Posts as you (self-authored PRs get stamp-as-comment). Session (`lizard <pr>`), loop (`lizard sweep`), or routine; agent-agnostic (git + gh + markdown). Easter egg — "why lizard". |
@@ -312,8 +318,15 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 > all context, business included, is welcome as input. **Economy of means** is a
 > first-class principle across the suite (`forge/references/simplicity.md`): two
 > axes both maximized — ambition of *outcome*, economy of *means* — with
-> subtraction as the default fix. `forge-review` absorbed the
-> old `forge-qa`. The forge suite is the bulk of this repo (plus the standalone
+> subtraction as the default fix. It runs at **every** stage, not just planning:
+> plan (`forge-plan`, harden's economy sweep), build (`forge-build` deletes what
+> the phase superseded), review (`forge-review` pass 5 covers the test diff and
+> the code the diff made dead), and arc (`forge-retro`'s `## Subtract` list).
+> Two corollaries live in `simplicity.md`: **deleting is a first-class edit** —
+> an unused path is removed, not deprecated, and "keep for compatibility" needs a
+> *named* caller — and **tests are means, not outcome**, so the bar is the fewest
+> tests that would catch the regression, not one per behavior. `forge-review`
+> absorbed the old `forge-qa`. The forge suite is the bulk of this repo (plus the standalone
 > `lizard` PR reviewer); install everything with
 > `npx skills add tinyorbit-ai/skills --all` (or `--skill '*'`). Note: `--skill`
 > only honors exact names or the literal `*` — there is **no prefix/glob** matching,
