@@ -22,8 +22,32 @@ export function checkPlanningDisciplines({ workdir }, profile) {
   add('uses exact machine-read phase blocks', phases.length >= 2, `found ${phases.length}`);
   add('early phase retires a named risk before breadth', phases.slice(0, 2).some((p) => /\*\*Risks retired:\*\*\s*(?!none\b)\S/i.test(p)));
   const releaseIndexes = phases.map((p, i) => (/^\d+\s+—\s+Release closure/im.test(p) ? i : -1)).filter((i) => i >= 0);
-  add('final phase is explicit Release closure', releaseIndexes.length === 1 && releaseIndexes[0] === phases.length - 1, `release index ${releaseIndexes[0] ?? 'missing'} of ${phases.length}`);
   const release = releaseIndexes.length ? phases[releaseIndexes[0]] : '';
+
+  // Release closure is proportional: it earns a phase only when the build reaches
+  // someone other than its author. `tiny` is the floor — nothing ships, so the
+  // contract must close in one line rather than nine n/a bullets.
+  if (profile === 'tiny') {
+    const oneLiner = /Release closure:?\s*(?:—|-|is)?\s*n\/a/i.test(all);
+    add('release closure closed in a single n/a line', oneLiner, oneLiner ? undefined : 'no `Release closure: n/a — …` line found');
+    add('no Release closure phase for an unpublished single-user build', releaseIndexes.length === 0,
+      releaseIndexes.length ? `phase present at index ${releaseIndexes[0]}` : undefined);
+    // The mild failure: enumerating the nine items just to mark them n/a.
+    const enumerated = ['secret scan', 'runbook', 'observab', 'packag', 'backup', 'upgrade', 'abuse']
+      .filter((k) => new RegExp(k, 'i').test(plan));
+    add('does not enumerate the release-closure items to n/a them', enumerated.length <= 1, `matched: ${enumerated.join(', ') || 'none'}`);
+    // The real failure: inventing the work rather than declaring it inapplicable.
+    add('no invented distribution work (packaging/installer/release phase)',
+      !/^\d+\s+—[^\n]*(packag|distribut|installer|publish|release|deploy)/im.test(plan.replace(/^## Phase /gm, '')),
+      undefined);
+    add('no invented ops work (telemetry/metrics/alerting/runbooks)',
+      !/telemetry|metrics endpoint|alerting|on-?call|runbook/i.test(plan));
+    // Everything else still applies — a small project is not an excuse for a vague plan.
+    add('phase count stays proportional to a one-file script', phases.length >= 2 && phases.length <= 4, `${phases.length} phases`);
+    return checks;
+  }
+
+  add('final phase is explicit Release closure', releaseIndexes.length === 1 && releaseIndexes[0] === phases.length - 1, `release index ${releaseIndexes[0] ?? 'missing'} of ${phases.length}`);
   for (const [label, re] of [
     ['security/authz', /security[\s\S]*authz|authz[\s\S]*security/i],
     ['abuse', /abuse|rate.?limit/i],

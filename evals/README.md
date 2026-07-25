@@ -128,6 +128,18 @@ Runs are stochastic — a single pass is a smoke signal, `--runs 3` is evidence.
   for a stateful system, and human evidence plus ambition pressure valves before
   SaaS billing. Each fixture carries identical `CLAUDE.md` and `AGENTS.md`; the
   harness mirrors the same skills into both agent paths.
+- **`forge-planning-disciplines-tiny`** — the proportionality floor for the three
+  above. `shotsort`: one Python file, one user, one laptop, non-goals that ban
+  PyPI, installers, releases, servers, and other users. Nothing ships, so release
+  closure must collapse to a single `Release closure: n/a — …` line. Two failures
+  are graded, in ascending badness: enumerating the nine closure items just to
+  mark them `n/a` (ceremony), and **inventing** packaging, telemetry, alerting, or
+  runbook work to fill the slots (accretion — the likelier one, since declaring
+  nine things inapplicable reads like shirking while inventing nine small
+  obligations reads like diligence). Every other discipline still applies in full:
+  risk contracts, goal gates, and behavior traceability are not waived for being
+  small. Without this case the other three all describe projects that genuinely
+  ship, so the release-closure rule is never tested where it costs.
 - **`forge-review-planted-bugs`** — a phase branch with three seeded defects
   (command injection, committed `sk-live` secret, header-inclusive mean that
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes

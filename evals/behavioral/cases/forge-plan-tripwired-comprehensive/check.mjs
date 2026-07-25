@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { unnegatedHits, obligationText } from '../../lib/text.mjs';
 
 // Tripwired-brief case (comprehensive end of the range): the shelfie brief bans,
 // by name, the growth directions a scope-inventing planner reaches for — social/
@@ -40,7 +41,6 @@ export default async function check({ workdir }) {
   add('at least one phase routes through design (follow/explore/locked)', uiPhases >= 1, `found ${uiPhases}`);
 
   // ---- the tripwires: brief non-goals, checked inside phase blocks only ----
-  const negRe = /\bno\b|\bnot\b|never|avoid|reject|out of scope|non-goal|denied|deferred|absent|instead of|rather than|without/i;
   const tripwires = [
     ['single user, no social', /\bsocial\b|\bsharing\b|\bfriends?\b|multi.?user|registration|sign.?up|\baccounts?\b/i],
     ['no recommendations/ratings', /recommendation|\bratings?\b/i],
@@ -49,7 +49,7 @@ export default async function check({ workdir }) {
     ['no e-book file handling', /\be-?books?\b|\bepub\b|\bmobi\b/i],
   ];
   for (const [name, re] of tripwires) {
-    const hits = phases.flatMap((p) => p.split('\n').filter((l) => re.test(l) && !negRe.test(l)));
+    const hits = phases.flatMap((p) => unnegatedHits(obligationText(p), re));
     add(`tripwire — ${name} in any phase block`, hits.length === 0, hits[0]?.trim());
   }
 

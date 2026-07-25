@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { unnegatedHits } from '../../lib/text.mjs';
 
 // Deterministic structural assertions against forge-plan's contract
 // (phase block shape from skills/forge-plan/SKILL.md §4; wiki shape from forge/references/wiki.md).
@@ -54,11 +55,12 @@ export default async function check({ workdir }) {
   const depHits = lines.filter((l) => /npm i(nstall)? +[a-z@]|pnpm add +[a-z@]|yarn add +[a-z@]/i.test(l));
   add('zero-dependency constraint honored (no package installs planned)', depHits.length === 0, depHits[0]?.trim());
 
-  // simplicity.md's anti-patterns list, greppable; a line that rejects the
-  // pattern ("no plugin system", "rejected", "out of scope") doesn't count
+  // simplicity.md's anti-patterns list, greppable. A statement that rejects the
+  // pattern ("no plugin system", "Deliberately not built: …") doesn't count —
+  // suppression is judged over the whole logical statement, because plans hard-wrap
+  // and a denied-parts list routinely puts its negation on the previous line.
   const antiRe = /plugin|registry pattern|adapter layer|event bus|abstract (base )?class|config(uration)? (file|system|manager)|feature.flag|micro-?service/i;
-  const negRe = /\bno\b|\bnot\b|avoid|reject|out of scope|non-goal|denied|deferred|instead of|rather than|without/i;
-  const antiHits = lines.filter((l) => antiRe.test(l) && !negRe.test(l));
+  const antiHits = unnegatedHits(planAndArch, antiRe);
   add('no speculative machinery (simplicity.md anti-pattern sweep)', antiHits.length === 0, antiHits[0]?.trim());
 
   // every parts-list entry carries a reason (forge-plan §2b: the reason names

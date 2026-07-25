@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { unnegatedHits, obligationText } from '../../lib/text.mjs';
 
 // Tripwired-brief case (simple end of the range): the pomo brief bans, by name,
 // the features a scope-inventing planner adds to a timer — config, extra flags,
@@ -36,7 +37,6 @@ export default async function check({ workdir }) {
   // ---- the tripwires: brief non-goals, checked inside phase blocks only ----
   // (architecture prose legitimately names banned features to reject them; a
   // phase's Goal/Work/Gate naming one means it's being BUILT)
-  const negRe = /\bno\b|\bnot\b|never|avoid|reject|out of scope|non-goal|denied|deferred|absent|instead of|rather than|without/i;
   const tripwires = [
     ['no config surface', /\bconfig(uration)?\b/i],
     ['no stats/history/streaks', /\bstats?\b|\bhistory\b|\bstreak/i],
@@ -44,7 +44,7 @@ export default async function check({ workdir }) {
     ['no break cycles/task names', /break (timer|cycle)|work.break|task name/i],
   ];
   for (const [name, re] of tripwires) {
-    const hits = phases.flatMap((p) => p.split('\n').filter((l) => re.test(l) && !negRe.test(l)));
+    const hits = phases.flatMap((p) => unnegatedHits(obligationText(p), re));
     add(`tripwire — ${name} in any phase block`, hits.length === 0, hits[0]?.trim());
   }
 
