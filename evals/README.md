@@ -195,6 +195,19 @@ Set `judgeFloor` in `config.json` to override the floor parsed from `rubric.md`.
   breaks the phase gate). Grades recall (≥2/3 detected), the mandated auto-fixes
   (secret gone, gate output correct, tests green), and the review record +
   learnings bookkeeping.
+- **`forge-review-economy`** — the subtractive half of the review bar, and the
+  mirror of the case above: the phase-2 diff is **correct and green**, so a review
+  hunting only for bugs passes it. What it leaves behind is the defect. It replaces
+  the buffered parser with a streaming one but keeps the old `src/parse.js` alive
+  behind a caller-less `src/compat.js` shim ("kept for backwards compatibility"),
+  keeps `test/parse.test.js` for behavior no longer in the product path, and
+  over-tests the new parser — 11 tests where two cover it, including duplicate
+  assertions of one regression, implementation-mirror tests on generator internals,
+  a hand-rolled stub for a module the parser never touches, and a 60-row fixture
+  proving a 2-row property. Every finding is fixed by **deleting**, so a review that
+  can only add cannot pass. Grades the removals, the test thinning (14 planted
+  `test()` blocks → ≤ 8), and — the bar it must not trade away — the gate and suite
+  still green with the streaming parser and end-to-end stats still covered.
 - **`forge-wiki-ingest-living-article`** — two client emails about the same
   evolving fact (offsite Sept 12 → moved to Sept 26) ingested in sequence. The
   second MUST merge as an append-only Timeline entry (Refined/Contradicted) on

@@ -190,7 +190,11 @@ ambition pressure valves, and release closure across three project shapes) plus
 closure must collapse to one `n/a` line; grades both enumerating the nine items to
 n/a them and, worse, inventing packaging/telemetry/runbook work to fill them),
 `forge-review-planted-bugs` (three seeded defects; recall + mandated auto-fixes —
-validated live at 3/3), and the wiki pair — `forge-wiki-ingest-living-article`
+validated live at 3/3), its mirror `forge-review-economy` (a **correct, green**
+phase whose defect is what it left behind — superseded parser kept alive behind a
+caller-less compat shim, orphaned test file, 11 tests where two cover it; every
+fix is a deletion, so an add-only review cannot pass), and the wiki pair —
+`forge-wiki-ingest-living-article`
 (second source must Timeline-merge, not duplicate or overwrite) and
 `forge-wiki-maintain-planted-rot` (six seeded rot items; safe fixes applied,
 structural ones reported-never-touched). `_smoke` self-tests the harness.

@@ -1,0 +1,6 @@
+{
+  "_comment": "Economy across the board. The phase-2 diff replaces the buffered parser with a streaming one but leaves the superseded path alive (src/parse.js, now reachable only through a caller-less src/compat.js shim, plus test/parse.test.js for behavior no longer in the product path) and over-tests the new parser (11 tests where a handful cover it: duplicate assertions of the same regression, implementation-mirror tests on generator internals, a hand-rolled stub for a module the parser never touches, a 60-row fixture proving a 2-row property). Review must delete the dead path and thin the tests while keeping the gate green.",
+  "skills": ["forge-review", "forge"],
+  "branch": "phase/2-streaming",
+  "timeoutMinutes": 30
+}

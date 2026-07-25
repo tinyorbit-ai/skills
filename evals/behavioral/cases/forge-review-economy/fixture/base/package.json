@@ -1,0 +1,9 @@
+{
+  "name": "csvstats",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tiny zero-dependency CSV stats CLI",
+  "scripts": {
+    "test": "node --test"
+  }
+}
