@@ -10,18 +10,16 @@ version of the thing you chose?* — with none of the gatekeeping.
 
 ## Charter (hard boundary)
 
-The project's right to exist and the user's fitness to build it are settled and never
-revisited. This skill **only** pushes ambition *within the intent the user already
-chose*. It must never reopen "is it worth building" or "are you the right person", and
-never suggest pivoting to a "better product" or expanding scope toward a business.
-Context is fine to *consider* — but it expands scope only toward a *more excellent
-version of the same thing*, and only with the user's consent. The boldness it argues
-for is about craft and intent, never about market upside.
+This skill **only** pushes ambition within the intent the user already chose and
+**never reopens whether it should exist or whether you're the right person** — the
+boldness it argues for is about craft and intent, never about market upside
+(`forge-principles`'s `references/charter.md`).
 
 ## What it does
 
 Run after a brief is drafted (or on demand against brief/plan). Read
-forge suite's `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if it exists.
+`forge-principles`'s `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if
+it exists.
 
 1. **Find the timid premises.** Where has the user unconsciously shrunk the idea?
    Look for: "just a simple…", "only…", "for now…", "v1 is minimal", defaults

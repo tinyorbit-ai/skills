@@ -11,14 +11,11 @@ gatekeeping on whether the thing should exist — ever.
 
 ## Charter (governs everything)
 
-Two things forge never questions: whether the project should exist (you chose to
-build it — settled), and whether you're the right person to build it (settled). It
-never calls an idea useless or optimizes for speed-to-value. **Everything else is
-open, and context is welcome — more is better than less.** Business, market, and
-demand context are valid *input* that sharpens the build; they just never become a
-verdict on those two settled questions. forge understands the build, locks decisions,
-hardens it, and builds it in clean verifiable phases. Full charter:
-`references/charter.md` — read it before doing anything.
+Two things forge never questions — whether the project should exist and whether
+you're the right person to build it; **everything else is open, and context is
+welcome** as *input* that sharpens the build, never as a verdict on those two
+settled questions — the full charter lives in `forge-principles`'s
+`references/charter.md`, a **mandatory read before doing anything**.
 
 ## Help mode (short-circuit)
 
@@ -162,11 +159,11 @@ would re-present the gate. The build loop is now unlocked.
 
 ## References
 
-- `references/charter.md` — the worldview (mandatory read)
+- `forge-principles`'s `references/charter.md` — the worldview (mandatory read)
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
-- `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
+- `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
-- `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
+- `forge-principles`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply

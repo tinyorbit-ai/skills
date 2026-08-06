@@ -10,10 +10,9 @@ each on its own branch, with every real decision locked and recorded as an ADR.
 
 ## Charter
 
-The project is worth building — that's settled. Don't re-litigate scope on value
-grounds. The scope is what the brief says; your job is to make it *buildable*, not
-smaller-for-business-reasons. (You may split or reorder for engineering soundness —
-that's different from cutting ambition.)
+The scope is what the brief says — your job is to make it *buildable*, never
+smaller-for-business-reasons, and splitting or reordering for engineering soundness
+is not the same as cutting ambition (`forge-principles`'s `references/charter.md`).
 
 ## Process
 
@@ -42,8 +41,8 @@ the brief's outcome** — the fewest moving parts, not the fewest features. An
 approach with more parts earns each one against the brief; the burden is on
 adding, not on cutting. The brief's ambition (locked at discovery) is the
 tiebreaker on *outcome* — how excellent the result is — never a licence for
-heavier means (`references/simplicity.md`). Present as one Decision Brief and lock
-the choice as ADR 0001.
+heavier means (`forge-principles`'s `references/simplicity.md`). Present as one
+Decision Brief and lock the choice as ADR 0001.
 
 ### 2b. Draft the architecture
 
@@ -140,7 +139,8 @@ Then state the phase count, phase 1's branch + gate, which phases carry
   soundness; keep the ambition the brief set.
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
-  should be as thorough as the build needs (`references/simplicity.md`).
+  should be as thorough as the build needs (`forge-principles`'s
+  `references/simplicity.md`).
 - Nor behaviors: anything a Goal, gate, or Work bullet *does* that neither the
   brief nor an ADR asked for is invented scope (`references/phase-contract.md`).
 

@@ -13,9 +13,9 @@ Gemini, or Claude — via the shared reviewer abstraction
 
 ## Charter
 
-The project is worth building and worth getting right. Review hardens the *code*,
-never the premise. The bar is correctness, safety, and durability — never market or
-speed. Never conclude "don't build this".
+Review hardens the *code*, never the premise — the bar is correctness, safety, and
+durability, never market or speed; never conclude "don't build this"
+(`forge-principles`'s `references/charter.md`).
 
 ## Scope
 
@@ -82,7 +82,7 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
      the old branch, the now-unreferenced helper, the compat shim with no caller
      left, the test whose behavior is gone. Removing it is an objective fix, not a
      suggestion — and "keep it for compatibility" needs a *named* consumer, else
-     it's an unexamined default (`forge/references/simplicity.md`).
+     it's an unexamined default (`forge-principles/references/simplicity.md`).
 
    The phase must be exactly what the plan asked — nothing more, nothing less, and
    nothing it obsoleted left standing. A simpler, faster, smaller diff that still
@@ -199,4 +199,4 @@ recorded, open taste decisions — and hand to **`forge-ship`**. Never ship from
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
-- forge suite's `references/simplicity.md` — economy of means + the simplicity pass
+- `forge-principles`'s `references/simplicity.md` — economy of means + the simplicity pass

@@ -9,14 +9,14 @@ export default async function check({ workdir, judgeRaw, root }) {
   const add = (name, pass, detail, required = true) => checks.push({ name, pass, detail, required });
 
   const FLOOR = 7;
-  const standards = readFileSync(join(root, 'skills/forge/references/simplicity.md'), 'utf8');
+  const standards = readFileSync(join(root, 'skills/forge-principles/references/simplicity.md'), 'utf8');
   const rubric = readFileSync(join(root, 'evals/behavioral/cases/forge-plan-structural/rubric.md'), 'utf8');
 
   const score = async (plan) => {
     const prompt = [
       'You are grading the output of an autonomous agent run. Be strict; a generous grade defeats the eval.',
       '', '## Standards to grade against (verbatim from the project — these outrank the rubric)',
-      `\n===== skills/forge/references/simplicity.md — the project's own standard, verbatim =====\n${standards}`,
+      `\n===== skills/forge-principles/references/simplicity.md — the project's own standard, verbatim =====\n${standards}`,
       '', '## Rubric (dimensions and pass floor)', rubric,
       '', '## Artifacts to grade', `\n===== wiki/plan.md =====\n${plan}`, '',
       'Reply with ONLY a JSON object: {"scores": {"<dimension>": <0-10>, ...}, "pass": <true|false>, "worst": "<dimension>", "reasons": ["..."]}',

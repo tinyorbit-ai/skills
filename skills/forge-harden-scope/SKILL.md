@@ -12,14 +12,10 @@ intent.
 
 ## Charter (hard boundary)
 
-The project's right to exist and the user's fitness to build it are settled,
-never re-litigated. This skill only pressure-tests scope *within the intent
-the user already chose*. It never reopens "is it worth building" or "are you
-the right person", and never suggests pivoting to a "better product".
-Context is fine to consider; scope changes only toward a *more excellent or
-more focused* version of the same thing, and only with the user's consent.
-"I want it small" is a complete answer that ends the
-review.
+This skill pressure-tests scope **only** within the intent the user already
+chose and **never reopens whether it should exist or whether you're the right
+person** — "I want it small" is a complete answer that ends the review
+(`forge-principles`'s `references/charter.md`).
 
 ## Modes
 

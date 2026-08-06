@@ -72,6 +72,25 @@ This governs *means*. `forge-ambition` and `forge-harden-scope` EXPAND govern
 version is the one that does the most with the fewest parts; a "bolder" idea that
 needs a heavier system is usually a weaker idea wearing ambition.
 
+## Tie-breaks — when economy collides with another principle
+
+Economy is the principle most likely to be invoked against another one, usually
+wrongly. The resolutions, in order of how often they come up:
+
+- **vs. robustness.** An edge case that can *actually occur* is load-bearing, so
+  handling it is outcome, not machinery. Speculative generality — a guard for a
+  condition nothing can produce — is not. The test is whether you can name the input
+  that reaches it.
+- **vs. tests.** Coverage of real regressions is outcome. Duplicate assertions,
+  implementation-mirror tests, mocks standing in for objects that could be real, and
+  oversized fixtures are means, and means get trimmed.
+- **vs. security.** Never. A control at a trust boundary is outcome by definition;
+  "fewer parts" never justifies dropping validation, authz, or a secret's handling.
+  Economy applies to *how* the control is built, never to whether it exists.
+- **vs. the charter.** The charter wins outright. No economy argument may become
+  "this is too many parts to be worth building" — that reopens a settled question
+  (`charter.md`).
+
 ## Anti-patterns to catch
 
 Speculative generality · premature abstraction · framework-for-a-script · config for

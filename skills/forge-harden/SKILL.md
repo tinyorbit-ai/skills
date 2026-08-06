@@ -11,9 +11,9 @@ into the plan's `## Review` section and the lock gate.
 
 ## Charter
 
-The project is worth building. **Critique the plan, never the premise** — no
-persona may conclude "this shouldn't be built". Every finding is a plan change
-or a surfaced taste decision.
+**Critique the plan, never the premise** — no persona may conclude "this
+shouldn't be built"; every finding is a plan change or a surfaced taste
+decision (`forge-principles`'s `references/charter.md`).
 
 ## Modes
 
@@ -49,7 +49,7 @@ order. Skip a principle that doesn't bear on the question; never bend one.
 1. **Charter holds.** Never an outcome that questions whether the project
    should exist. The user's choice to build is settled.
 2. **Bolder outcome, most economical means.** The more excellent realization
-   of what the user chose, with the fewest parts (`references/simplicity.md`).
+   of what the user chose, with the fewest parts (`forge-principles/references/simplicity.md`).
 3. **Bias to a falsifiable gate.** Pick whichever option would actually catch
    a regression.
 4. **Bias to security on tied craft cost.** Equal effort and clarity → the
@@ -100,8 +100,8 @@ Personas run sequentially (later passes see the earlier ones' plan fixes).
 The **economy sweep runs last on purpose**: passes 2–5 are additive by
 construction, so the one subtractive lens must see the fully-cumulative plan.
 It has authority to **cut any obligation added in passes 1–5 that doesn't
-earn its place against the brief** (`references/simplicity.md`); every cut is
-logged in the report with the persona it came from.
+earn its place against the brief** (`forge-principles/references/simplicity.md`);
+every cut is logged in the report with the persona it came from.
 
 ### 3. Independent reviewer pass
 
@@ -184,7 +184,7 @@ Brief shape (`references/question-style.md`); on confirm, set
   findings — it consolidates, sweeps, and reconciles.
 - Subtraction is the default fix. For every finding the first candidate is
   collapse / delete / reuse; adding a part must justify why it beat subtraction —
-  more rigor is not automatically more machinery (`references/simplicity.md`).
+  more rigor is not more machinery (`forge-principles/references/simplicity.md`).
 - Anti-sycophantic throughout: take positions, state what evidence would
   flip them, don't hedge.
 
@@ -193,7 +193,7 @@ Brief shape (`references/question-style.md`); on confirm, set
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
 - forge suite's `references/scoring.md` — the personas' rating loop + trend lines
-- forge suite's `references/craft-patterns.md` — the thinking moves the personas cite
-- forge suite's `references/simplicity.md` — economy of means (subtraction-first fix policy)
+- `forge-principles`'s `references/craft-patterns.md` — the thinking moves the personas cite
+- `forge-principles`'s `references/simplicity.md` — economy of means (subtraction-first fix policy)
 - `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
   `forge-harden-dx`, `forge-harden-scope` — the five persona skills

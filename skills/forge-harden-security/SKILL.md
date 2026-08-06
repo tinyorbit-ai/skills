@@ -12,9 +12,9 @@ risks if the build touches model APIs.
 
 ## Charter
 
-Critique the plan, never the premise. "Don't build this" is never the
-answer — a finding's fix is always a plan change. Threat-model the build;
-this is not "is it worth securing".
+Critique the plan, never the premise — a finding's fix is always a plan
+change; threat-model the build, this is not "is it worth securing"
+(`forge-principles`'s `references/charter.md`).
 
 ## Modes
 

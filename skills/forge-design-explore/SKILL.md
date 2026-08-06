@@ -11,9 +11,10 @@ user picks before code commits to one. Sister to `forge-harden-design`
 
 ## Charter
 
-Exploration is for craft, not market. Never frame variants in
-conversion / engagement / "users prefer" terms. The bar is: which of these
-does the *user* want to build, given what the brief said it should feel like?
+Exploration is for craft, not market — never frame variants in conversion /
+engagement / "users prefer" terms; the bar is which of these the *user* wants to
+build, given what the brief said it should feel like (`forge-principles`'s
+`references/charter.md`).
 
 ## When to run
 

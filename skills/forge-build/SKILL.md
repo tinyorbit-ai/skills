@@ -10,14 +10,15 @@ phase*, not the fastest, not beyond its boundary.
 
 ## Charter
 
-The project is worth building — that's settled, never re-litigated. "Best version"
-means craft and durability, **not** scope expansion and **not** speed-to-value.
-Build the phase as written, excellently. Ambition lives in the plan; honor it.
+"Best version" means craft and durability, **not** scope expansion and **not**
+speed-to-value — build the phase as written, excellently (`forge-principles`'s
+`references/charter.md`).
 
 ## Before building
 
-1. Read `references/charter.md` (suite) and `wiki/learnings.md` — past review
-   lessons are rules you build by *now*, so review doesn't have to catch them again.
+1. Read `forge-principles`'s `references/charter.md` and `wiki/learnings.md` — past
+   review lessons are rules you build by *now*, so review doesn't have to catch them
+   again.
 2. Read the phase in `wiki/plan.md`: its **goal**, **verifiable gate**, **work**
    bullets, **branch**, its **Design:** marker, and the ADRs it depends on
    (`wiki/decisions/`). Read `wiki/architecture.md` for the intended shape.
@@ -56,14 +57,15 @@ Build the phase's work to a standard you'd defend in review:
   the work, not scope creep; leaving both paths alive is the phase's own mess, and
   the next builder inherits it as "legacy". If a removal is genuinely unsafe, name
   the consumer that needs it and record an ADR — never default to keeping it "for
-  compatibility" without one (`references/simplicity.md`).
+  compatibility" without one (`forge-principles`'s `references/simplicity.md`).
 - **Match the codebase.** Read neighboring code first; follow its patterns, naming,
   and idioms. New code should read like the surrounding code.
 - **Default-deny before adding.** A new dependency, config surface, wrapper,
   abstraction, or service boundary needs the phase's work to demand it — otherwise
   prefer the existing path, and inline over abstract until a second caller exists.
   Keep functions small and performant: reach for the straightforward algorithm
-  before the clever one, and never an accidental quadratic (`references/simplicity.md`).
+  before the clever one, and never an accidental quadratic (`forge-principles`'s
+  `references/simplicity.md`).
 - **Honor the ADRs.** Build along the recorded decisions. If a decision turns out
   wrong while building, stop, write/update the ADR with what you learned, and raise
   it — don't silently diverge.
@@ -76,7 +78,8 @@ Build the phase's work to a standard you'd defend in review:
   fewest tests that would actually catch it: one crossing the real seam over five
   mirroring the implementation, a real object over a mock, a fixture no bigger than
   its assertion. Tests are parts you pay for on every future change
-  (`references/simplicity.md`), so match the depth to the risk the phase carries.
+  (`forge-principles`'s `references/simplicity.md`), so match the depth to the risk
+  the phase carries.
 - **Handle the edges.** Empty/nil/error/timeout/concurrent paths the phase implies.
 - **Capture the why.** Any non-trivial decision made while building → ADR; any
   surprising failure → `wiki/notes/`. Tell the user in the same turn.

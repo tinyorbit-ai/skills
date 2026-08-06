@@ -11,9 +11,9 @@ docs surface a given change belongs in.
 
 ## Charter
 
-Docs are part of the craft. Critique the docs, never the premise. The
-bar is "the docs match what shipped, in the right Diataxis quadrant" —
-never "rank for SEO" or "convert".
+Critique the docs, never the premise — the bar is "the docs match what shipped, in
+the right Diataxis quadrant", never "rank for SEO" or "convert"
+(`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 

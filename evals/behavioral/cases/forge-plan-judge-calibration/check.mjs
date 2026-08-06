@@ -9,7 +9,7 @@ export default async function check({ workdir, judgeRaw, root }) {
   const checks = [];
   const add = (name, pass, detail, required = true) => checks.push({ name, pass, detail, required });
 
-  const standards = readFileSync(join(root, 'skills/forge/references/simplicity.md'), 'utf8');
+  const standards = readFileSync(join(root, 'skills/forge-principles/references/simplicity.md'), 'utf8');
   const golden = readFileSync(join(workdir, 'golden-plan.md'), 'utf8');
   const degraded = readFileSync(join(workdir, 'degraded-plan.md'), 'utf8');
   const brief = 'A zero-dependency Node CLI that tidies a screenshots folder: YYYY-MM/ subfolders by capture date, honest per-file date-source receipt, dedupe to _dupes/ (never delete), idempotent, --dry-run first-class, 2,000 files < 10 s. Non-goals: no OCR, no GUI, no watching, no cloud.';

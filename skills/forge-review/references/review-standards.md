@@ -67,7 +67,8 @@ specific behavior described must be present.
   numbers are not the goal; meaningful failure on regression is.
 
 **Cost is part of the bar.** Tests are parts the project pays for on every future
-change, so economy of means applies to them (`forge/references/simplicity.md`):
+change, so economy of means applies to them
+(`forge-principles/references/simplicity.md`):
 
 - **Count** — "covered" is the requirement, not one test per behavior. Two tests
   that fail together on the same regression are one test and a duplicate; delete

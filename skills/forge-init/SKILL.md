@@ -11,11 +11,10 @@ it never clobbers existing content.
 
 ## Charter
 
-The project is worth building because you chose to, and you're the right person to
-build it — both settled, never questioned. Context, on the other hand, is welcome:
-more is better than less. This skill builds the scaffolding that captures the *why*
-as you go — including a knowledge base that can ingest any context the build rests on
-(forge suite's `references/charter.md`).
+The project's right to exist and your fitness to build it are settled — this skill
+builds the scaffolding that captures the *why* as you go, including a knowledge base
+that can ingest any context the build rests on (`forge-principles`'s
+`references/charter.md`).
 
 ## What it does
 

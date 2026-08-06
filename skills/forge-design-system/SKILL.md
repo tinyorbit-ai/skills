@@ -15,10 +15,10 @@ Output: `DESIGN.md` at the repo root, the design source of truth that
 
 ## Charter
 
-A design system here is craft infrastructure, never branding-for-market. No
-"target demographic", no conversion framing — the bar is "every surface
-feels like one intentional thing", calibrated to the brief's "How it should
-feel". The user's taste is the client.
+A design system here is craft infrastructure, never branding-for-market — the bar is
+"every surface feels like one intentional thing", calibrated to the brief's "How it
+should feel", and the user's taste is the client (`forge-principles`'s
+`references/charter.md`).
 
 ## When it runs
 
@@ -45,9 +45,9 @@ plan chose — tokens must land in its vocabulary).
 Ask, verbatim enough: **"What's the one thing someone should remember
 after seeing this for the first time?"** One sentence. Push once if the
 answer is a vibe ("that it's clean") rather than a thing ("the graph
-animates as data arrives") — per `references/voice.md`. The answer is the
-lodestar every later trade-off resolves against; it goes at the top of
-`DESIGN.md`.
+animates as data arrives") — per `forge-principles`'s `references/voice.md`.
+The answer is the lodestar every later trade-off resolves against; it goes at
+the top of `DESIGN.md`.
 
 ### 3. Propose 2–3 named aesthetic directions
 
@@ -140,4 +140,4 @@ font) now has an objective finding waiting in `forge-polish`.
 - forge suite's `references/design-feedback-board.md` — the interactive specimen board + generate-and-open contract
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — used by harden-design when auditing against this
-- forge suite's `references/voice.md` — the push on vibe-answers
+- `forge-principles`'s `references/voice.md` — the push on vibe-answers

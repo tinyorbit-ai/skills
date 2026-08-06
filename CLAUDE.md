@@ -231,10 +231,14 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
   Split aggressively into `references/`. The validator warns at ≥185 body lines and
   fails at ≥200.
-  **Two skills are in the warning band: `forge-harden` (196) and `forge-review`
-  (199) — forge-review is one line off the wall, so its next edit must extract
-  first.** (forge-plan and forge-discovery left the band when their contracts moved
-  to `references/` in #16.)
+  **Two skills are still in the warning band: `forge-harden` (196) and
+  `forge-review` (199) — forge-review is one line off the wall, so its next edit
+  must extract first.** The #18/#19 charter collapse did *not* clear them: swapping
+  each skill's charter block for a one-line bar plus a pointer to `forge-principles`
+  freed a few lines apiece, and those were spent in place rather than banked.
+  `forge-principles` itself landed at 184 — one under the warn threshold, so treat
+  it as a third file in the band. (forge-plan and forge-discovery left the band when
+  their contracts moved to `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
   its behavioral eval re-run, and where a contract lives is behavior-affecting, so
   it needs the baseline→change→re-run loop either way. Don't do it as standalone
@@ -255,7 +259,10 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
   satisfy the loop"*), destructive-action guards (*"never commit to base"*),
   machine-read format contracts (`Design:` is parsed), and real technical traps
   (`never --filter=blob:none`). A sweep to reduce the count would strip the
-  load-bearing ones and leave nothing worth removing. Duplication between a
+  load-bearing ones and leave nothing worth removing. The charter's absolutes now
+  have a single home in `forge-principles` instead of being restated in every
+  skill, so the raw count dropped without a single guard being weakened —
+  consolidation, not a cull. Duplication between a
   `SKILL.md` and its own `references/` was measured at the same time: max 1.7%.
 
 ## Skills index

@@ -11,10 +11,9 @@ the objective ones, surfaces the taste calls.
 
 ## Charter
 
-Critique the **plan**, never the premise. The project is worth building —
-your job is to make it buildable, not to find reasons to stop. "Don't build
-this" is out of scope by charter. If a finding's only fix is "kill the
-project", you've mis-framed it — restate it as a plan change.
+Critique the **plan**, never the premise — a finding whose only fix is "kill
+the project" is mis-framed; restate it as a plan change (`forge-principles`'s
+`references/charter.md`).
 
 ## Modes
 
@@ -43,8 +42,8 @@ Run the **rate → fix-to-10 → re-rate loop** (forge suite's
 `references/scoring.md`) over these eight dimensions. Each gets a 0–10 with
 the gap named, a "what a 10 looks like for *this* plan", fixes, and a
 re-rate; deltas go in the report. Thinking moves: **inversion** ("what makes
-this phase fail?"), **idempotency reflex**, **proxy skepticism** — forge
-suite's `references/craft-patterns.md`.
+this phase fail?"), **idempotency reflex**, **proxy skepticism** —
+`forge-principles`'s `references/craft-patterns.md`.
 
 - **Failure modes & edges:** nil / empty / wrong type / overflow / timeout /
   partial failure / concurrent writes / stale cache. Name the specific edges
@@ -70,7 +69,7 @@ suite's `references/craft-patterns.md`.
   abstraction, one caller", "use the existing Bar module", "split the 200-line
   function", "replace the nested loop with a map". Default-deny on new
   dependencies and abstractions; run the "can a phase be deleted?" challenge
-  (`references/simplicity.md`).
+  (`forge-principles`'s `references/simplicity.md`).
 
 ### 2b. Concrete triggers for the economy dimension
 
@@ -182,6 +181,6 @@ present the taste batch directly.
 
 - forge suite's `references/question-style.md` — Decision Brief format for taste decisions
 - forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- forge suite's `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
-- forge suite's `references/simplicity.md` — economy of means & performance dimension
-- forge suite's `references/voice.md` — how to push; banned hedges
+- `forge-principles`'s `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
+- `forge-principles`'s `references/simplicity.md` — economy of means & performance dimension
+- `forge-principles`'s `references/voice.md` — how to push; banned hedges

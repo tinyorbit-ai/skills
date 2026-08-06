@@ -10,12 +10,9 @@ pinned so the rest of forge can build it as high-quality, simple, performant sof
 
 ## Charter
 
-The project is worth building because you chose it, and you're the right person to
-build it — **both settled; never ask either.** Everything else is fair game.
-Context (market, business, competitive, user — all of it) is welcome and sharpens
-the brief; it just never becomes a verdict on the two settled questions. If only
-the user will ever use it, that's a complete reason. Understand the build they
-want; don't qualify it.
+**Never ask either settled question** — if only the user will ever use it that's a
+complete reason, so understand the build they want and don't qualify it
+(`forge-principles`'s `references/charter.md`).
 
 ## Process
 
@@ -95,7 +92,7 @@ once, in the filmable-moment form; likewise "hard part" folds into §2b's
 **Every question has a push gate.** Each (base seven and sharpening six) has a
 "push until you hear" bar and named red flags in `references/questions.md` — when
 an answer is vague, push once with the sharper frame, then once more if needed,
-never a third time (forge suite's `references/voice.md`). If two answers
+never a third time (`forge-principles`'s `references/voice.md`). If two answers
 contradict ("dead simple" + a large feature list), name the tension and resolve
 it with them now.
 
@@ -173,5 +170,5 @@ section order, the unknown-real-use marker, ADR handling, and source filing.
 
 - `references/questions.md` — per-question push-until gates and red flags
 - `references/brief-contract.md` — required brief shape and human-evidence marker
-- forge suite's `references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
+- `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
 - forge suite's `references/question-style.md` — Decision Brief format for the shape lock

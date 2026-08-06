@@ -12,6 +12,7 @@ row, and on a row with no folder.
 | Skill | Status | Description |
 |---|---|---|
 | `forge` | stable | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→design (gated, if UI)→harden→(build→review→ship loop, one phase/run). A UI phase can't build until its `Design:` marker is locked. `/forge help` prints a status-aware usage map. Only off-limits: questioning whether the project should exist or who builds it — context (incl. business) is welcome. |
+| `forge-principles` | stable | The suite's shared source of truth — every other forge skill is a *procedure*, this is the *worldview* they enforce. Carries the charter (the project's right to exist and the builder's fitness are settled; context, business included, is welcome but never a verdict) plus the 11 quality principles the whole suite applies — economy of means, correctness/robustness, security as structure, strict by construction, tests-as-means, maintainability, evidence over claims, root cause over symptom, priced-and-recorded decisions, craft in the interface, anti-sycophantic voice — and the tie-breaks between them (ambition governs *outcome*, economy governs *means*; the charter always wins). Owns the four worldview references `charter.md` / `simplicity.md` / `craft-patterns.md` / `voice.md` (moved out of `forge/references/`). The non-obvious part: each skill's own `## Charter` block is now a one-line bar tailored to that skill plus a pointer here, so the full text exists in exactly one place instead of being restated 20+ times. Other skills cite it by principle name; it also runs standalone — nothing in it needs a `wiki/`, so it answers "what's the bar" or grades code that never went through the pipeline. |
 | `forge-init` | stable | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base + `.forge/` config & taste profile); injects wiki/ADR/phase/design rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
 | `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six with push-until gates; unknown real use becomes a named human-evidence marker for planning. Files source docs into `knowledge/`. Never reopens whether it should exist / who builds it. |
 | `forge-plan` | stable | Brief → risk-first `wiki/plan.md` with full material-bet contracts, ordered goal gates, conditional human-evidence stop, and a final release-closure phase; plus seed ADRs and substantive `architecture.md`. Behaviors trace to brief/ADR. Licensed to flag "too large to build well". |
@@ -36,12 +37,15 @@ row, and on a row with no folder.
 | `forge-wiki-maintain` | stable | Wiki janitor: regenerate all indexes (`index.md`, `knowledge/INDEX.md`, per-topic `_index.md`) + health checks (orphans, broken `[[links]]`, stale evidence, dupes, flat-invariant). `--fix` for the safe ones. |
 | `lizard` | stable | AI PR reviewer, one binary verdict — an approval's entire body is 🦎 (see a lizard → merge; no other emoji anywhere). Triage tiers (quick / standard / deep with multi-agent fan-out + cross-model adversary via codex/claude; runtime dep upgrades always deep + consumer matrix), "not proven safe ≠ clean" on high-risk surfaces (proof obligations — bounded/index-supported DB reads, aggregation stage order, platform limits) balanced by its mirror "not proven broken ≠ broken" (a finding carries the same proof burden as the stamp — trace broken before you assert it, hedge if you can't; the burden is re-charged **every round**, so a finding surviving an author dispute must re-earn its severity on the current head, and a blocker that can only be stated in future tense — "unbounded as it grows" — is a follow-up, not a blocker), a five-kind author-dispute taxonomy each with its own check (a prescribed fix proven impossible **voids** the finding until re-derived), claims cross-checked against linked Linear/Notion/issue context, every finding inline + actionable, collapsed receipts toggle (always a two-column `<details>` table — plain bullet receipts invalid), fingerprint dedup + delta re-review + parallel-run guard (at most one standing verdict per head — own-account 👀 in-flight claim, pre-POST re-check, later duplicate yields), `~/.lizard/` ledger + mandatory blind-spot entries, `lizard retro` for post-merge calibration. Posts as you (self-authored PRs get stamp-as-comment). Session (`lizard <pr>`), loop (`lizard sweep`), or routine; agent-agnostic (git + gh + markdown). Easter egg — "why lizard". |
 
-> **forge suite** (23 skills) is **released** — it lives in `skills/` and is installable
+> **forge suite** (24 skills) is **released** — it lives in `skills/` and is installable
 > by default (no `INSTALL_INTERNAL_SKILLS` flag needed).
 > Loop: `forge` → init → discovery (+ambition) → plan → design (gated stage if UI —
 > design-system then design-explore per `Design: explore` phase) → harden → lock →
 > per run: build → review (+polish/+dx) → ship (+docs, architecture reconcile,
 > wiki-maintain); at Done: retro.
+> `forge-principles` is the 24th and is **not** a stage — it's the worldview the
+> stages enforce (charter + the 11 quality principles), cited by name from the
+> others and runnable on its own.
 > `forge-harden` orchestrates five plan-time persona skills (-eng / -security always;
 > -design if UI; -dx if dev-facing; -scope on request) as isolated subagents, runs an
 > economy sweep last (with authority to cut persona additions), then an independent
@@ -49,21 +53,24 @@ row, and on a row with no folder.
 > scaffolded by forge-init) that grades the before→after diff + claimed deltas. Each
 > persona is also runnable standalone, runs the shared 0–10 rate→fix-to-10→re-rate
 > loop (`forge/references/scoring.md` — honest "no change" is first-class; deltas
-> cite their edit hunks), and cites the shared voice + craft-pattern references. The four runtime persona skills
+> cite their edit hunks), and cites the shared voice + craft-pattern references
+> (`forge-principles/references/voice.md`, `craft-patterns.md`). The four runtime persona skills
 > (forge-polish, forge-dx, forge-docs, forge-ambition) auto-invoke in their phase and
 > also run standalone. The `wiki/` is two layers — a project record (brief, plan,
 > ADRs, build-log, learnings) and a `knowledge/` base of ingested context as
 > Timeline-based living articles (`forge-wiki` ingests/asks, `forge-wiki-maintain`
 > keeps indexes + links healthy). Charter (relaxed): the only off-limits moves are
 > questioning whether the project should exist or whether the user should build it;
-> all context, business included, is welcome as input. **Economy of means** is a
-> first-class principle across the suite (`forge/references/simplicity.md`): two
+> all context, business included, is welcome as input — full text in
+> `forge-principles/references/charter.md`, which every skill's one-line `## Charter`
+> block points at rather than restating. **Economy of means** is a
+> first-class principle across the suite (`forge-principles/references/simplicity.md`): two
 > axes both maximized — ambition of *outcome*, economy of *means* — with
 > subtraction as the default fix. It runs at **every** stage, not just planning:
 > plan (`forge-plan`, harden's economy sweep), build (`forge-build` deletes what
 > the phase superseded), review (`forge-review` pass 5 covers the test diff and
 > the code the diff made dead), and arc (`forge-retro`'s `## Subtract` list).
-> Two corollaries live in `simplicity.md`: **deleting is a first-class edit** —
+> Two corollaries live in that same `simplicity.md`: **deleting is a first-class edit** —
 > an unused path is removed, not deprecated, and "keep for compatibility" needs a
 > *named* caller — and **tests are means, not outcome**, so the bar is the fewest
 > tests that would catch the regression, not one per behavior. `forge-review`
