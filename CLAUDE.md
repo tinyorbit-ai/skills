@@ -231,14 +231,14 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **200-line ceiling is real.** Long `SKILL.md` files load slowly and bloat context.
   Split aggressively into `references/`. The validator warns at ≥185 body lines and
   fails at ≥200.
-  **Two skills are still in the warning band: `forge-harden` (196) and
-  `forge-review` (199) — forge-review is one line off the wall, so its next edit
-  must extract first.** The #18/#19 charter collapse did *not* clear them: swapping
-  each skill's charter block for a one-line bar plus a pointer to `forge-principles`
-  freed a few lines apiece, and those were spent in place rather than banked.
-  `forge-principles` itself landed at 184 — one under the warn threshold, so treat
-  it as a third file in the band. (forge-plan and forge-discovery left the band when
-  their contracts moved to `references/` in #16.)
+  **Two skills are in the warning band, measured 2026-08-09: `forge-review` (198) and
+  `forge-harden` (192) — forge-review is two lines off the wall, so its next edit must
+  extract first.** Removing the settled-questions charter language improved both
+  (from 199 and 196) but did *not* clear either — it freed a few lines apiece and they
+  were largely spent in place rather than banked. `forge-principles` sits at 184 —
+  one line under the warn threshold, so treat it as a third file in the band.
+  (forge-plan and forge-discovery left the band when their contracts moved to
+  `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
   its behavioral eval re-run, and where a contract lives is behavior-affecting, so
   it needs the baseline→change→re-run loop either way. Don't do it as standalone
@@ -249,21 +249,26 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
 - **Experimental needs both** the `.experimental/` location *and* `metadata.internal:
   true` — the dir alone won't gate it once discovery falls back to recursive search.
 - **Validate before pushing.** `push = published`; there's no review gate but us.
-- **Don't cull the absolutes.** The suite carries ~280 "never"/"always"
-  statements, and that number looks alarming against context-engineering guidance
-  that says to drop absolute directives. It was audited on 2026-07-25 and the
-  count is a bad proxy: **zero** are the formatting/naming dictates that guidance
-  targets (no docstring, quote-style, casing, or line-length rules exist here).
-  They are overwhelmingly charter (*"never conclude 'don't build this'"* — remove
-  it and forge stops being forge), evidence discipline (*"never declare green to
-  satisfy the loop"*), destructive-action guards (*"never commit to base"*),
-  machine-read format contracts (`Design:` is parsed), and real technical traps
-  (`never --filter=blob:none`). A sweep to reduce the count would strip the
-  load-bearing ones and leave nothing worth removing. The charter's absolutes now
-  have a single home in `forge-principles` instead of being restated in every
-  skill, so the raw count dropped without a single guard being weakened —
-  consolidation, not a cull. Duplication between a
-  `SKILL.md` and its own `references/` was measured at the same time: max 1.7%.
+- **Don't cull the absolutes — one category was already removed on purpose.** The
+  forge suite carries a couple hundred "never"/"always" statements (~280 at the
+  2026-07-25 audit, ~240 after the charter strip below), and that number looks
+  alarming against context-engineering guidance that says to drop absolute
+  directives. What the audit found still holds: the count is a bad proxy, because
+  **zero** are the formatting/naming dictates that guidance targets (no docstring,
+  quote-style, casing, or line-length rules exist here). The one category that
+  *did* deserve to go has gone — the charter absolutes asserting the project's
+  right to exist and the builder's fitness (*"never conclude 'don't build
+  this'"*, *"never question whether the user is the right person"*) were
+  **deliberately stripped**, because an LLM doesn't spontaneously raise those
+  objections — stating the guard bought nothing and cost context. The behavior is
+  unchanged: forge still never gatekeeps, it just no longer says so. What remains
+  is load-bearing and must not be swept — evidence
+  discipline (*"never declare green to satisfy the loop"*), destructive-action
+  guards (*"never commit to base"*), machine-read format contracts (`Design:` is
+  parsed), and real technical traps (`never --filter=blob:none`). Each one is a
+  behavior the model would otherwise get wrong, which is exactly what the charter
+  absolutes were not. Duplication between a `SKILL.md` and its own `references/`
+  was measured in the same audit: max 1.7%.
 
 ## Skills index
 

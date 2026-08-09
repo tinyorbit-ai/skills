@@ -11,8 +11,7 @@ Tests the *experienced* developer journey by living it, not by reading the plan
 ## Charter
 
 DX quality is about respect for the developer's time and attention — never about
-adoption metrics or market positioning (`forge-principles`'s
-`references/charter.md`).
+adoption metrics or market positioning.
 
 ## When it runs
 

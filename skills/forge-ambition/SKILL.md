@@ -1,17 +1,16 @@
 ---
 name: forge-ambition
-description: Charter-safe ambition check — pressure-tests whether you're building the most ambitious version of the thing YOU already chose to build. Challenges self-imposed limits and timid premises; never reopens whether the project should exist or whether you're the right person to build it. Auto-invoked by forge-discovery before the brief locks; also standalone. Use when asked "am I thinking big enough", "challenge this", "ambition check", or when a brief/plan feels smaller than it could be.
+description: Ambition check — pressure-tests whether you're building the most ambitious version of the thing YOU already chose to build. Challenges self-imposed limits and timid premises; the boldness it argues for is about craft and intent, never market upside. Auto-invoked by forge-discovery before the brief locks; also standalone. Use when asked "am I thinking big enough", "challenge this", "ambition check", or when a brief/plan feels smaller than it could be.
 ---
 
 # forge-ambition
 
-The non-commercial core of a founder's rethink: *are you building the boldest
-version of the thing you chose?* — with none of the gatekeeping.
+Pressure-tests one question: *are you building the boldest version of the thing
+you chose?*
 
 ## Charter (hard boundary)
 
-This skill **only** pushes ambition within the intent the user already chose and
-**never reopens whether it should exist or whether you're the right person** — the
+This skill **only** pushes ambition within the intent the user already chose — the
 boldness it argues for is about craft and intent, never about market upside
 (`forge-principles`'s `references/charter.md`).
 

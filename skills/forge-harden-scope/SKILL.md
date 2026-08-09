@@ -1,6 +1,6 @@
 ---
 name: forge-harden-scope
-description: Plan-time scope review (charter-safe CEO analogue) — pressure-tests whether the plan is the boldest version of what the user already chose. Three modes — EXPAND (raise ambition within the chosen intent), HOLD (lock the current scope deliberately), TRIM (strip non-essential phases). Never reopens whether the project should exist or whether the user should build it; "smaller on purpose" is a respected answer. Use after forge-plan when ambition feels off, when asked "scope review", "is this ambitious enough", "trim the plan", or via forge-harden orchestration. Complements forge-ambition (which runs at brief time).
+description: Plan-time scope review (CEO analogue) — pressure-tests whether the plan is the boldest version of what the user already chose. Three modes — EXPAND (raise ambition within the chosen intent), HOLD (lock the current scope deliberately), TRIM (strip non-essential phases). "Smaller on purpose" is a respected answer that ends the review. Use after forge-plan when ambition feels off, when asked "scope review", "is this ambitious enough", "trim the plan", or via forge-harden orchestration. Complements forge-ambition (which runs at brief time).
 ---
 
 # forge-harden-scope
@@ -10,12 +10,10 @@ runs at brief time); this one re-checks scope *after* planning, where the
 plan has its own gravity and may have quietly drifted from the brief's
 intent.
 
-## Charter (hard boundary)
+## Scope discipline (hard boundary)
 
 This skill pressure-tests scope **only** within the intent the user already
-chose and **never reopens whether it should exist or whether you're the right
-person** — "I want it small" is a complete answer that ends the review
-(`forge-principles`'s `references/charter.md`).
+chose — "I want it small" is a complete answer that ends the review.
 
 ## Modes
 
@@ -40,7 +38,7 @@ Prereq: `wiki/plan.md` exists. Read it, `wiki/brief.md` (especially "How
 it should feel", "The hard/interesting part", "Smallest useful version",
 "Three-year fit"), and `wiki/architecture.md`. Check the brief for an
 `**Ambition check (...):**` marker — `forge-ambition`'s brief-time outcome. If
-present, don't re-litigate what it already settled; build on it.
+present, don't re-litigate what it already decided; build on it.
 
 ### 1. Find the drift
 

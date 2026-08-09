@@ -13,8 +13,7 @@ user picks before code commits to one. Sister to `forge-harden-design`
 
 Exploration is for craft, not market — never frame variants in conversion /
 engagement / "users prefer" terms; the bar is which of these the *user* wants to
-build, given what the brief said it should feel like (`forge-principles`'s
-`references/charter.md`).
+build, given what the brief said it should feel like.
 
 ## When to run
 

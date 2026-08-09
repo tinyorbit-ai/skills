@@ -79,7 +79,9 @@ Build the phase's work to a standard you'd defend in review:
   mirroring the implementation, a real object over a mock, a fixture no bigger than
   its assertion. Tests are parts you pay for on every future change
   (`forge-principles`'s `references/simplicity.md`), so match the depth to the risk
-  the phase carries.
+  the phase carries. While building, run only the tests your change affects — fast
+  feedback per iteration; the full suite still gates the hand-off in `forge-review`,
+  so this scopes the inner loop only.
 - **Handle the edges.** Empty/nil/error/timeout/concurrent paths the phase implies.
 - **Capture the why.** Any non-trivial decision made while building → ADR; any
   surprising failure → `wiki/notes/`. Tell the user in the same turn.

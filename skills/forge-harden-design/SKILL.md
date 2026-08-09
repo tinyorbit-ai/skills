@@ -11,10 +11,9 @@ this plan, as written, set up a designed thing or an undesigned thing? Runs
 
 ## Charter
 
-Design is part of the craft — critique the plan, never the premise, and
-never frame findings in market/conversion terms; the bar is "intentional,
-coherent, accessible", not "convert better" (`forge-principles`'s
-`references/charter.md`).
+Design is part of the craft — critique the plan, and never frame findings in
+market/conversion terms; the bar is "intentional, coherent, accessible", not
+"convert better" (`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 
@@ -144,7 +143,7 @@ the section yourself and present the taste batch.
 ## Rules
 
 - Plan-time only. Runtime visual QA is `forge-polish`'s job.
-- Never kill the project. Never frame in market/conversion.
+- Never frame in market/conversion.
 - "Smaller on purpose" applies — a deliberately minimal UI is fine; demand
   intention, not size.
 - Respect any `DESIGN.md` or system ADRs already in place (see

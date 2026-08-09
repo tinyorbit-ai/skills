@@ -13,9 +13,8 @@ Gemini, or Claude — via the shared reviewer abstraction
 
 ## Charter
 
-Review hardens the *code*, never the premise — the bar is correctness, safety, and
-durability, never market or speed; never conclude "don't build this"
-(`forge-principles`'s `references/charter.md`).
+Review hardens the *code* — the bar is correctness, safety, and durability, never
+market or speed.
 
 ## Scope
 
@@ -87,11 +86,11 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
    The phase must be exactly what the plan asked — nothing more, nothing less, and
    nothing it obsoleted left standing. A simpler, faster, smaller diff that still
    passes the gate is a fix, not a suggestion.
-6. **Runtime verification (was forge-qa).** Actually run it: execute the phase's
-   verifiable gate and show it green, then exercise the phase **goal** like a real
-   user (UI: drive the flow incl. loading/empty/error states; CLI/lib: real +
-   adversarial inputs; data: verify against the real store). A gate that passes
-   while the goal is unmet is itself a high-severity finding.
+6. **Runtime verification.** Actually run it: execute the phase's verifiable gate
+   and show it green, then exercise the phase **goal** like a real user (UI: drive
+   the flow incl. loading/empty/error states; CLI/lib: real + adversarial inputs;
+   data: verify against the real store). A gate that passes while the goal is unmet
+   is itself a high-severity finding.
    - If the phase diff **touched UI** and `DESIGN.md` exists, first run the
      objective token pass: grep the diff for raw color literals, off-scale px
      values, and `font-family` declarations outside the system. Each hit is an

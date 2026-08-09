@@ -2,9 +2,8 @@
 
 The convergence mechanism every harden persona and runtime QA skill uses. A review
 that only lists findings can't show it improved anything; a review that scores,
-fixes, and re-scores can. Borrowed from gstack's plan-design-review loop,
-charter-adjusted: **scores measure craft, never worth.** A 3/10 means "this plan
-under-specifies the thing", never "this thing shouldn't exist".
+fixes, and re-scores can. **Scores measure craft.** A 3/10 means "this plan
+under-specifies the thing".
 
 ## The loop
 
@@ -26,9 +25,6 @@ For each dimension the skill owns (its SKILL.md names them):
 - **10 is rare and earned.** Most healthy dimensions land 7–9 after fixes. Don't
   inflate to declare victory; the residual gap names the next run's work.
 - **Score the artifact, not the effort.** "We tried hard" is not a point.
-- **Never score the premise.** No dimension may be "is this worth building" in
-  disguise. If a dimension can't reach 10 without questioning the project's
-  existence, the dimension is mis-framed — fix the dimension.
 - **Deltas go in the report — with their edit hunks.** Every report block carries
   `before → after` per dimension, and **every non-zero delta cites the plan/code
   edit that earned it** — a delta with no diff behind it is decoration, not proof.
@@ -60,4 +56,4 @@ line has no source. Before scoring, read the previous run's block/record if one
 exists and report the trend line: *"Security findings: 5 last harden → 2 now."*
 `forge-retro` reads these trends across the whole arc. A skill that can show its
 finding counts falling phase over phase is demonstrating the loop works; rising
-counts are a process finding for retro, not a verdict on the project.
+counts are a process finding for retro.

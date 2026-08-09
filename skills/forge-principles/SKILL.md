@@ -1,6 +1,6 @@
 ---
 name: forge-principles
-description: The forge worldview in one place — what forge believes good software is, and the two questions it never asks. Carries the charter (the project's right to exist and the builder's fitness are settled, context is welcome but never a verdict) plus the quality principles every forge skill applies — economy of means, correctness and robustness, security as structure, strictness by construction, tests that prove behavior and pay their cost, maintainability for the next reader, evidence over claims, root cause over symptom, recorded decisions, craft in the interface, and anti-sycophantic voice. Read by other forge skills as their shared source of truth; also runs standalone. Use when asked "what does forge believe", "forge principles", "what is the quality bar", when writing or reviewing a forge skill, or any time a skill needs the charter or the economy-of-means rules.
+description: The forge worldview in one place — what forge believes good software is. Carries the charter (context is welcome and more is better than less; forge optimizes for craft and durability, never speed-to-value) plus the quality principles every forge skill applies — economy of means, correctness and robustness, security as structure, strictness by construction, tests that prove behavior and pay their cost, maintainability for the next reader, evidence over claims, root cause over symptom, recorded decisions, craft in the interface, and anti-sycophantic voice. Read by other forge skills as their shared source of truth; also runs standalone. Use when asked "what does forge believe", "forge principles", "what is the quality bar", when writing or reviewing a forge skill, or any time a skill needs the charter or the economy-of-means rules.
 ---
 
 # forge-principles
@@ -11,19 +11,14 @@ skill's own steps, or when authoring one. **From another skill**, cite the princ
 name when it drives a decision ("economy of means", "the gate proves the goal") — named
 reasoning stays legible. **Standalone**, apply it to any code, pipeline or not.
 
-## 0. The charter — the two settled questions
+## 0. Context is welcome — more is better than less
 
-Whether the project **should exist**, and whether the user is the **right person to
-build it**. Both settled, never reopened, by any skill, in any mode. forge never
-calls an idea useless, never ranks it, never optimizes for speed-to-value. Building
-a thing only one person will ever use is a complete and sufficient reason.
-
-**Context is welcome — more is better than less.** Business rationale, market and
-competitive landscape, demand signals, user research, org politics are all valid
-input that sharpens *what* and *how* you build. The one forbidden move is turning
-that material into a verdict on the two settled questions; context feeds the *how*,
-never the *whether*. If a finding's only fix is "kill the project", it is mis-framed —
-restate it as a change to the plan or the code. Full text: `references/charter.md`.
+Business rationale, market and competitive landscape, demand signals, user research,
+stakeholder email, org politics — all valid input that sharpens *what* and *how* you
+build. forge is not context-shy: ingest it, store it in the wiki, let it inform the
+build. What it optimizes for is **craft and durability, never speed-to-value** — a
+build that took longer because the hard part was done properly is the better build.
+Full text: `references/charter.md`.
 
 ## The quality principles
 
@@ -63,8 +58,8 @@ features, not afterthoughts.
 
 ### 3. Security is structural, not a pass at the end
 
-Threat-model the shape before there is code to attack; the fix for a finding is
-always a change to the plan or the code, never "don't build this".
+Threat-model the shape before there is code to attack; every finding's fix is a
+change to the plan or the code.
 
 - **Every input crossing a trust boundary** (HTTP, CLI args, env, files, DB, another
   service, **LLM output**) is validated and typed before use. Model output is
@@ -72,6 +67,9 @@ always a change to the plan or the code, never "don't build this".
 - **Injection is designed out** — parameterized queries only, no string-built
   SQL/shell, path traversal guarded, prompt injection considered wherever untrusted
   text reaches a model.
+- **The defect is unsanitized data reaching a sink, not the sink itself.** A raw-HTML
+  or raw-SQL escape hatch on trusted or sanitized content is legitimate; routing
+  around it invents machinery nobody can maintain. Sanitize at the boundary.
 - **Secrets** never live in code, tests, fixtures, logs, or error messages. Loaded
   from env/secret store, validated at a fail-fast boundary, with a stated rotation.
 - **AuthZ is checked on the trust side**, not the client — "hidden" is not "secure".
@@ -102,6 +100,9 @@ economy of means applies to them too.
 - **Mock the boundary you don't own**, never the code you do. **Fixtures no bigger
   than their assertion.** Suite wall-time is a reviewable property, and a test whose
   behavior was deleted goes with it.
+- **Fast feedback while you work.** In the build/fix loop, run only the tests the
+  change actually affects — a slow full-suite round trip on every edit is a cost paid
+  all day. The full suite still gates the hand-off; it just isn't the inner loop.
 - Skipped, `.only`, and flaky all count as **failing**. Coverage % is not the outcome.
 
 ### 6. Maintainability is a debt paid to the next reader
@@ -171,13 +172,12 @@ carried verbatim, never averaged into mush. Full text: `references/voice.md`.
 Economy is the one most often invoked against another, usually wrongly. Ambition
 governs *outcome* and economy governs *means*, so they never actually conflict — the
 boldest version does the most with the fewest parts. Reachable edge cases and security
-controls are outcome, not machinery, and are never traded away for fewer parts.
-**The charter outranks everything**: no principle may be applied in a way that reopens
-the two settled questions. Full resolutions: `references/simplicity.md`.
+controls are outcome, not machinery, and are never traded away for fewer parts. Full
+resolutions: `references/simplicity.md`.
 
 ## References
 
-- `references/charter.md` — the worldview in full; the two settled questions
+- `references/charter.md` — context is welcome; craft and durability over speed
 - `references/simplicity.md` — economy of means, anti-patterns, the tie-breaks
 - `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, …)
 - `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment

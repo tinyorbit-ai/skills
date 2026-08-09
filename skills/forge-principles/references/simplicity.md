@@ -87,9 +87,6 @@ wrongly. The resolutions, in order of how often they come up:
 - **vs. security.** Never. A control at a trust boundary is outcome by definition;
   "fewer parts" never justifies dropping validation, authz, or a secret's handling.
   Economy applies to *how* the control is built, never to whether it exists.
-- **vs. the charter.** The charter wins outright. No economy argument may become
-  "this is too many parts to be worth building" — that reopens a settled question
-  (`charter.md`).
 
 ## Anti-patterns to catch
 

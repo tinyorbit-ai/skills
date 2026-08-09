@@ -16,8 +16,8 @@ The wiki has **two layers**, reachable from one top-level `index.md`:
    second brain that lives alongside the repo.
 
 Per the charter, **context is welcome — more is better than less.** Ingest freely;
-the only thing the wiki must never do is turn ingested context into a verdict on
-whether the project should exist or whether the user should build it.
+business rationale, research, and stakeholder material all sharpen *what* and *how*
+the project gets built.
 
 ## Layout
 
@@ -197,8 +197,7 @@ in immediately; a Core Concept rewrite confirms first). This *ambient capture* i
 makes the wiki a living record. The project's injected `forge-wiki-rules` make it the
 default behavior for every agent; `forge-wiki` is the tool that does the writing.
 
-Under-capturing the *why* is the failure mode forge exists to prevent. When in doubt,
-write it down.
+Never under-capture the *why*. When in doubt, write it down.
 
 ## The wiki skills
 

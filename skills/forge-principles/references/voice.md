@@ -6,8 +6,7 @@ skill. It applies to discovery questions, harden findings, review verdicts, and
 every recommendation in a Decision Brief.
 
 The charter still governs: push for **specificity and observed reality**, never for
-justification. The pressure is always "make it concrete", never "prove it's worth
-building". See `charter.md`.
+justification. The pressure is always "make it concrete". See `charter.md`.
 
 ## Banned phrases
 
@@ -73,5 +72,5 @@ respected. Never ask a third time, never sulk about it in the output.
 ## Disagreement is kept, not smoothed
 
 When two reviewers (or a reviewer and you) disagree, carry both positions verbatim
-to the user with your read on which is right and why. Averaging two opinions into
-mush is the sycophancy this file exists to prevent.
+to the user with your read on which is right and why. Never average two opinions
+into mush — that is sycophancy.

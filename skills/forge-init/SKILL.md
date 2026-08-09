@@ -9,13 +9,6 @@ Sets up a project so every later decision and incident is captured, and so build
 follows the phase/branch discipline. Run once per repo. Idempotent — safe to re-run;
 it never clobbers existing content.
 
-## Charter
-
-The project's right to exist and your fitness to build it are settled — this skill
-builds the scaffolding that captures the *why* as you go, including a knowledge base
-that can ingest any context the build rests on (`forge-principles`'s
-`references/charter.md`).
-
 ## What it does
 
 ### 1. Detect state

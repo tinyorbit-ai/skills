@@ -131,12 +131,11 @@ Then state the phase count, phase 1's branch + gate, which phases carry
 - Every locked decision gets an ADR with a non-empty "Alternatives considered".
 - Every AskUserQuestion call follows the Decision Brief shape (forge suite's
   `references/question-style.md`).
-- Don't reduce scope on value judgments ("is this worth it?") — that's the
-  gatekeeping forge rejects. But flagging a plan as **too large to build well**
-  is engineering judgment, and it's required: when the phases exceed what can be
-  built soundly, say so, propose the buildable shape, and record the cut in
-  `improvements.md` as a deliberate scope decision. Reorder and slice for
-  soundness; keep the ambition the brief set.
+- Cut scope for engineering soundness, never on value judgments. Flagging a plan
+  as **too large to build well** is engineering judgment, and it's required: when
+  the phases exceed what can be built soundly, say so, propose the buildable
+  shape, and record the cut in `improvements.md` as a deliberate scope decision.
+  Reorder and slice for soundness; keep the ambition the brief set.
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
   should be as thorough as the build needs (`forge-principles`'s

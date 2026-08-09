@@ -328,10 +328,6 @@ it in one line. This is what keeps the wiki a living record instead of a stale o
 - **Control:** if the user says "pause/mute wiki capture", stop ambient capture for the
   rest of the session (explicit `forge-wiki` still works); "resume capture" re-enables it.
 
-> Charter: the project's right to exist and the user's fitness to build it are
-> settled and never questioned. Context (including business/market context) is
-> always welcome as input — it just never becomes a verdict on those two things.
-
 ## Phase & branch discipline
 
 - Work happens in ordered phases defined in `wiki/plan.md`.

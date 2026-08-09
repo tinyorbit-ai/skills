@@ -1,6 +1,6 @@
 ---
 name: forge-harden-eng
-description: Plan-time engineering review (staff eng / EM persona). Walks wiki/plan.md and wiki/architecture.md for failure modes, edge cases, idempotency, test coverage gaps, and whether each phase's verifiable gate actually proves its goal. Two modes — LOCK (mandatory before build, all findings) and TRIAGE (critical issues only). Auto-fixes structural plan gaps; surfaces taste decisions. Strengthens the plan, never vetoes the project. Use after forge-plan, when asked to "engineer the plan", "lock the plan", "eng review", or via forge-harden orchestration.
+description: Plan-time engineering review (staff eng / EM persona). Walks wiki/plan.md and wiki/architecture.md for failure modes, edge cases, idempotency, test coverage gaps, and whether each phase's verifiable gate actually proves its goal. Two modes — LOCK (mandatory before build, all findings) and TRIAGE (critical issues only). Auto-fixes structural plan gaps; surfaces taste decisions. Use after forge-plan, when asked to "engineer the plan", "lock the plan", "eng review", or via forge-harden orchestration.
 ---
 
 # forge-harden-eng
@@ -11,9 +11,7 @@ the objective ones, surfaces the taste calls.
 
 ## Charter
 
-Critique the **plan**, never the premise — a finding whose only fix is "kill
-the project" is mis-framed; restate it as a plan change (`forge-principles`'s
-`references/charter.md`).
+Critique the **plan** — every finding is a plan change, never a reason to stop.
 
 ## Modes
 
@@ -172,7 +170,6 @@ present the taste batch directly.
 
 ## Rules
 
-- No "kill the project" recommendations — out of scope.
 - A finding without a concrete plan change or surfaced decision is noise.
 - Don't write feature code. The output is a stronger plan.
 - Anti-sycophantic — take positions; state what evidence would flip you.

@@ -1,9 +1,8 @@
 # Decision Brief — the forge question-style
 
-Every `AskUserQuestion` call in any forge skill should follow this shape. The
-format is borrowed (lighter) from gstack's decision-brief pattern — enough
-structure to surface a real choice, not so much that it turns every prompt
-into ceremony.
+Every `AskUserQuestion` call in any forge skill should follow this shape. It
+carries enough structure to surface a real choice, not so much that it turns
+every prompt into ceremony.
 
 ## When to use it
 
@@ -69,8 +68,7 @@ Concrete, not vague. Three rules:
   split them.
 - Listing options without a recommendation. Take a position.
 - A "recommendation" that just repeats the framing without naming the *why*.
-- Decision briefs on questions that won't be referenced again — that's the
-  noise this format exists to prevent, not create.
+- Decision briefs on questions that won't be referenced again — that's noise.
 
 ## Example
 

@@ -17,8 +17,7 @@ Output: `DESIGN.md` at the repo root, the design source of truth that
 
 A design system here is craft infrastructure, never branding-for-market — the bar is
 "every surface feels like one intentional thing", calibrated to the brief's "How it
-should feel", and the user's taste is the client (`forge-principles`'s
-`references/charter.md`).
+should feel", and the user's taste is the client.
 
 ## When it runs
 

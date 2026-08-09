@@ -10,9 +10,9 @@ pinned so the rest of forge can build it as high-quality, simple, performant sof
 
 ## Charter
 
-**Never ask either settled question** — if only the user will ever use it that's a
-complete reason, so understand the build they want and don't qualify it
-(`forge-principles`'s `references/charter.md`).
+**Ask nothing about money, market, demand, or whether it's "worth it."** Understand
+the build the user wants and don't qualify it — if only they will ever use it,
+that's a complete answer.
 
 ## Process
 
@@ -96,11 +96,10 @@ never a third time (`forge-principles`'s `references/voice.md`). If two answers
 contradict ("dead simple" + a large feature list), name the tension and resolve
 it with them now.
 
-### 2b. Sharpening pass — six forcing questions (charter-safe)
+### 2b. Sharpening pass — six forcing questions
 
-After the base seven, run these six — adapted from gstack's office-hours forcing
-questions, **stripped of every business/market/demand hook**. Skip any question
-already answered (the §2 folds apply here).
+After the base seven, run these six. Skip any question already answered (the §2
+folds apply here).
 
 **Generative prompts, not an interrogation.** Push gates target unexamined
 vagueness, never honest uncertainty — *"I don't know yet, I'll learn by building
@@ -129,12 +128,12 @@ it"* clears any gate. Offer it explicitly, take it at face value, move on.
 
 Lead with your best read, two questions per round, like before.
 
-### 3. Reflect back: offer shapes, not verdicts
+### 3. Reflect back — offer shapes
 
 Synthesize what you heard into 2–3 candidate **shapes** — different ways to build
 the *same intent* ("a CLI", "a local web app", "a library + thin demo"). For each:
 what it optimizes for, what it costs, what the first runnable version looks like.
-Build approaches only — every option assumes the project happens.
+Build approaches only.
 
 Lock the chosen shape with AskUserQuestion in the **Decision Brief** shape
 (forge suite's `references/question-style.md`): concrete framing, named stakes,
@@ -144,8 +143,8 @@ recommendation with the *why* and the evidence that would flip it.
 
 Before writing the brief, invoke **`forge-ambition`** on the draft — it
 pressure-tests whether this is the most ambitious version of *the thing the user
-already chose* (charter-safe; "smaller on purpose" is a valid answer it must
-accept). Fold its outcome into the brief. Skip only if the user declines.
+already chose* ("smaller on purpose" is a valid answer it must accept). Fold its
+outcome into the brief. Skip only if the user declines.
 
 ### 4. Write `wiki/brief.md`
 
@@ -161,8 +160,8 @@ section order, the unknown-real-use marker, ADR handling, and source filing.
 ## Rules
 
 - No code. No file scaffolding beyond the brief + any ADR.
-- About to evaluate the idea's merit? Stop — shape the build; never grade the
-  premise. (Flagging an incoherent or impossible requirement is not grading it.)
+- Flag an incoherent or impossible requirement when you hit one — resolving it
+  with the user is part of pinning the brief down.
 - The brief must make the *non-goals* and *the feel* explicit — those two are the
   most common things later stages need and the most common things left implicit.
 

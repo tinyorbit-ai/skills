@@ -11,10 +11,9 @@ leave DX to chance? Runs *before* implementation.
 
 ## Charter
 
-DX is part of the craft — critique the plan, never the premise, and never
-frame in adoption-metrics or market-share terms; the bar is "respect the
-developer's time and attention", not "win a market" (`forge-principles`'s
-`references/charter.md`).
+DX is part of the craft — critique the plan, and never frame in adoption-metrics
+or market-share terms; the bar is "respect the developer's time and attention",
+not "win a market" (`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 
@@ -58,8 +57,8 @@ Expects:   <what they assume exists before trying (docs? types? --help?)>
 ```
 
 Every finding below is filtered through "would *this* developer abandon
-here?" — not a generic developer. Charter note: the persona describes the
-experience to respect, never a market to win.
+here?" — not a generic developer. The persona describes the experience to
+respect, never a market to win.
 
 ### 0b. Set the first-run bar
 
@@ -163,7 +162,7 @@ the section yourself and present the taste batch.
 ## Rules
 
 - Plan-time only. Runtime DX testing is `forge-dx`'s job.
-- Never kill the project. Never frame in adoption/market.
+- Never frame in adoption/market.
 - "Smaller on purpose" applies — a library that doesn't try to be
   everything is fine; demand intention, not feature count.
 

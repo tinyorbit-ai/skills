@@ -11,7 +11,7 @@ Catches what static review can't see: how it actually looks and feels.
 ## Charter
 
 Polish is about taste and coherence, never about market appeal or conversion — make
-it feel intentional (`forge-principles`'s `references/charter.md`).
+it feel intentional.
 
 ## When it runs
 
