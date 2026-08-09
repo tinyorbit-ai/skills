@@ -11,9 +11,8 @@ entry. Never lands ungated, on a stale base, or with messy history.
 
 ## Charter
 
-The project is worth building. Shipping here means **landing a verified phase
-cleanly** — not "get it out fast", not "is it shippable as a product". The only bar
-is: did the phase's declared gate pass.
+Shipping here means **landing a verified phase cleanly**, not "get it out fast" —
+the only bar is whether the phase's declared gate passed.
 
 ## The contract (enforced here)
 

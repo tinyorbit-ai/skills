@@ -10,8 +10,8 @@ with a test, and captures instructive failures in the wiki.
 
 ## Charter
 
-The project is worth building and worth getting right. Debugging is craft, not
-triage-for-speed. The bar is "we understand why it broke", not "make it go away".
+Debugging is craft, not triage-for-speed — the bar is "we understand why it broke",
+not "make it go away" (`forge-principles`'s `references/charter.md`).
 
 ## Iron law
 

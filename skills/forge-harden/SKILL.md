@@ -1,6 +1,6 @@
 ---
 name: forge-harden
-description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Two modes — interactive (default; surfaces taste decisions to the user) and --auto (auto-decides everything except irreversible-feeling shape calls, per six named principles). Strengthens the plan, never vetoes the project. Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", "auto-harden", or as stage 3 of forge.
+description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Two modes — interactive (default; surfaces taste decisions to the user) and --auto (auto-decides everything except irreversible-feeling shape calls, per five named principles). Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", "auto-harden", or as stage 3 of forge.
 ---
 
 # forge-harden
@@ -11,16 +11,15 @@ into the plan's `## Review` section and the lock gate.
 
 ## Charter
 
-The project is worth building. **Critique the plan, never the premise** — no
-persona may conclude "this shouldn't be built". Every finding is a plan change
-or a surfaced taste decision.
+**Critique the plan** — every finding is a plan change or a surfaced taste
+decision, never a reason to stop.
 
 ## Modes
 
 - **Interactive** (default) — persona passes run; taste decisions reach the
   user as one batch at the end.
 - **`--auto`** — auto-decides objective findings and any taste decision the
-  principles below cover; only the always-surface allowlist (principle 6)
+  principles below cover; only the always-surface allowlist (principle 5)
   reaches the user. State which principle resolved each auto-decision.
 
 State the mode upfront. Default to interactive.
@@ -43,20 +42,18 @@ Every decision surfaced by a persona or the reviewer falls into one of three:
 
 ### Auto-decision principles (only used in `--auto`)
 
-When auto-deciding a taste call surfaced by a persona, apply these six in
+When auto-deciding a taste call surfaced by a persona, apply these five in
 order. Skip a principle that doesn't bear on the question; never bend one.
 
-1. **Charter holds.** Never an outcome that questions whether the project
-   should exist. The user's choice to build is settled.
-2. **Bolder outcome, most economical means.** The more excellent realization
-   of what the user chose, with the fewest parts (`references/simplicity.md`).
-3. **Bias to a falsifiable gate.** Pick whichever option would actually catch
+1. **Bolder outcome, most economical means.** The more excellent realization
+   of what the user chose, with the fewest parts (`forge-principles/references/simplicity.md`).
+2. **Bias to a falsifiable gate.** Pick whichever option would actually catch
    a regression.
-4. **Bias to security on tied craft cost.** Equal effort and clarity → the
+3. **Bias to security on tied craft cost.** Equal effort and clarity → the
    more secure shape; severity tags from `forge-harden-security` carry.
-5. **Bias to economy of means.** Fewer phases, dependencies, abstractions;
+4. **Bias to economy of means.** Fewer phases, dependencies, abstractions;
    established tech over novel; no new service the brief doesn't demand.
-6. **Always-surface allowlist — never auto-decided:** framework, language,
+5. **Always-surface allowlist — never auto-decided:** framework, language,
    persistence model, public API shape, a new external service, a new runtime
    dependency, the auth model, the data model, or any edit to a user-locked
    ADR. These reach the user even in `--auto`; the bar is "the user would
@@ -75,7 +72,7 @@ From `wiki/brief.md` + `wiki/plan.md`:
   `forge-harden-dx`.
 - Scope rethink (`forge-harden-scope`) is opt-in: run when a `scope` arg was
   passed; otherwise in interactive mode ask once (AskUserQuestion — *"rethink
-  scope, or take it as settled?"*, default settled). `--auto` skips it unless
+  scope, or take it as-is?"*, default as-is). `--auto` skips it unless
   the arg was given. State plainly which personas run, and why, before invoking.
 
 ### 2. Run persona passes
@@ -100,8 +97,8 @@ Personas run sequentially (later passes see the earlier ones' plan fixes).
 The **economy sweep runs last on purpose**: passes 2–5 are additive by
 construction, so the one subtractive lens must see the fully-cumulative plan.
 It has authority to **cut any obligation added in passes 1–5 that doesn't
-earn its place against the brief** (`references/simplicity.md`); every cut is
-logged in the report with the persona it came from.
+earn its place against the brief** (`forge-principles/references/simplicity.md`);
+every cut is logged in the report with the persona it came from.
 
 ### 3. Independent reviewer pass
 
@@ -176,7 +173,6 @@ Brief shape (`references/question-style.md`); on confirm, set
 
 ## Rules
 
-- Never produce a "kill the project" recommendation. Out of scope by charter.
 - The orchestrator itself never writes findings — that's each persona's
   job. Keep the orchestrator thin.
 - A persona's auto-fix stands unless the economy sweep (pass 6) cuts it or
@@ -184,7 +180,7 @@ Brief shape (`references/question-style.md`); on confirm, set
   findings — it consolidates, sweeps, and reconciles.
 - Subtraction is the default fix. For every finding the first candidate is
   collapse / delete / reuse; adding a part must justify why it beat subtraction —
-  more rigor is not automatically more machinery (`references/simplicity.md`).
+  more rigor is not more machinery (`forge-principles/references/simplicity.md`).
 - Anti-sycophantic throughout: take positions, state what evidence would
   flip them, don't hedge.
 
@@ -193,7 +189,7 @@ Brief shape (`references/question-style.md`); on confirm, set
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
 - forge suite's `references/scoring.md` — the personas' rating loop + trend lines
-- forge suite's `references/craft-patterns.md` — the thinking moves the personas cite
-- forge suite's `references/simplicity.md` — economy of means (subtraction-first fix policy)
+- `forge-principles`'s `references/craft-patterns.md` — the thinking moves the personas cite
+- `forge-principles`'s `references/simplicity.md` — economy of means (subtraction-first fix policy)
 - `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
   `forge-harden-dx`, `forge-harden-scope` — the five persona skills

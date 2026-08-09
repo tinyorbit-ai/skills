@@ -1,9 +1,7 @@
 # Craft patterns — how the personas think
 
 Named thinking moves the forge personas apply *while* reviewing — not a checklist to
-recite, a set of reflexes to fire when the material triggers them. Adapted from
-gstack's CEO/design cognitive patterns with the market/business framing removed;
-what survives is the part that was always about craft.
+recite, a set of reflexes to fire when the material triggers them.
 
 Each persona's SKILL.md says which of these it leans on. Cite a pattern by name
 when it drives a finding ("inversion: what makes phase 3 fail?") — the name keeps
@@ -14,7 +12,7 @@ the reasoning legible.
 1. **One-way vs. two-way doors.** Classify every decision by reversibility ×
    magnitude. Two-way doors (most things): decide fast, note it, move on. One-way
    doors (framework, language, persistence, public API shape): slow down, ADR,
-   reach the user. This is also `forge-harden --auto`'s principle 6.
+   reach the user. This is also `forge-harden --auto`'s principle 5.
 2. **Inversion reflex.** For every "how does this phase succeed?" also ask "what
    would make it fail?" — then check the plan handles that path. The fastest route
    to the missing edge case.

@@ -3,12 +3,11 @@
 Companion to `forge-discovery/SKILL.md`. The SKILL lists the questions; this
 defines, per question, **what "specific enough" sounds like** (push until you
 hear it) and **what a vague answer sounds like** (red flags — push once more,
-per the forge suite's `references/voice.md`: push once, then push again, never
+per `forge-principles`'s `references/voice.md`: push once, then push again, never
 a third time).
 
-Charter framing for every gate: the push targets **specificity and observed
-reality**, never justification. No gate may ask the user to prove demand,
-worth, or fitness. *"I don't know yet — I'll learn by building"* clears any
+Every gate pushes on **specificity and observed reality** — never on demand,
+worth, or justification. *"I don't know yet — I'll learn by building"* clears any
 gate instantly — record it as an open question and move on.
 
 ## Base seven

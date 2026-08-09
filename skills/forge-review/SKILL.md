@@ -13,9 +13,8 @@ Gemini, or Claude — via the shared reviewer abstraction
 
 ## Charter
 
-The project is worth building and worth getting right. Review hardens the *code*,
-never the premise. The bar is correctness, safety, and durability — never market or
-speed. Never conclude "don't build this".
+Review hardens the *code* — the bar is correctness, safety, and durability, never
+market or speed.
 
 ## Scope
 
@@ -82,16 +81,16 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
      the old branch, the now-unreferenced helper, the compat shim with no caller
      left, the test whose behavior is gone. Removing it is an objective fix, not a
      suggestion — and "keep it for compatibility" needs a *named* consumer, else
-     it's an unexamined default (`forge/references/simplicity.md`).
+     it's an unexamined default (`forge-principles/references/simplicity.md`).
 
    The phase must be exactly what the plan asked — nothing more, nothing less, and
    nothing it obsoleted left standing. A simpler, faster, smaller diff that still
    passes the gate is a fix, not a suggestion.
-6. **Runtime verification (was forge-qa).** Actually run it: execute the phase's
-   verifiable gate and show it green, then exercise the phase **goal** like a real
-   user (UI: drive the flow incl. loading/empty/error states; CLI/lib: real +
-   adversarial inputs; data: verify against the real store). A gate that passes
-   while the goal is unmet is itself a high-severity finding.
+6. **Runtime verification.** Actually run it: execute the phase's verifiable gate
+   and show it green, then exercise the phase **goal** like a real user (UI: drive
+   the flow incl. loading/empty/error states; CLI/lib: real + adversarial inputs;
+   data: verify against the real store). A gate that passes while the goal is unmet
+   is itself a high-severity finding.
    - If the phase diff **touched UI** and `DESIGN.md` exists, first run the
      objective token pass: grep the diff for raw color literals, off-scale px
      values, and `font-family` declarations outside the system. Each hit is an
@@ -199,4 +198,4 @@ recorded, open taste decisions — and hand to **`forge-ship`**. Never ship from
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
-- forge suite's `references/simplicity.md` — economy of means + the simplicity pass
+- `forge-principles`'s `references/simplicity.md` — economy of means + the simplicity pass

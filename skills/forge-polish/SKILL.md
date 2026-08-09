@@ -10,8 +10,8 @@ Catches what static review can't see: how it actually looks and feels.
 
 ## Charter
 
-The project is worth building and worth making feel crafted. Polish is about taste
-and coherence, never about market appeal or conversion. Make it feel intentional.
+Polish is about taste and coherence, never about market appeal or conversion — make
+it feel intentional.
 
 ## When it runs
 

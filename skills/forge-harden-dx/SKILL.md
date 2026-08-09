@@ -11,9 +11,9 @@ leave DX to chance? Runs *before* implementation.
 
 ## Charter
 
-DX is part of the craft. Critique the plan, never the premise. Never kill
-the project; never frame in adoption-metrics or market-share terms. The
-bar is "respect the developer's time and attention" — not "win a market".
+DX is part of the craft — critique the plan, and never frame in adoption-metrics
+or market-share terms; the bar is "respect the developer's time and attention",
+not "win a market" (`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 
@@ -57,8 +57,8 @@ Expects:   <what they assume exists before trying (docs? types? --help?)>
 ```
 
 Every finding below is filtered through "would *this* developer abandon
-here?" — not a generic developer. Charter note: the persona describes the
-experience to respect, never a market to win.
+here?" — not a generic developer. The persona describes the experience to
+respect, never a market to win.
 
 ### 0b. Set the first-run bar
 
@@ -162,7 +162,7 @@ the section yourself and present the taste batch.
 ## Rules
 
 - Plan-time only. Runtime DX testing is `forge-dx`'s job.
-- Never kill the project. Never frame in adoption/market.
+- Never frame in adoption/market.
 - "Smaller on purpose" applies — a library that doesn't try to be
   everything is fine; demand intention, not feature count.
 
@@ -170,5 +170,5 @@ the section yourself and present the taste batch.
 
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- forge suite's `references/craft-patterns.md` — respect the developer's time
+- `forge-principles`'s `references/craft-patterns.md` — respect the developer's time
 - `forge-dx` — runtime counterpart; reads the persona card + first-run bar set here

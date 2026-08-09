@@ -1,24 +1,18 @@
 ---
 name: forge
-description: Resumable end-to-end build pipeline for makers — tells you where you left off and continues from exactly there, with zero gatekeeping on whether the project should exist or whether you're the right person to build it (context, including business context, is welcome — it just never becomes a verdict). Routes through setup, discovery, planning, hardening, then a build→review→ship loop one phase at a time, with a wiki knowledge base alongside. Invoke with `help` (or `--help` / `?`) to print a status-aware usage map instead of running. Use when starting OR resuming a project, when asked to "forge this", "forge help", "continue", "where was I", "build the next phase", "let's build X", or any time you want forge to pick up the thread.
+description: Resumable end-to-end build pipeline for makers — tells you where you left off and continues from exactly there. Routes through setup, discovery, planning, hardening, then a build→review→ship loop one phase at a time, with a wiki knowledge base alongside. Add `crack-on` to run every remaining phase back-to-back instead of stopping after each one; invoke with `help` (or `--help` / `?`) to print a status-aware usage map instead of running. Use when starting OR resuming a project, when asked to "forge this", "forge help", "forge crack-on", "crack on", "keep going", "don't stop", "run it all", "continue", "where was I", "build the next phase", "let's build X", or any time you want forge to pick up the thread.
 ---
 
 # forge
 
 The orchestrator. It is **resumable**: every run starts by reading the project's
-state and telling you exactly where you left off, then continues from there. No
-gatekeeping on whether the thing should exist — ever.
+state and telling you exactly where you left off, then continues from there.
 
 ## Charter (governs everything)
 
-Two things forge never questions: whether the project should exist (you chose to
-build it — settled), and whether you're the right person to build it (settled). It
-never calls an idea useless or optimizes for speed-to-value. **Everything else is
-open, and context is welcome — more is better than less.** Business, market, and
-demand context are valid *input* that sharpens the build; they just never become a
-verdict on those two settled questions. forge understands the build, locks decisions,
-hardens it, and builds it in clean verifiable phases. Full charter:
-`references/charter.md` — read it before doing anything.
+**Context is welcome** — more is better than less, as *input* that sharpens the
+build. forge optimizes for craft and durability over speed-to-value. Full charter in
+`forge-principles`'s `references/charter.md` — a **mandatory read before anything**.
 
 ## Help mode (short-circuit)
 
@@ -36,14 +30,13 @@ You are here ──────────────────────�
 
 Full map ─────────────────────────────────────
   PLAN   init · discovery (+ambition) · plan · design (system+explore, if UI) · harden
-  BUILD  build · review (+polish +dx) · ship   ·· one phase per /forge run
+  BUILD  build · review (+polish +dx) · ship  ·· 1 phase/run · all: /forge crack-on
   LOOK   debug (root-cause) · retro (synthesis, auto at Done)
   WIKI   wiki (ask · ingest context) · wiki-maintain (index · health) ·· any time
 
 Every skill also runs standalone — invoke any directly:
   /forge-init  /forge-discovery  /forge-ambition  /forge-plan
-  /forge-design-system            (DESIGN.md — the design source of truth)
-  /forge-design-explore           (divergent design variants)
+  /forge-design-system  /forge-design-explore  (DESIGN.md, then design variants)
   /forge-harden                   (orchestrator; --auto for auto-decision)
   /forge-harden-eng  /forge-harden-security  /forge-harden-design
   /forge-harden-dx   /forge-harden-scope
@@ -151,10 +144,32 @@ would re-present the gate. The build loop is now unlocked.
    the user runs `/forge` again to take the next phase. If any step fails (red gate,
    blocked review), stop there, report, and recommend `forge-debug`.
 
+### Crack-on mode (build loop only) — every remaining phase, back-to-back
+
+`/forge crack-on` (also `--crack-on`, "crack on", "keep going", "don't stop", "run it
+all") — **name the mode in the run's opening line**. Planning stages are unchanged;
+only the post-lock loop changes — build → review → ship for every phase left until a
+stop below fires, then the summary. Skips and full rules: `references/crack-on.md`.
+
+- gate can't be run here (human, browser, device, dashboard) → **skip** and record it
+- gate runs red → `forge-debug` + review's 3-attempt fix loop; still red → **stop**
+- one-way door (`forge-harden`'s always-surface allowlist) → **stop and ask**
+- unlocked `Design:` marker on a UI phase → **stop**, `forge-design-explore` next
+
+```
+forge · crack-on — complete | stopped at phase <n>
+  Landed     phase <n> <title> — <commit>            (one line per phase)
+  Gates      ✓ <gate that passed>  ·  ⏸ <skipped> → you run `<exact check>`
+  Decisions  <taste decision deferred, its phase, the position taken>
+  Your eyes  <one-way door hit; gate-deferred phases; anything else needing you>
+  Left       <phases not attempted, and why the run stopped>
+```
+
 ## Rules
 
 - The status block comes first, every run. "Where you left off" is non-negotiable.
-- One phase per `/forge` in the build loop. Never batch phases unattended.
+- One phase per `/forge` in the build loop by default, never batching unattended —
+  `/forge crack-on` is the one deliberate opt-in exception to both.
 - Never collapse a stage silently; each artifact is written before moving on.
 - Decisions in any stage → ADRs in `wiki/decisions/` (`references/wiki.md`).
 - Prototype-first: phase 1 is the thinnest end-to-end thing that runs.
@@ -162,11 +177,11 @@ would re-present the gate. The build loop is now unlocked.
 
 ## References
 
-- `references/charter.md` — the worldview (mandatory read)
+- `forge-principles`'s `references/charter.md` — the worldview (mandatory read)
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
-- `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
+- `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
-- `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
+- `forge-principles`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply

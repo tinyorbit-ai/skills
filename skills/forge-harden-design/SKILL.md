@@ -11,9 +11,9 @@ this plan, as written, set up a designed thing or an undesigned thing? Runs
 
 ## Charter
 
-Design is part of the craft. Critique the plan, never the premise. Never
-recommend killing the project; never frame findings in market/conversion
-terms. The bar is "intentional, coherent, accessible", not "convert better".
+Design is part of the craft — critique the plan, and never frame findings in
+market/conversion terms; the bar is "intentional, coherent, accessible", not
+"convert better" (`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 
@@ -54,7 +54,7 @@ existing `DESIGN.md` or design ADRs. Past `wiki/learnings.md` rules count.
    every AI-generated site, the plan under-specifies it.
 6. **Responsive is not "stacked on mobile".** Each viewport gets intent.
 7. **Accessibility is specified or it doesn't exist.**
-8. **Subtraction default** and **design for trust** — forge suite's
+8. **Subtraction default** and **design for trust** — `forge-principles`'s
    `references/craft-patterns.md`.
 
 ### 1. Rated passes — each writes an artifact into the plan
@@ -143,7 +143,7 @@ the section yourself and present the taste batch.
 ## Rules
 
 - Plan-time only. Runtime visual QA is `forge-polish`'s job.
-- Never kill the project. Never frame in market/conversion.
+- Never frame in market/conversion.
 - "Smaller on purpose" applies — a deliberately minimal UI is fine; demand
   intention, not size.
 - Respect any `DESIGN.md` or system ADRs already in place (see
@@ -155,5 +155,5 @@ the section yourself and present the taste batch.
 
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- forge suite's `references/craft-patterns.md` — constraint worship, subtraction default, design for trust
+- `forge-principles`'s `references/craft-patterns.md` — constraint worship, subtraction default, design for trust
 - `forge-design-system` — creates the DESIGN.md Pass 5 aligns against

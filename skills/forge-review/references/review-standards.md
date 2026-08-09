@@ -43,8 +43,10 @@ specific behavior described must be present.
   another service, LLM output) is validated and typed before use. LLM output is
   untrusted input — never `eval`/exec/SQL-interpolate it.
 - **Injection:** parameterized queries only; no string-built SQL/shell; no
-  `dangerouslySetInnerHTML`/template injection with untrusted data; path traversal
-  guarded; prompt-injection considered where untrusted text reaches a model.
+  *unsanitized untrusted* data into `dangerouslySetInnerHTML`/template injection
+  (with trusted or sanitized content it is legitimate — the defect is the
+  unsanitized input, never the API); path traversal guarded; prompt-injection
+  considered where untrusted text reaches a model.
 - **Secrets:** none in code, tests, fixtures, logs, or error messages. Loaded from
   env/secret store, validated at a fail-fast boundary.
 - **AuthZ:** every privileged action checks authorization at the server/trust side,
@@ -67,7 +69,8 @@ specific behavior described must be present.
   numbers are not the goal; meaningful failure on regression is.
 
 **Cost is part of the bar.** Tests are parts the project pays for on every future
-change, so economy of means applies to them (`forge/references/simplicity.md`):
+change, so economy of means applies to them
+(`forge-principles/references/simplicity.md`):
 
 - **Count** — "covered" is the requirement, not one test per behavior. Two tests
   that fail together on the same regression are one test and a duplicate; delete
@@ -83,6 +86,9 @@ change, so economy of means applies to them (`forge/references/simplicity.md`):
   materially slows it is a finding; note the before/after in the receipts.
 - **Lifecycle** — a test whose behavior was deleted goes with it. Tests left behind
   by removed code are the same debt as the code itself.
+- **Feedback speed** — in the build/fix loop, run only the tests the change affects
+  so each iteration is fast. Inner loop only: the hand-off still requires the
+  **full** suite run green with its output pasted.
 
 These are objective and auto-fixable, and the fix is usually **deletion** — see
 pass 5, which covers the test diff as well as the source.
@@ -103,7 +109,7 @@ there. Prefer fixing the type over suppressing the error — always.
   user/caller sees a truthful, actionable signal (no silent empty success).
 - State: transactions atomic; no write-then-fail leaving partial state.
 
-## 5. Runtime verification (absorbs the old forge-qa)
+## 5. Runtime verification
 
 Static review is not enough — run the thing.
 

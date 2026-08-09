@@ -10,10 +10,9 @@ synthesis you can act on. The only forge skill that reasons across the whole arc
 
 ## Charter
 
-The project is worth building and worth doing better each cycle. Retro is about
-**craft and process** — patterns in how the work went, what to keep, what to
-improve. Never about speed, output volume, "shipping faster", or business value.
-"We slowed down to get the hard part right" is a *positive* finding here.
+Retro is about **craft and process**, never speed, output volume, "shipping faster",
+or business value — "we slowed down to get the hard part right" is a *positive*
+finding here (`forge-principles`'s `references/charter.md`).
 
 ## When it runs
 
@@ -55,7 +54,7 @@ improve. Never about speed, output volume, "shipping faster", or business value.
      tests that duplicate each other or outlived the behavior they covered, and
      anything kept "for compatibility" whose consumer you can no longer name. Name
      each with the phase that obsoleted it. This is the arc's accumulated cost, and
-     it only ever grows if nobody looks (`forge/references/simplicity.md`).
+     it only ever grows if nobody looks (`forge-principles/references/simplicity.md`).
    - **Open threads** — unresolved taste decisions, deferred items still pending.
 
 3. **File it back into the wiki:**

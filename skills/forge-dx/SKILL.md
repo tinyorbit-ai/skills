@@ -10,9 +10,8 @@ Tests the *experienced* developer journey by living it, not by reading the plan
 
 ## Charter
 
-The project is worth building and worth being a pleasure to integrate. DX quality is
-about respect for the developer's time and attention — never about adoption metrics
-or market positioning.
+DX quality is about respect for the developer's time and attention — never about
+adoption metrics or market positioning.
 
 ## When it runs
 

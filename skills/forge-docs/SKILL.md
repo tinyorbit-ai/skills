@@ -11,9 +11,8 @@ docs surface a given change belongs in.
 
 ## Charter
 
-Docs are part of the craft. Critique the docs, never the premise. The
-bar is "the docs match what shipped, in the right Diataxis quadrant" —
-never "rank for SEO" or "convert".
+The bar is "the docs match what shipped, in the right Diataxis quadrant", never
+"rank for SEO" or "convert".
 
 ## When it runs
 

@@ -12,9 +12,8 @@ risks if the build touches model APIs.
 
 ## Charter
 
-Critique the plan, never the premise. "Don't build this" is never the
-answer — a finding's fix is always a plan change. Threat-model the build;
-this is not "is it worth securing".
+Critique the plan — a finding's fix is always a plan change, never a reason to
+stop. Threat-model the build as the plan specifies it.
 
 ## Modes
 
@@ -127,7 +126,6 @@ the section yourself and present the taste batch.
 
 ## Rules
 
-- Never kill the project — a finding's fix is always a plan change.
 - Severity tags are required. "Security finding" without H/M/L is noise.
 - Confidence gates are hard: DAILY drops sub-8/10 findings silently;
   DEEP keeps them with `TENTATIVE`. Never report an ungated hunch as fact.

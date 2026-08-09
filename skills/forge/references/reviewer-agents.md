@@ -40,8 +40,8 @@ Both `forge-harden` and `forge-review` send the same shape. Only the CLI shell
 changes between agents.
 
 ```
-You are an adversarial reviewer. Be concrete. Do not comment on whether the
-project is worth building — only on the artifact's soundness.
+You are an adversarial reviewer. Be concrete. Comment only on the artifact's
+soundness.
 
 Find:
 1. The weakest assumption.
