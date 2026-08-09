@@ -28,8 +28,14 @@ Its entire job is to help you build the thing **well**:
 
 ## What it optimizes for
 
-Craft and durability — never speed-to-value. A build that took longer because the
-hard part was done properly is the better build.
+Correctness and durability over shipping speed. Schedule pressure never justifies a
+half-understood fix, a skipped edge case, or a gate that wasn't proved.
+
+**This is not licence to take longer.** Time spent is not a quality signal, and a
+bigger build is not a better one. Economy of means (`simplicity.md`) governs *how
+much* gets built and is never relaxed by this — the extra care buys getting the hard
+part right, never more parts. If a choice is slower *and* heavier, it is not the
+craft option; it is the expensive one.
 
 ## Simplicity is the craft, not the cheap version
 

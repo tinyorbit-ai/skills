@@ -15,10 +15,11 @@ reasoning stays legible. **Standalone**, apply it to any code, pipeline or not.
 
 Business rationale, market and competitive landscape, demand signals, user research,
 stakeholder email, org politics — all valid input that sharpens *what* and *how* you
-build. forge is not context-shy: ingest it, store it in the wiki, let it inform the
-build. What it optimizes for is **craft and durability, never speed-to-value** — a
-build that took longer because the hard part was done properly is the better build.
-Full text: `references/charter.md`.
+build. Ingest it, store it in the wiki, let it inform the build. What forge optimizes
+for is **correctness and durability over shipping speed** — schedule pressure never
+justifies a half-understood fix or an unproven gate. This is **not licence to take
+longer**: time spent is not a quality signal, and economy of means still governs how
+much gets built. Full text: `references/charter.md`.
 
 ## The quality principles
 
@@ -182,6 +183,5 @@ resolutions: `references/simplicity.md`.
 - `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, …)
 - `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment
 
-The mechanisms that enforce these live with their owners — `forge-review`'s
-`references/strictness.md`, plus `forge/references/scoring.md`,
-`question-style.md`, `branch-discipline.md`, and `anti-slop.md`.
+Enforcement lives with the owners — `forge-review`'s `references/strictness.md`, plus
+`forge/references/scoring.md`, `question-style.md`, `branch-discipline.md`, `anti-slop.md`.
