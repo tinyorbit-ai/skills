@@ -1,6 +1,6 @@
 ---
 name: forge-retro
-description: Build retrospective — synthesizes wiki/build-log.md, wiki/learnings.md, and git history since the last retro into "what shipped, recurring patterns, what to improve next", then files durable lessons and action items back into the wiki. Charter-safe — about craft and process, never velocity or business. Auto-invoked by forge when all plan phases have landed; also standalone anytime. Use when asked "retro", "what did we ship", "what should we do better", or at a natural milestone.
+description: Build retrospective — synthesizes wiki/build-log.md, wiki/learnings.md, and git history since the last retro into "what shipped, recurring patterns, what to improve next", then files durable lessons and action items back into the wiki. About craft and process, never velocity or business. Auto-invoked by forge when all plan phases have landed; also standalone anytime. Use when asked "retro", "what did we ship", "what should we do better", or at a natural milestone.
 ---
 
 # forge-retro
@@ -75,7 +75,7 @@ finding here (`forge-principles`'s `references/charter.md`).
 ## Rules
 
 - Synthesis over enumeration — if it reads like a commit list, it's not done.
-- Charter-safe: craft/process only; never velocity, output count, or business.
+- Craft and process only; never velocity, output count, or business.
 - Evidence-based: every claimed pattern cites the phases/learnings it came from.
 - Read-and-reflect plus wiki writes only — no feature code, no shipping. The
   subtraction pass *names* what can go; a later phase does the deleting.
