@@ -98,7 +98,7 @@ Tell the user every file changed, in the same turn.
   doc page without naming its quadrant.
 - Never invent content for a feature you don't fully understand from the
   diff. If the diff is unclear, ask (Decision Brief) — don't hallucinate.
-- Charter-safe: docs serve the developer, not SEO or marketing.
+- Docs serve the developer, not SEO or marketing.
 - Stay on the current branch (typically the base, post-ship); never push.
 
 ## References
