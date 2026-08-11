@@ -67,6 +67,10 @@ of an existing subsystem, an abstraction that will force future contortions.
 - Logic errors, off-by-one, race conditions, ordering bugs, stale state.
 - Missing null / empty / duplicate / permission / concurrency / retry / timeout /
   partial-failure handling. Input validation and output shape at system boundaries.
+- **Runtime input contracts across boundaries** — for every new or repurposed
+  action, RPC, client, or shared-helper call, read the callee's actual parser/schema
+  and compare the values the caller sends. TypeScript primitives do not encode Zod
+  refinements; one platform's limit or enum is not proof another boundary accepts it.
 - **Backwards compatibility** — callers, persisted data, API consumers, user
   workflows. Grep call sites; do not assume.
 - **Behaviour preservation in refactors and migrations** — the #1 risk is silent
@@ -121,5 +125,8 @@ Security regressions are **critical**.
   that hid a regression is **critical**.
 - Test quality counts against the repo bar: assertions that can't fail, mocks that
   mock the thing under test.
+- A mocked action/RPC/client proves caller behavior, not boundary compatibility.
+  When behavior depends on a schema, range, or enum, require a test through the real
+  parser at the intended value and its nearest rejected boundary.
 - Failing CI is read as review signal — which test, what does it say about the diff —
   never re-run locally, never a reason by itself to withhold the stamp.
