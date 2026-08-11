@@ -1,4 +1,8 @@
 {
+  "major-runtime-boundary-limit": {
+    "number": 15,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/15"
+  },
   "dispute-measured-scale": {
     "number": 14,
     "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/14"

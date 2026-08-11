@@ -22,3 +22,13 @@ delta from this change.
 rebuilding its fixture without the stray PR-body file. `grade.mjs` grades every case
 in `cases.json`, so the six that never ran are counted as errors: read this row as
 1/1 with the pass rate as an artifact, not a regression.
+| 2026-08-11 | boundary-contract-baseline-20260811 | default | 0/7 | 0 | 0 | n/a |
+
+`boundary-contract-baseline-20260811` could not start any review because the Claude
+CLI reported its weekly usage limit on all seven cases. The row records a harness
+infrastructure error, not reviewer behavior, so it is not a behavioral baseline.
+| 2026-08-11 | boundary-contract-after-20260811 | default | 0/8 | 0 | 0 | n/a |
+
+`boundary-contract-after-20260811` hit the same Claude CLI weekly limit on all eight
+cases, including the new boundary-contract fixture. Deterministic validation still
+runs below; this row is not evidence of a behavioral pass or regression.
