@@ -24,6 +24,7 @@ CASES_JSON="$EVAL_DIR/cases.json"
 PRS_JSON="$EVAL_DIR/fixtures/prs.json"
 
 TIMEOUT_SECS="${LIZARD_EVAL_TIMEOUT:-900}"   # 15 min hard cap per case
+JOBS="${LIZARD_EVAL_JOBS:-5}"                # cases reviewed concurrently
 
 die() { printf 'run.sh: %s\n' "$*" >&2; exit 1; }
 
@@ -150,11 +151,20 @@ One raw JSON object, no code fence, exactly these keys. When the approval would 
   return 0
 }
 
+# Cases are independent by construction — each gets its own scratch project and its
+# own LIZARD_HOME — so they run concurrently. Batched rather than a rolling window:
+# bash 3.2 (macOS) has no `wait -n`. Failures are recorded as marker files because a
+# backgrounded subshell cannot increment a counter in this shell.
+fail_dir="$(mktemp -d "${TMPDIR:-/tmp}/lizard-fails.XXXXXX")"
+batch=0
 for id in "${CASE_IDS[@]}"; do
-  if ! process_case "$id"; then
-    errors=$((errors+1))
-  fi
+  ( process_case "$id" || : > "$fail_dir/$id" ) &
+  batch=$((batch+1))
+  if [ "$batch" -ge "$JOBS" ]; then wait; batch=0; fi
 done
+wait
+errors="$(find "$fail_dir" -type f | wc -l | tr -d ' ')"
+rm -rf "$fail_dir"
 
 printf 'done. %d case(s), %d error(s). grade with: bin/grade.mjs --run-id %s\n' \
   "${#CASE_IDS[@]}" "$errors" "$RUN_ID"
