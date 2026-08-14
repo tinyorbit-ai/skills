@@ -313,6 +313,7 @@ lint_ledgers() {
   local rec_unchanged='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ verdict=unchanged-blocked head=[0-9a-fA-F]+ prior=[0-9]+'
   local rec_dupe='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ .*duplicate-averted'
   local rec_miss='^[0-9]{4}-[0-9]{2}-[0-9]{2} MISS PR#[0-9]+ '
+  local rec_late='^[0-9]{4}-[0-9]{2}-[0-9]{2} PR#[0-9]+ late-finding head=[0-9a-fA-F]+ first-reachable=[0-9a-fA-F]+'
   local total=0 bad=0 f line
   while IFS= read -r f; do
     while IFS= read -r line || [ -n "$line" ]; do
@@ -326,7 +327,8 @@ lint_ledgers() {
       if printf '%s' "$line" | grep -qE "$rec_review" \
         || printf '%s' "$line" | grep -qE "$rec_unchanged" \
         || printf '%s' "$line" | grep -qE "$rec_dupe" \
-        || printf '%s' "$line" | grep -qE "$rec_miss"; then
+        || printf '%s' "$line" | grep -qE "$rec_miss" \
+        || printf '%s' "$line" | grep -qE "$rec_late"; then
         :
       else
         bad=$((bad+1))
