@@ -139,6 +139,16 @@ When a prior lizard review exists and the diff has genuinely changed:
    open, record what re-proved it, not merely that it was reviewed. Label new findings as pre-existing misses,
    author-fix regressions, or lizard-fix regressions. Never imply that an old miss was
    caused by the new push.
+   **A change lizard asked for is new code, not a resolved finding.** When a delta hunk
+   exists because lizard prescribed it, review it at full depth as if it had arrived
+   unprompted — never grade it `prior finding resolved ✓` and move on. Run the inverse
+   test first: *what does this new guard, restriction, or fail-closed path now reject
+   that used to work?* Enumerate the reachability grid of the state it rejects
+   (`criteria.md` §3), including the caller that made the old permissive branch
+   necessary. This is the highest-asymmetry stamp in the system — lizard wrote the
+   requirement and is now grading it, so no second party is left to catch the gap, and
+   an outage caused here is one lizard authored rather than missed.
+
 2. **Review the delta** — fetch what changed since the last reviewed head:
 
    ```bash

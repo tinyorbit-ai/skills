@@ -118,6 +118,14 @@ record the silent outcome instead:
 2026-07-04 PR#4242 verdict=unchanged-blocked head=9fb2ddf prior=2
 ```
 
+When a re-review blocks on something already present at a head lizard reviewed
+before, record the late finding alongside the review record — this is the reviewer's
+miss, and the pattern is only visible in aggregate (`scope.md`):
+
+```text
+2026-07-04 PR#4242 late-finding head=9fb2ddf first-reachable=3ac81f0 (round 1) — cell: drawer reopen on reload; the round-1 closure sweep enumerated dismissal but not the reload lifecycle.
+```
+
 **Miss detection** — once per sweep per repo, check recently merged PRs that lizard
 stamped (`verdict=go` in the ledger, PR now merged):
 

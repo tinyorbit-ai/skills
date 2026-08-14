@@ -32,11 +32,9 @@ in the hidden metadata line (`references/dedup.md`), never in emoji.
 - **REQUEST_CHANGES** — body starts `do not merge.` and uses the same `Why:` format.
   Only for confirmed critical findings or malicious-looking changes.
 
-**Self-authored PRs**: GitHub forbids approving your own PR. When the PR author is
-the authenticated `gh` user, deliver an approval as a plain issue comment whose body
-is `🦎` + receipts + metadata (see `references/github-review-api.md`). Same meaning,
-no formal approval state. If it has nits, first submit one COMMENT review containing
-all inline nits, then post the stamp. Non-approvals post normally.
+**Self-authored PRs**: GitHub forbids approving your own PR, so the stamp posts as a
+plain issue comment instead — same meaning, no formal approval state. Exact procedure,
+including the nits-first COMMENT review, in `references/github-review-api.md`.
 
 The receipts block is always a collapsed `<details>` block containing a two-column
 markdown table. A plain `Receipts:` heading or bullet list is invalid and must be
@@ -72,6 +70,8 @@ hedged question, not a major with a suggestion block. Severity scales the burden
 more you're asking the author to undo, the harder you must have proven it. The burden
 is charged **every round, not once**: a finding carried across a push or an author
 reply re-earns it on the current head, or it stops blocking (`references/scope.md`).
+The **fix** you prescribe carries it too — before telling an author to reject a state,
+prove no legitimate caller produces it (`references/criteria.md` §3).
 
 ## The stamp contract
 
@@ -131,7 +131,8 @@ mid-review. Record the tier in the receipts and metadata.
 2. Deduplicate (`references/dedup.md`) — if this head/diff/context was already
    reviewed, stop. If a prior lizard review exists, this run is a **re-review**: audit
    every prior blocking finding (resolved / still open) first, review the delta since
-   the last reviewed head, and never repost a still-open inline thread — link it.
+   the last reviewed head, and never repost a still-open inline thread — link it. A
+   change lizard itself requested is new code: review it, never grade it resolved.
 3. Claim the run — a fresh 👀 reaction **from your own account** on the PR means
    another lizard run is in flight: stop (anyone else's 👀 is just a reaction, never
    a claim; an explicit user request to review overrides). Otherwise add yours (best
@@ -142,7 +143,8 @@ mid-review. Record the tier in the receipts and metadata.
    — `references/criteria.md` always (all seven groups); every
    matching focus pack under `references/focus-packs/` (load by trigger signals, plus
    any repo-local guidance and `--brief` file); `references/deep-review.md` for T3.
-7. Before a first non-approval, run the closure sweep in `references/scope.md`; if
+7. Before **every** non-approval, run the closure sweep in `references/scope.md` — it
+   enumerates the changed unit's behaviour family, it does not merely re-read; if
    heading toward APPROVE, run the pre-stamp refutation.
 8. Compose — short `Why:` body for non-approvals, plain-English inline comments with
    verified anchors, receipts block,

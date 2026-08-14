@@ -83,6 +83,27 @@ of an existing subsystem, an abstraction that will force future contortions.
   the helper, follow the value, check the default) instead of inferring it from a name
   or a plausible story. Ungrounded, it's a question, not a major.
 
+**Proof obligation — reachability.** A unit is only reviewed once every way of
+reaching it is. Before judging a change to anything more than one caller or lifecycle
+reaches, enumerate the grid and judge the change in **every** cell:
+
+- **entry points** — channels, callers, triggers, dispatch modes, routes, queue
+  consumers, sibling handlers sharing a bootstrap, every consumer of a shared
+  constant or schema.
+- **lifecycles** — first call vs. subsequent, cold vs. warm, create vs. update,
+  mount / remount / reload / navigate-away, empty vs. populated state.
+
+Trigger signals: a new guard, assert, early return, or `throw` on a missing or
+unexpected value; shared bootstrap or module-scope init; a hook or effect owning state
+across routes; a job added to a workflow's `needs`; a constant crossing a package
+boundary; a producer whose consumer mounts under a different gate; any id minted by a
+client before the server has stored it.
+
+An unenumerated cell is unreviewed, not safe — the happy-path cell is never the one
+that breaks. Record the grid in the receipts, naming the cell that motivated the
+change and at least one cell that is not the happy path; "callers checked ✓" is not a
+receipt. Finding one bug in a grid and stopping is what turns one review into four.
+
 ## 4. Security & safety
 
 - Injection — SQL/NoSQL, command, path traversal, and prompt injection where LLM

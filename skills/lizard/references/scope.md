@@ -47,6 +47,15 @@ reviewer gathers evidence. If the reviewer cannot establish that a query scans o
 is unsupported, ask a non-blocking question. If the repository proves the index is
 missing, ask for the index or a bounded query path — not an evidence attachment.
 
+**A fix that branches on an unchecked fact is not a fix.** Before prescribing anything
+that rejects, restricts, or fails closed on a state, prove no legitimate producer
+creates that state — the reachability grid in `criteria.md` §3 is that proof. Writing
+“fail closed; *if* X must be supported, do Y instead” hands the author a fork the
+reviewer was supposed to resolve, and the author will take the shorter branch. Resolve
+it before posting, or prescribe the branch that keeps every existing producer working.
+The burden scales with the prescription: telling an author to reject traffic demands
+the same proof as telling them their code is broken.
+
 Treat a proposed new service, RPC, schema, migration, reconciler, worker, feature
 gate, or deploy sequence as a scope-brake trigger. First try subtraction or a local
 fix. If the only safe option genuinely expands the project, report the trade-off and
@@ -78,14 +87,36 @@ high-risk exposure or the rollback is not credible. “Internal-only” does not
 database, data-loss, payment, or security risk, but a controlled rollout with no
 exposed cohort can bound it.
 
-## First-pass closure
+## Closure before every non-approval
 
-Before the first non-approval, run one final whole-PR closure sweep at the tier's
-depth: all criteria, all triggered focus packs, every changed file, relevant
+Before **every** non-approval — not only the first — run a whole-PR closure sweep at
+the tier's depth: all criteria, all triggered focus packs, every changed file, relevant
 surrounding call sites, and existing human/bot review threads. Ask: “What blocker
 already present on this head would otherwise appear only after these fixes?” Verify
 each candidate independently and drop it if it does not survive. This promises
 completeness for the current head, not immunity from bugs introduced by future fixes.
+
+The sweep is an **enumeration, not a re-read**. For every unit the PR changes, walk the
+reachability grid (`criteria.md` §3) and the whole behaviour family around the change:
+if the PR makes a panel open, the family is every way it opens and closes — first
+paint, dismissal, reload, navigation, focus. If the PR adds a guard, the family is
+every producer of the guarded state. Report the family's failures together, in one
+round. One bug found per family per round is the pattern that turns a single review
+into four, and each extra round costs the author more than the finding was worth.
+
+## Late findings are the reviewer's, not the author's
+
+On re-review, every new finding names the head on which its code first became
+reachable. If lizard already reviewed that head, the finding is a **miss**, and the
+comment says so plainly: “missed on the round-N review — your push did not cause
+this.” It still blocks at its own severity; a real problem does not stop being one
+because it surfaced late. What changes is the story the author is told — never let a
+miss read as damage they introduced.
+
+Round-after-round discovery is a review failure even when every finding is real.
+Record it: append a `late-finding` ledger line naming the missed cell and the sweep
+that should have enumerated it, so the pattern shows up in calibration instead of only
+in the author's patience.
 
 ## Author disputes
 

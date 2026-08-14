@@ -87,6 +87,7 @@ Template — include a row only when it has content:
 | issue fit | ENG-1234 acceptance criteria 4/4 met |
 | context | ✓ Linear ENG-1234 · ✓ Notion "Checkout spec" · ✗ Slack thread (unavailable) |
 | beyond the diff | 14 surrounding files read · call sites of removed `getOrderLegacy` grepped, none remain |
+| reachability | `assertDraftAccess` — web first-save ✗ (breaks) · web update ✓ · api ✓ · importer ✓ |
 | findings | 1 nit (naming), inline — non-diluting |
 | prior findings | 2 resolved · 0 still open |
 | provenance | 1 introduced-by-pr · 1 pre-existing follow-up |
