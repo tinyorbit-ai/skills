@@ -190,11 +190,15 @@ any change to `skills/lizard/`, run the smoke set** —
 scorecard (false-🦎 must be 0). One-time setup:
 `evals/lizard/fixtures/bootstrap.sh`. Details in `evals/lizard/README.md`.
 
-`dispute-measured-scale` is the suite's **two-round** case (`round1/` +
-`thread.json`): bootstrap seeds a prior lizard review and an author dispute reply
-before handing lizard the fixed head, so the delta re-review path is graded on how
-a finding is *disposed of* rather than whether it is found. Golden answer is a
-stamp; restating the residue in future tense is the false-block it exists to catch.
+Two **two-round** cases (`round1/` + `thread.json`) grade the delta re-review path:
+bootstrap seeds a prior lizard review and an author reply before handing lizard the
+fixed head, so what's measured is how a finding is *disposed of* rather than whether
+it is found. They fail in opposite directions and both must hold —
+**`dispute-measured-scale`** (golden answer: stamp; restating the residue in future
+tense is the false-block) and **`lizard-fix-breaks-caller`** (golden answer: block;
+the author implemented lizard's own prescribed guard and it broke the caller that
+legitimately produced the rejected state — grading that delta "prior finding resolved
+✓" is the false-🦎, and stands in for a production incident lizard caused this way).
 
 Two traps when running these, both hit for real:
 

@@ -111,7 +111,7 @@ Set `LIZARD_EVAL_MODEL` identically for `run.sh` and `grade.mjs` if you pin a mo
 3. Run just that case: `bin/run.sh --run-id try <case-id>` then `bin/grade.mjs
    --run-id try`.
 
-### Two-round cases (author disputes)
+### Two-round cases (prior review in context)
 
 Most cases are a first pass. A case that also carries `round1/` and `thread.json`
 is a **two-round** fixture: bootstrap pushes `round1/` first, opens the PR, posts a
@@ -122,11 +122,21 @@ marker), *then* pushes the case's top-level overlay as the author's fix and post
 verdict and a real author dispute in context — the delta re-review path.
 
 Use one when the behaviour under test is *how a finding is disposed of* rather than
-whether it is found. `dispute-measured-scale` is the reference example: the author
-refutes the prescribed fix on mechanism, supplies a measured bound, and the only
-residue is a growth hypothetical — restating it as a blocker is the false-block the
-case exists to catch. Re-run `bootstrap.sh` with `FORCE_REFRESH=1` after editing a
-two-round fixture; the seeding is skipped whenever the branch already exists.
+whether it is found. There are two, and they pull in opposite directions:
+
+- **`dispute-measured-scale`** — the author refutes the prescribed fix on mechanism,
+  supplies a measured bound, and the only residue is a growth hypothetical. Restating
+  it as a blocker is the **false-block** the case exists to catch. Golden answer: stamp.
+- **`lizard-fix-breaks-caller`** — the author implements lizard's prescribed guard
+  *exactly*, and the guard breaks the one caller that legitimately produced the
+  rejected state. Grading the delta "prior finding resolved ✓" is the **false-🦎** the
+  case exists to catch — drawn from a production incident where lizard demanded the
+  guard, stamped the result four times, and it shipped. Golden answer: block.
+
+Together they say a prior finding's disposal is a decision in both directions — carrying
+one forward without re-earning it is one failure, waving through the fix it demanded is
+the other. Re-run `bootstrap.sh` with `FORCE_REFRESH=1` after editing a two-round
+fixture; the seeding is skipped whenever the branch already exists.
 
 ## Cost
 

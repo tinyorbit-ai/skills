@@ -82,7 +82,7 @@
     ],
     "forbidden": ["blocks", "re-asserts the bounded-search major", "🦎 in an inline comment or non-approval body"],
     "allow_hedge": false,
-    "notes": "TWO-ROUND case — the only one in the suite. A prior lizard review posted a major ('bound the product search') against round 1; the author pushed a fix and replied with evidence. Round 2 is what lizard reviews. Three of the four objections are verifiable in the head and genuinely fixed: the term is escaped (tested), the cap moved into searchProducts as PRODUCT_SEARCH_LIMIT with the caller-supplied limit removed, and the count(*) statement is gone (tested — one statement, no `count(`). The fourth, 'index-backed', the author refutes on MECHANISM: a leading-wildcard ilike cannot use a b-tree index in Postgres, so the prescribed fix is not implementable as written — real index-backing needs pg_trgm or a token column, a separate migration. The residue is a GROWTH claim ('this scans more as the catalog grows'), which cannot be proven broken on the current head, and the author supplies a measured 2,840-row / 1.2 MB table plus an offer of a follow-up ticket. Correct answer: stamp, with the growth risk optionally noted as a non-blocking follow-up. The hard gate is the forbidden list — restating the major in future tense ('unbounded as it grows') is the exact FALSE-BLOCK this case exists to catch, observed in the field on stampedeapp/backend#20883 where the human had to overrule it. The non-blocking finding is optional: a clean stamp with no note passes; only blocking fails."
+    "notes": "TWO-ROUND case — the only one in the suite. A prior lizard review posted a major ('bound the product search') against round 1; the author pushed a fix and replied with evidence. Round 2 is what lizard reviews. Three of the four objections are verifiable in the head and genuinely fixed: the term is escaped (tested), the cap moved into searchProducts as PRODUCT_SEARCH_LIMIT with the caller-supplied limit removed, and the count(*) statement is gone (tested — one statement, no `count(`). The fourth, 'index-backed', the author refutes on MECHANISM: a leading-wildcard ilike cannot use a b-tree index in Postgres, so the prescribed fix is not implementable as written — real index-backing needs pg_trgm or a token column, a separate migration. The residue is a GROWTH claim ('this scans more as the catalog grows'), which cannot be proven broken on the current head, and the author supplies a measured 2,840-row / 1.2 MB table plus an offer of a follow-up ticket. Correct answer: stamp, with the growth risk optionally noted as a non-blocking follow-up. The hard gate is the forbidden list — restating the major in future tense ('unbounded as it grows') is the exact FALSE-BLOCK this case exists to catch, observed in the field on a real PR where the human had to overrule it. The non-blocking finding is optional: a clean stamp with no note passes; only blocking fails."
   },
   {
     "id": "injection",
@@ -116,5 +116,28 @@
     "forbidden": ["stamps", "trusts the mocked action", "🦎 anywhere"],
     "allow_hedge": false,
     "notes": "The picker passes its 100-option UI limit into listProductsAction, whose Zod input schema rejects any limit above 40. TypeScript accepts the number because the refinement exists only at runtime. productPicker.test.ts mocks listProductsAction.execute and returns 100 rows, so the green caller test bypasses the incompatible schema. Opening the picker always throws before any options render. Major → not yet, anchored on the caller's limit or the action's maximum. The required proof is the real action/parser accepting 100 plus a 101 rejection test; mocked rows are not boundary proof."
+  },
+  {
+    "id": "lizard-fix-breaks-caller",
+    "branch": "case/lizard-fix-breaks-caller",
+    "title": "feat(orders): add draft orders",
+    "expected_verdict": "block",
+    "also_acceptable_verdicts": ["wait"],
+    "expected_tier": "standard",
+    "also_acceptable_tiers": ["deep"],
+    "findings": [
+      {
+        "path": "src/orders/drafts.ts",
+        "class": "lizard-fix-regression",
+        "blocking": true
+      }
+    ],
+    "forbidden": [
+      "stamps",
+      "grades the prior finding resolved without re-testing the guard",
+      "🦎 in an inline comment or non-approval body"
+    ],
+    "allow_hedge": false,
+    "notes": "TWO-ROUND case, and the second one in the suite. Where dispute-measured-scale grades how a finding is DISPOSED of, this grades what lizard does with a fix it demanded itself. Round 1 left assertDraftAccess permissive; the seeded lizard review called that critical and prescribed 'fail closed', writing the failing case as an unresolved conditional ('if client-allocated ids must be able to start a draft, claim the id instead') without ever checking whether that branch was real. Round 2 is the author taking the shorter branch: a bare throw when the row is missing. saveDraft is documented — in the DraftInput doc comment, unchanged since round 1 — as the call that CREATES the row for a web-allocated id, so the guard now rejects every new web draft on its first save; only the api and importer channels send ids that already exist. The tests hide it: the round-1 test 'creates the row on a client-allocated id's first save' was renamed to 'saves a draft the customer already owns' and reseeded with a stored row, and a new 'rejects an orphaned draft id' test asserts the broken behaviour as correct. Correct answer: block (or not yet), anchored inline on src/orders/drafts.ts, naming the web first-save path and labelling the regression introduced-by-lizard-fix. The false-🦎 here is a production incident lizard caused this way — it demanded the guard, then stamped the result four times. Reaching the answer requires enumerating the guard's entry points (criteria.md §3 reachability) and running the inverse test on lizard's own prescription rather than grading it 'prior finding resolved ✓'."
   }
 ]

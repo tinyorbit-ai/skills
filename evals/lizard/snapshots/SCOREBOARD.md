@@ -32,3 +32,19 @@ infrastructure error, not reviewer behavior, so it is not a behavioral baseline.
 `boundary-contract-after-20260811` hit the same Claude CLI weekly limit on all eight
 cases, including the new boundary-contract fixture. Deterministic validation still
 runs below; this row is not evidence of a behavioral pass or regression.
+| 2026-08-14 | reach-baseline-20260814 | default | 7/8 | 0 | 0 | 100% |
+| 2026-08-14 | reach-after-20260814 | default | 9/9 | 0 | 0 | 100% |
+
+The reachability-grid change. `reach-baseline-20260814` ran the 8 pre-change cases
+from a worktree pinned to the previous commit; its one FAIL was
+`major-runtime-boundary-limit` blocking where `wait` was expected — a severity
+overshoot, not a safety miss. `reach-after-20260814` ran all 9 on the changed skill:
+the overshoot corrected itself and the new `lizard-fix-breaks-caller` case blocked,
+naming the break as caused by lizard's own prescribed fix. No metric regressed.
+
+Two things to read honestly in this pair. The after-run's `lizard-fix-breaks-caller`
+row is the **second** run of that case: the first exposed two defects in the fixture
+itself (missing vitest imports, an unread `channel` field), both real and both mine,
+so the fixture was cleaned and the case re-run rather than counted around. And the
+case's `expected_tier` was corrected from `standard` to also accept `deep` — an auth
+surface always promotes to T3, so the skill was right and the golden answer was wrong.
