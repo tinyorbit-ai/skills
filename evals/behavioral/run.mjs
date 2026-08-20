@@ -98,7 +98,7 @@ function setUpWorkdir(caseDir, config) {
   for (const s of config.skills || []) {
     const src = join(ROOT, 'skills', s);
     if (!existsSync(src)) throw new Error(`skill not found in repo: ${s}`);
-    for (const target of skillsTargets) symlinkSync(src, join(target, s));
+    for (const target of skillsTargets) symlinkSync(src, join(target, basename(s)));
   }
   return workdir;
 }

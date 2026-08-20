@@ -13,6 +13,7 @@ lizard trigger cases return with that widening.
 |---|---|---|---|
 | **0 static** | frontmatter parses, discovery works, references resolve, index in sync | free, seconds | every change, before pushing |
 | **1 trigger** | user utterances route to the right skill from `description` alone | ~45 haiku calls, pennies | when any `description` changes |
+| **1b routing** | `maximum-effort`'s triage rule sizes tasks (S/M/L) and floors risk (sonnet/opus) as intended, from its live `## Triage` section alone | 15 haiku calls, pennies | when the triage rule changes |
 | **2 behavioral** | the skill, run end-to-end headless, produces its contracted artifacts | real tokens, minutes/case | when a skill's body changes |
 
 ## The edit loop (how these are actually used)
@@ -63,6 +64,24 @@ ambition, plan-time vs runtime personas) are the highest-value cases. Threshold:
 
 **Add a case** whenever a description edit ships or a routing miss happens in real
 use — the miss becomes a case, like a regression test.
+
+## Tier 1b — routing (maximum-effort)
+
+```bash
+node evals/routing/run.mjs              # 15 cases
+node evals/routing/run.mjs --dry-run    # print the assembled prompt, no calls
+node evals/routing/run.mjs --only stripe
+```
+
+Same shape as tier 1, different question: not *which skill*, but *which lane*. Reads
+the live `## Triage` section of `maximum-effort`'s SKILL.md (experimental or promoted,
+whichever exists), shows Haiku ONLY that section plus one task, and asserts the size
+(S/M/L) and the worker floor (sonnet/opus). Passes at ≥ 14/15 **and** two hard
+constraints — no `routine` case may floor at opus, every `hard` case must. The misses
+that shaped the rule on day one: "add X and cover it with tests" reading as S (a new
+test is now M), "double-sends emails" not reading as risky (outbound side effects are
+now named), and an auth *refactor* reading as safe (the surface decides, not the
+intent). Cases in `routing/cases.json`; a real mis-route becomes a case.
 
 ## Tier 2 — behavioral
 
@@ -226,13 +245,29 @@ Set `judgeFloor` in `config.json` to override the floor parsed from `rubric.md`.
   items reported-but-untouched (nested file not moved, broken link not silently
   deleted) — plus no collateral damage to healthy articles.
 
+- **`maximum-effort-m-task`** — the lane contract, graded from the transcript's
+  top-level tool calls (a subagent's own calls never surface there, which is the
+  point). A tiny zero-dep login server; the task adds per-IP rate limiting to
+  `POST /login` — M-sized, one unknown (where the handler and its tests live), one
+  risky step (it sits on the auth surface). Checks: a scout before the first worker, a
+  worker on Sonnet, the risky step's worker on Opus, no planner/Fable on an M task, the
+  leaf boundary in every spawn prompt, the coordinator editing nothing but
+  `.maximum-effort/`, a plan with a `check:` per step and every box ticked,
+  `.git/info/exclude` rather than `.gitignore`, a receipt line, the suite green, a test
+  naming 429, and a live probe (six logins from one IP → the sixth is 429 with
+  `Retry-After`). Judge: plan quality, economy of the limiter, brief fidelity. Reads
+  the role agents from `~/.claude/agents/` (headless loads them) but accepts the
+  `model:` fallback, so it passes without them; that machine state is outside the
+  fingerprint — pass `--no-cache` after touching the agent files.
+
 ### Add a case
 
 ```
 evals/behavioral/cases/<name>/
 ├── task.md        headless prompt — say "NON-INTERACTIVE: don't AskUserQuestion,
 │                  take your recommendation" for interactive skills
-├── config.json    { "skills": [...include "forge" for cross-skill refs...],
+├── config.json    { "skills": [...include "forge" for cross-skill refs; an experimental
+│                    skill is ".experimental/<name>" — the symlink takes the basename...],
 │                    "branch": "...", "judgeFiles": [...], "timeoutMinutes": N }
 ├── fixture/       flat, or base/ + phase/ overlays for phase-branch cases
 ├── check.mjs      export default async ({ workdir, transcript, exec }) => checks[]
@@ -245,6 +280,22 @@ no network.
 
 ## Recorded baselines
 
+- **2026-08-20** · tier 1b routing (15 cases, Haiku): 12/15 → 15/15 after two
+  rule sharpenings (a new test is M; un-recallable side effects and a refactor on a
+  trust boundary are risky). Both hard constraints clean.
+- **2026-08-20** · tier 2 `maximum-effort-m-task` ×3, first baseline: **FAIL**, and
+  the autopsy reshaped both the skill and the check. Re-graded offline with the
+  corrected check, runs 1–2 clear all 19 deterministic checks (run 1 ran every lane
+  through the Codex pool — a legitimate pool pick at Claude 7-day 30% vs Codex 3%;
+  run 2 was the contract to the letter on the Claude pool); run 3 backgrounded its
+  Codex scouts and ended the headless turn with nothing done — now forbidden by the
+  skill. Judge medians plan_quality 7 · **economy_of_means 5 ✗** · brief_fidelity 8:
+  both real runs shipped a factory module with options for a 12-line per-IP window.
+  The plan step now carries the default-deny (no file for one caller, no option for
+  a fixed value, one seam test over five module tests). A second ×3 run against the
+  fixed skill was started and stopped before any run completed (5-hour window at
+  92%) — **not yet green**; re-run with
+  `node evals/behavioral/run.mjs maximum-effort-m-task --runs 3 --no-cache`.
 - **2026-07-11** · tier 1 (forge-only scope, 41 cases): 40/41 (98%) on Haiku —
   the miss was a deliberately soft utterance since reworded ("what are we
   building again?" → "help me pin down exactly what we're building", verified
