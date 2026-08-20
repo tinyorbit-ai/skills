@@ -280,6 +280,32 @@ no network.
 
 ## Recorded baselines
 
+- **2026-08-20** · forge ↔ maximum-effort lane wiring. Tier 1 scope widened so
+  `maximum-effort` competes with the forge suite for the first time — it immediately
+  stole `"continue where we left off"` (44/47), which is the collision the change
+  exists to fix; after narrowing the description to "invoked by name, not by
+  inference" plus a forge stand-down clause, **51/51** across repeated runs with
+  `"continue"` and `"build the next phase"` both back on forge. Tier 1b gained 3
+  `forge`-tag cases (the runner now also feeds `## When not to run` and accepts the
+  answer `forge`): 13/15 **failing** before → **17-18/18** after. Two pre-existing
+  sizing misses were fixed in the same pass; measured 10 runs to confirm the M/L cue
+  edit was not the cause of a one-off hard-constraint miss — with the cues
+  18/18/17/18/17 and 0/5 misses, without them 16/15/17/18/16 and 1/5, i.e. router
+  flake, and the cues are net better. **No tier-2 case** for the lane-powered phase
+  loop on purpose: no crack-on baseline exists to protect, and its deterministic
+  checks would measure build variance rather than the wiring. First lane-powered
+  crack-on run is attended; a real miss becomes the permanent case.
+- **Harness note (measured, unfixed).** Every tier-1/1b case shells out a full
+  `claude -p` boot — 7.3s wall and 4.3s CPU per case, most of it connecting MCP
+  servers, so a routing run is ~100s and a trigger run ~3min. Raising
+  `EVAL_CONCURRENCY` barely helps (4 → 12 was 99s → 87s) because it is CPU-bound on
+  process boot, not network. The intermittent
+  `clientlisttools() called but server does not advertise tools capability` "failures"
+  are MCP handshake noise leaking into the router's answer, not routing misses —
+  which is why verdicts here are taken over repeated runs. Passing
+  `--strict-mcp-config --mcp-config '{"mcpServers":{}}'` measures 3.8s wall / 0.9s CPU
+  and would remove both the cost and the flake.
+
 - **2026-08-20** · tier 1b routing (15 cases, Haiku): 12/15 → 15/15 after two
   rule sharpenings (a new test is M; un-recallable side effects and a refactor on a
   trust boundary are risky). Both hard constraints clean.

@@ -5,13 +5,11 @@ description: Resumable end-to-end build pipeline for makers — tells you where 
 
 # forge
 
-The orchestrator. It is **resumable**: every run starts by reading the project's
-state and telling you exactly where you left off, then continues from there.
+The orchestrator. It is **resumable**: every run starts by reading the project's state and telling you exactly where you left off, then continues from there.
 
 ## Charter (governs everything)
 
-**Context is welcome** — more is better than less, as *input* that sharpens the
-build. forge optimizes for craft and durability over speed-to-value. Full charter in
+**Context is welcome** — more is better than less, as *input* that sharpens the build. forge optimizes for craft and durability over speed-to-value. Full charter in
 `forge-principles`'s `references/charter.md` — a **mandatory read before anything**.
 
 ## Help mode (short-circuit)
@@ -90,8 +88,7 @@ sequence so first-time setup isn't four invocations.)
 
 ### Design stage (plan ships UI, direction unresolved)
 
-The shotgun fires **after planning, before hardening** — the user picks with their
-eyes before any code exists and before harden-design audits a guess. In order:
+The shotgun fires **after planning, before hardening** — the user picks with their eyes before any code exists and before harden-design audits a guess. In order:
 
 1. **`forge-design-system`** if no `DESIGN.md` — locks the materials
    (type/color/space/radius/motion) via the served specimen board.
@@ -130,7 +127,9 @@ would re-present the gate. The build loop is now unlocked.
    idempotently, ship checks branch position), so re-entry is always safe.
 2. **Announce it.** Phase number, title, its branch, its verifiable gate. One line.
 3. **Build.** Invoke `forge-build` for this phase (staff-engineer build of the best
-   version of the phase, on its `phase/<n>-<slug>` branch).
+   version of the phase, on its `phase/<n>-<slug>` branch) — in a maximum-effort
+   worker lane when installed, changing only where it runs, never this loop's
+   stop-and-report contract (`references/phase-lanes.md`).
 4. **Review.** Invoke `forge-review` on the phase's diff (security, tests, strict
    types, optional Codex, auto-fix objective findings, learnings → `wiki/learnings.md`,
    runtime verification of gate + goal). Review auto-invokes `forge-polish` (if the
@@ -185,3 +184,4 @@ forge · crack-on — complete | stopped at phase <n>
 - `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
 - `forge-principles`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
+- `references/phase-lanes.md` — how a phase runs in a maximum-effort worker lane instead of on the main thread

@@ -59,6 +59,14 @@ have the conversation — everything you need is in the prompt. If it is not, th
   demands a reason. Match the code around you.
 - Run the step's `check:` before answering and paste its real output. No output, no DONE.
 - Do not commit. Do not touch `.maximum-effort/`.
+- Exception — your prompt names a forge phase (a `wiki/plan.md` phase plus its
+  branch): that phase's own forge skill contract governs instead, replacing the two
+  rules above. Commit freely on the phase branch; on the base branch, nothing
+  except the single squash commit `forge-ship` lands for your own named phase, gate
+  green — and your spawn prompt is that step's "unless they said proceed", so never
+  stop to ask for it. Wiki writes the skill requires (build-log, improvements, ADRs,
+  learnings) are part of the step, not out of scope. The phase's verifiable gate is
+  the step's `check:` — same rule, paste its real output.
 - Reply in exactly this shape:
 
 Step:   <N — what>

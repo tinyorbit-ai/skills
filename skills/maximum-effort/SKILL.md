@@ -1,6 +1,6 @@
 ---
 name: maximum-effort
-description: Token-frugal task runner — triages any task by size and risk, sends read-only scouting to the cheapest model, implementation to a mid-tier worker, and only the hard decision (the plan, the root cause, the review of a risky hunk) to the frontier model, then hands off to lizard and shepherd. Same flow in Claude Code and Codex. Use when a task touches more than one file, when asked to "maximum effort", "max effort this", "plan this then do it", "route this to cheap agents", "continue" a half-done plan, or whenever you would otherwise run a whole multi-file job on the session model.
+description: Token-frugal task runner — triages any task by size and risk, sends read-only scouting to the cheapest model, implementation to a mid-tier worker, and only the hard decision (the plan, the root cause, the review of a risky hunk) to the frontier model, then hands off to lizard and shepherd. Same flow in Claude Code and Codex. Invoked by name, not by inference — use when asked to "maximum effort", "max effort this", "plan this then do it", "route this to cheap agents", or to resume a half-done `.maximum-effort/plan.md`. Stands down for forge — in a repo with a forge plan, forge owns the phases and spawns these lanes itself, so bare "continue", "keep going", "where were we", "next phase" and "build the next phase" go to forge, never here.
 model: opus
 effort: medium
 ---
@@ -26,9 +26,16 @@ The bar is `forge-principles` — economy of means, evidence over claims, root c
 symptom. A cheaper model is never permission to skip a test or a step's check. Going
 cheaper is free; going up needs a named failure.
 
+Frugality governs *where* reading happens, never *how much*: scouts are more reading,
+just placed in a cheaper window — forge's "context is welcome" stance is honoured, not inverted.
+
 ## When not to run
 
-- The repo has `wiki/.forge/` and the ask is a forge phase → `forge` owns it. Stop.
+- `wiki/plan.md` or `wiki/.forge/` exists and `forge` is installed → forge owns it. Stop.
+  forge spawns these same lanes itself when it wants them (`forge/references/phase-lanes.md`)
+  — standing down loses nothing. Unless the user asked for maximum effort by name, which
+  always wins (Guardrail: a model or effort the user picked by hand always wins).
+  Fallback: no `forge` installed → triage as normal.
 - The ask is a PR → `shepherd`. A review → `lizard`.
 - S-size (one file, you already know the change) → do it on the main thread. Say
   `Route: S` and nothing else.
@@ -50,8 +57,8 @@ Unknowns:    <questions a scout answers, one per line>
 | Size | Looks like | Flow |
 |---|---|---|
 | S | one file, an edit you could dictate — no new test, nothing to look up | main thread does it. No scouts, no plan file. |
-| M | a few files or a new test; a pattern you know; nothing to discover | scouts → plan (no stop) → workers |
-| L | many files, cross-service, unclear cause, or any step the user must approve | scouts → brain writes the plan → **user approves** → workers → brain reviews risky hunks |
+| M | a few files or a new test; a pattern you know; nothing to discover; a small feature built on existing patterns, even if it is only one page | scouts → plan (no stop) → workers |
+| L | many files, cross-service, unclear cause, a data/schema migration or a backfill, or any step the user must approve | scouts → brain writes the plan → **user approves** → workers → brain reviews risky hunks |
 
 **Risk → floor.** A step is *risky* when it is hard to reverse, touches auth / money /
 data loss / secrets (the surface decides, not the intent — a behaviour-preserving
@@ -60,12 +67,23 @@ refactor there is still risky), has outbound side effects that cannot be recalle
 steps run on the Opus (Sol) worker whatever the size, and the brain reviews their diff
 before close. Everything else never goes above the Sonnet (Terra) worker.
 
+**Design → floor.** A step is *design* when it **decides** how something looks or feels —
+inventing a surface's shape, choosing type/colour/spacing/motion with no precedent to
+follow. **Applying** an already-decided system — existing theme tokens, an existing
+palette, a locked `DESIGN.md`, an established component's conventions — is ordinary
+work and stays on Sonnet, however visual the file looks. Design steps run on the Fable
+(Sol) worker whatever the size: a cheap model returns competent generic defaults, and
+generic is the failure here. Precedence: a step that is both design and risky runs on
+Fable and still gets the brain's risky-hunk review. Not design merely because a step
+touches a file that renders something — wiring an existing component to data is
+ordinary work.
+
 ## Lanes
 
 | Lane | Model | Gets | Returns |
 |---|---|---|---|
 | Scout | Haiku / Luna — fresh context, read-only, parallel | one unknown | files, symbols, callers, tests, one-line risk — ≤ 1 K tokens |
-| Worker | Sonnet / Terra (Opus / Sol on a risky step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
+| Worker | Sonnet / Terra (Opus / Sol on a risky step, Fable / Sol on a design step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
 | Brain | Fable / Sol @ xhigh — L plans, re-plans, risky-hunk review | brief + findings + `forge-principles` | the plan file, or `APPROVE` / `BLOCK`. Never executes. |
 
 The coordinator never reads source files itself — that is what scouts are for. Spawn
