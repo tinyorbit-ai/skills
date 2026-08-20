@@ -24,7 +24,7 @@ CASES_JSON="$EVAL_DIR/cases.json"
 PRS_JSON="$EVAL_DIR/fixtures/prs.json"
 
 TIMEOUT_SECS="${LIZARD_EVAL_TIMEOUT:-900}"   # 15 min hard cap per case
-JOBS="${LIZARD_EVAL_JOBS:-5}"                # cases reviewed concurrently
+JOBS="${LIZARD_EVAL_JOBS:-12}"               # cases reviewed concurrently
 
 die() { printf 'run.sh: %s\n' "$*" >&2; exit 1; }
 
@@ -32,6 +32,19 @@ die() { printf 'run.sh: %s\n' "$*" >&2; exit 1; }
 [ -d "$SKILL_SRC" ]  || die "no skill at $SKILL_SRC"
 command -v claude >/dev/null 2>&1 || die "the 'claude' CLI is not on PATH"
 command -v jq >/dev/null 2>&1 || die "jq is required"
+
+# Why a case produced no payload. Only the last kind is a behavioural result; the
+# others are the provider or the harness failing and must never be read as a verdict.
+failure_kind() {
+  local out="$1"
+  if grep -qE 'usage limit|rate.?limit|Overloaded|API Error' "$out"; then
+    printf 'provider error, not a verdict'
+  elif grep -qE "waiting (only )?(on|for)|still (running|reading)|hasn't landed" "$out"; then
+    printf 'turn ended mid-review (adversary still running), not a verdict'
+  else
+    printf 'no LIZARD_PAYLOAD block in output'
+  fi
+}
 
 # Portable hard timeout: prefer coreutils timeout, else perl's alarm+exec.
 run_with_timeout() {
@@ -116,28 +129,44 @@ One raw JSON object, no code fence, exactly these keys. When the approval would 
 
   # Capture combined stdout+stderr. A non-zero exit (incl. timeout) still lets us
   # try to extract a payload; missing payload is the real error condition.
-  (
-    cd "$proj"
-    export LIZARD_HOME="$scratch/home"
-    run_with_timeout "$TIMEOUT_SECS" \
-      claude -p "$prompt" --permission-mode bypassPermissions \
-      "${model_args[@]+"${model_args[@]}"}"
-  ) > "$out_txt" 2>&1 || true
+  #
+  # Attempted twice, because a missing payload is usually not a verdict: measured on
+  # a 9-case wave, one case died on a provider safeguard error and one ended its turn
+  # while its codex adversary was still running. Both cost a full manual re-run of the
+  # suite. The retry is logged, so a skill that genuinely never emits a payload still
+  # fails — it just fails twice instead of once.
+  local attempt=1
+  while :; do
+    (
+      cd "$proj"
+      export LIZARD_HOME="$scratch/home"
+      run_with_timeout "$TIMEOUT_SECS" \
+        claude -p "$prompt" --permission-mode bypassPermissions \
+        "${model_args[@]+"${model_args[@]}"}"
+    ) > "$out_txt" 2>&1 || true
 
-  # Extract the LAST complete BEGIN..END block, strip any stray code fences.
-  local payload_raw="$scratch/payload.raw"
-  awk '
-    /LIZARD_PAYLOAD_BEGIN/ { buf=""; cap=1; next }
-    /LIZARD_PAYLOAD_END/   { last=buf; cap=0; next }
-    cap { buf = buf $0 "\n" }
-    END { printf "%s", last }
-  ' "$out_txt" > "$payload_raw"
-  grep -v '^[[:space:]]*```' "$payload_raw" > "$payload_json" 2>/dev/null || cp "$payload_raw" "$payload_json"
+    # Extract the LAST complete BEGIN..END block, strip any stray code fences.
+    local payload_raw="$scratch/payload.raw"
+    awk '
+      /LIZARD_PAYLOAD_BEGIN/ { buf=""; cap=1; next }
+      /LIZARD_PAYLOAD_END/   { last=buf; cap=0; next }
+      cap { buf = buf $0 "\n" }
+      END { printf "%s", last }
+    ' "$out_txt" > "$payload_raw"
+    grep -v '^[[:space:]]*```' "$payload_raw" > "$payload_json" 2>/dev/null || cp "$payload_raw" "$payload_json"
+
+    if [ -s "$payload_json" ] && jq empty "$payload_json" >/dev/null 2>&1; then break; fi
+    [ "$attempt" -ge 2 ] && break
+    cp "$out_txt" "$RESULTS_DIR/$id.attempt1.txt"
+    printf '%-28s retry 1/1 — %s (first attempt kept as %s)\n' \
+      "$id" "$(failure_kind "$out_txt")" "$id.attempt1.txt"
+    attempt=$((attempt+1))
+  done
 
   rm -rf "$scratch"
 
   if [ ! -s "$payload_json" ]; then
-    printf '%-28s ERROR — no LIZARD_PAYLOAD block in output (see %s)\n' "$id" "$id.txt"
+    printf '%-28s ERROR — %s (see %s)\n' "$id" "$(failure_kind "$out_txt")" "$id.txt"
     rm -f "$payload_json"
     return 1
   fi
@@ -152,15 +181,16 @@ One raw JSON object, no code fence, exactly these keys. When the approval would 
 }
 
 # Cases are independent by construction — each gets its own scratch project and its
-# own LIZARD_HOME — so they run concurrently. Batched rather than a rolling window:
-# bash 3.2 (macOS) has no `wait -n`. Failures are recorded as marker files because a
-# backgrounded subshell cannot increment a counter in this shell.
+# own LIZARD_HOME — so they run concurrently. A rolling window, not batches: a batch
+# barrier idles every finished slot until the batch's slowest case ends, which on a
+# suite whose cases range from two to twelve minutes is most of the wall clock.
+# bash 3.2 (macOS) has no `wait -n`, so the window is held by polling `jobs -pr`.
+# Failures are recorded as marker files because a backgrounded subshell cannot
+# increment a counter in this shell.
 fail_dir="$(mktemp -d "${TMPDIR:-/tmp}/lizard-fails.XXXXXX")"
-batch=0
 for id in "${CASE_IDS[@]}"; do
+  while [ "$(jobs -pr | wc -l | tr -d ' ')" -ge "$JOBS" ]; do sleep 1; done
   ( process_case "$id" || : > "$fail_dir/$id" ) &
-  batch=$((batch+1))
-  if [ "$batch" -ge "$JOBS" ]; then wait; batch=0; fi
 done
 wait
 errors="$(find "$fail_dir" -type f | wc -l | tr -d ' ')"
