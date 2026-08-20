@@ -321,14 +321,13 @@ lint_ledgers() {
       case "$line" in
         ''|'#'*|'<!--'*|'>'*) continue ;;
       esac
-      # only grade lines that look like a dated record
-      printf '%s' "$line" | grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ' || continue
+      # only grade lines that look like a dated record. Matched with bash's own `=~`
+      # rather than a piped grep: at six spawns per line over a real ledger this was
+      # ~11k processes and most of the field lint's runtime.
+      [[ $line =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}\  ]] || continue
       total=$((total+1))
-      if printf '%s' "$line" | grep -qE "$rec_review" \
-        || printf '%s' "$line" | grep -qE "$rec_unchanged" \
-        || printf '%s' "$line" | grep -qE "$rec_dupe" \
-        || printf '%s' "$line" | grep -qE "$rec_miss" \
-        || printf '%s' "$line" | grep -qE "$rec_late"; then
+      if [[ $line =~ $rec_review || $line =~ $rec_unchanged || $line =~ $rec_dupe \
+         || $line =~ $rec_miss || $line =~ $rec_late ]]; then
         :
       else
         bad=$((bad+1))
