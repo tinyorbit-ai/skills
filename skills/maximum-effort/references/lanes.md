@@ -23,14 +23,23 @@ default, or a plan limit moves — it is the only file in the skill that differs
   `~/.claude/settings.json` (`"model": "opus"`, `"effortLevel": "medium"`).
 - Headroom: `~/.claude/rate-limits.json`, written by the statusline on every refresh —
   `seven_day.used_percentage`.
+- `Agent` returns "launched successfully" immediately and the lane keeps running in the
+  background — that return is not the result. Start no dependent work and end no turn
+  while a lane is still out.
+- The lane's completion notification (a later user-role message) IS its answer: tick
+  its plan box and write the Log and ledger line from that notification, not from the
+  launch return.
+- Turn ended with a lane in flight anyway? `SendMessage` that agent for its result
+  before re-spawning or re-planning anything.
 - Codex-pool lanes from Claude:
   `codex exec -p scout --sandbox read-only --json "<scout prompt>"` and
   `codex exec -p worker --sandbox workspace-write --json "<worker prompt>"`.
   Profiles are the files `~/.codex/{scout,worker,brain}.config.toml`. Run them in the
   foreground and wait — a backgrounded `codex exec` plus a later turn ends a headless
-  session with nothing done. `workspace-write` denies `listen`, so a step whose check
-  starts a server stays on the Claude pool (observed: a Codex worker `BLOCKED(EPERM)`
-  on `npm test` for an HTTP server).
+  session with nothing done. Pin the `Bash` call's `timeout` to 600000 — the 120s
+  default backgrounds the lane mid-run. `workspace-write` denies `listen`, so a
+  step whose check starts a server stays on the Claude pool (observed: a Codex worker
+  `BLOCKED(EPERM)` on `npm test` for an HTTP server).
 
 ## Codex
 
@@ -65,3 +74,5 @@ default, or a plan limit moves — it is the only file in the skill that differs
    transcript format).
 3. The brain never crosses pools.
 4. Name the pool in the receipt.
+5. No output, an error, or past 10 minutes: re-run the lane once in the home pool
+   rather than treating a silent foreign pool as a finished lane.

@@ -24,8 +24,15 @@ export default async function check({ workdir, transcript, exec }) {
   for (const ev of events) {
     if (ev.type !== 'assistant' || ev.parent_tool_use_id) continue;
     for (const block of ev.message?.content ?? []) {
-      if (block.type === 'tool_use') calls.push({ name: block.name, input: block.input ?? {}, i: calls.length });
+      if (block.type === 'tool_use') calls.push({ name: block.name, input: block.input ?? {}, id: block.id, i: calls.length });
       else if (block.type === 'text') texts.push(block.text);
+    }
+  }
+  const results = new Map();
+  for (const ev of events) {
+    if (ev.type !== 'user' || ev.parent_tool_use_id) continue;
+    for (const block of ev.message?.content ?? []) {
+      if (block.type === 'tool_result' && block.tool_use_id) results.set(block.tool_use_id, block.content);
     }
   }
   const finalText = events.findLast((e) => e.type === 'result')?.result || texts.at(-1) || '';
@@ -41,7 +48,7 @@ export default async function check({ workdir, transcript, exec }) {
       const lane = type === 'planner' || model === 'fable' ? 'planner'
         : type === 'scout' || model === 'haiku' ? 'scout'
         : type === 'worker' || MID.has(model) || HOT.has(model) ? 'worker' : 'other';
-      spawns.push({ i: c.i, lane, model, pool: 'claude', boundary: /do not spawn agents/i.test(String(c.input.prompt ?? '')) });
+      spawns.push({ i: c.i, id: c.id, lane, model, pool: 'claude', boundary: /do not spawn agents/i.test(String(c.input.prompt ?? '')) });
     } else if (c.name === 'Bash') {
       const cmd = String(c.input.command ?? '');
       for (const m of cmd.matchAll(/codex exec\s+([^\n;&|)]*)/g)) {
@@ -74,9 +81,17 @@ export default async function check({ workdir, transcript, exec }) {
     .map((c) => String(c.input.command ?? ''))
     .filter((cmd) => /codex exec/.test(cmd) && /(\)\s*&(?!&)|[^&]&\s*$)/m.test(cmd));
   const unwaited = backgrounded.filter((cmd) => !/\bwait\b/.test(cmd));
-  const deferred = calls.filter((c) => c.name === 'Monitor' || c.name === 'TaskOutput');
-  add('lanes awaited in the turn that spawned them', unwaited.length === 0 && deferred.length === 0,
-    `${unwaited.length} backgrounded codex exec without wait · ${deferred.length} Monitor/TaskOutput calls`);
+  const noAnswer = (content) => {
+    if (content == null) return true;
+    const text = typeof content === 'string' ? content : JSON.stringify(content);
+    return !text || /<retrieval_status>\s*timeout\s*<\/retrieval_status>/i.test(text) || /launched successfully/i.test(text);
+  };
+  const deferred = calls
+    .filter((c) => c.name === 'Monitor' || c.name === 'TaskOutput')
+    .filter((c) => noAnswer(results.get(c.id)));
+  const orphaned = spawns.filter((s) => s.pool === 'claude' && noAnswer(results.get(s.id)));
+  add('lanes awaited in the turn that spawned them', unwaited.length === 0 && deferred.length === 0 && orphaned.length === 0,
+    `${unwaited.length} backgrounded codex exec without wait · ${deferred.length} Monitor/TaskOutput calls with no answer · ${orphaned.length} Agent spawns with no result in transcript`);
 
   const wd = realpathSync(workdir);
   const rel = (p) => {

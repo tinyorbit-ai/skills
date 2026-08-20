@@ -1,8 +1,6 @@
 ---
 name: maximum-effort
 description: Token-frugal task runner — triages any task by size and risk, sends read-only scouting to the cheapest model, implementation to a mid-tier worker, and only the hard decision (the plan, the root cause, the review of a risky hunk) to the frontier model, then hands off to lizard and shepherd. Same flow in Claude Code and Codex. Use when a task touches more than one file, when asked to "maximum effort", "max effort this", "plan this then do it", "route this to cheap agents", "continue" a half-done plan, or whenever you would otherwise run a whole multi-file job on the session model.
-metadata:
-  internal: true
 model: opus
 effort: medium
 ---
@@ -78,7 +76,9 @@ mechanics per tool, the role preambles, and the fallback when a role agent is mi
 
 1. **Triage.** Brief, size, risky steps. If `.maximum-effort/plan.md` exists with open
    checkboxes, this is a continuation — skip to step 4. Fully ticked → overwrite it.
-2. **Scout.** One scout per unknown, all in parallel. No unknowns → no scouts.
+2. **Scout.** One scout per unknown, all in parallel. No unknowns → no scouts. Every
+   lane prompt — scout, worker, brain — ends with the leaf boundary: `Complete this
+   directly. Do not spawn agents.`
 3. **Plan.** M: the coordinator writes it. L: the brain writes it. Both land in
    `.maximum-effort/plan.md` in the shape of `references/plan-template.md`; add
    `.maximum-effort/` to `.git/info/exclude` (never the repo's `.gitignore`). One line
@@ -89,12 +89,12 @@ mechanics per tool, the role preambles, and the fallback when a role agent is mi
    second caller exists), no option for a value the brief fixes, one test across the
    real seam over five that mirror the module. L only: stop and ask the user to approve
    (AskUserQuestion / request_user_input) before anything runs.
-4. **Execute.** One worker per step, in order unless marked independent. Every worker
-   prompt ends with the leaf boundary: `Complete this directly. Do not spawn agents.`
-   The worker runs the step's check before it answers. Tick the box on `DONE`, log the
-   run in the plan's `## Log`. A lane run is awaited in the turn that spawned it —
-   parallel means parallel calls in one message, never a background job picked up in a
-   later turn.
+4. **Execute.** One worker per step, in order unless marked independent. The worker
+   runs the step's check before it answers. Spawn, then collect every lane's
+   answer before the turn ends — parallel means parallel calls in one message, not a
+   background job picked up later (mechanics: `references/lanes.md`). Only once an
+   answer is in hand: tick the box on `DONE`, log the run in the plan's `## Log`. A
+   turn that ends with a lane still out orphans it.
 5. **Blocked.** Same reason twice → the brain re-plans the remaining steps from the
    plan plus a five-line state summary — never the raw transcript. Back to 4.
    Escalation is a diagnosis, not a reflex:
@@ -102,7 +102,9 @@ mechanics per tool, the role preambles, and the fallback when a role agent is mi
    - had the full context and still misread it → bigger model
    - the step was underspecified → fix the step; never buy context with model
 6. **Close.** Risky hunks → brain review; a `BLOCK` becomes a new step for a worker,
-   never a patch by the coordinator. Then one receipt line, exactly this shape:
+   never a patch by the coordinator. Before the receipt, re-read the plan: every box
+   ticked or no receipt — an open box is either a lane still to collect or a tick that
+   never landed. Then one receipt line, exactly this shape:
    `Route: <S|M|L> · scouts <model>×<n> · plan <model> · workers <model>×<n> (<step> <model>: <why>) · fable <n>`
    Append one JSON line per lane run to `~/.maximum-effort/ledger.jsonl` —
    `{"ts","tool","cwd","task","size","lane","model","effort","outcome","escalated_why"}`,
@@ -123,6 +125,10 @@ other's by 15 points or more (`~/.claude/rate-limits.json` vs the last `rate_lim
 port or needs the network (the foreign pool runs sandboxed). The receipt says
 `(codex pool)` or `(claude pool)`.
 
+A foreign-pool lane that returns nothing, errors, or runs past 10 minutes is re-run
+once in the home pool. A scout that still returns nothing leaves its unknown open —
+never read as "no findings".
+
 ## Guardrails
 
 - A model or effort the user picked by hand always wins.
@@ -133,3 +139,5 @@ port or needs the network (the foreign pool runs sandboxed). The receipt says
   the hard part.
 - The check is the step. A worker that answers `DONE` without its check output is
   `BLOCKED`.
+- A lane whose answer you never collected is `BLOCKED`, not `DONE` — go get it before
+  you close.
