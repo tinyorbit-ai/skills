@@ -1,0 +1,20 @@
+{
+  "_comment": "Triage fixtures for maximum-effort, from real work with the details filed off. `size` lists every acceptable size; `floor` is the worker floor the rule must produce. `tag` drives the hard constraints in run.mjs: a `routine` case must never floor at opus, a `hard` case always must. Add a case whenever a real task was mis-sized or mis-floored — the miss becomes the regression test.",
+  "cases": [
+    { "tag": "routine",  "task": "bump the retry count in fetchWithRetry from 3 to 5", "size": ["S"], "floor": "sonnet" },
+    { "tag": "routine",  "task": "fix the typo in the README install command", "size": ["S"], "floor": "sonnet" },
+    { "tag": "routine",  "task": "the startup log line in server.js prints the wrong port — use config.port", "size": ["S"], "floor": "sonnet" },
+    { "tag": "routine",  "task": "add a unit test for slugify covering unicode input", "size": ["S"], "floor": "sonnet" },
+    { "tag": "standard", "task": "add rate limiting to the contact-form endpoint — 5 per minute per IP, return 429", "size": ["M"], "floor": "sonnet" },
+    { "tag": "standard", "task": "add a --since flag to the CLI report command and cover it with tests", "size": ["M"], "floor": "sonnet" },
+    { "tag": "standard", "task": "the CSV export drops rows with commas in the name — fix it and add a regression test", "size": ["M"], "floor": "sonnet" },
+    { "tag": "standard", "task": "extract the date-formatting helpers into lib/dates.js and update the three callers", "size": ["M"], "floor": "sonnet" },
+    { "tag": "standard", "task": "add a dark-mode toggle to the settings page using the existing theme tokens", "size": ["M"], "floor": "sonnet" },
+    { "tag": "hard",     "task": "migrate the bookings collection from an eventId string to an ObjectId reference, with a backfill script", "size": ["L"], "floor": "opus" },
+    { "tag": "hard",     "task": "add Stripe refund support to the orders service", "size": ["M", "L"], "floor": "opus" },
+    { "tag": "hard",     "task": "the admin role check is repeated in each route handler — move it into middleware without changing who can access what", "size": ["M", "L"], "floor": "opus" },
+    { "tag": "hard",     "task": "rotate the webhook signing secret and accept both old and new during the cutover", "size": ["M", "L"], "floor": "opus" },
+    { "tag": "hard",     "task": "the nightly sync job double-sends emails when it is retried — find out why and fix it", "size": ["M", "L"], "floor": "opus" },
+    { "tag": "hard",     "task": "rewrite the whole checkout flow with React Server Components", "size": ["L"], "floor": "opus" }
+  ]
+}

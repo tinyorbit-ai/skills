@@ -140,7 +140,8 @@ the evals are part of *editing skills in this repo*, run by whoever (human or
 agent) is making the change. **Scope: the forge suite only, for now** (`forge` +
 `forge-*`; lizard has its own harness — see **Lizard** below; other non-forge
 skills are excluded until deliberately added — every runner takes `--all` to
-widen). Full docs + add-a-case guide: `evals/README.md`.
+widen; `maximum-effort` is covered by its own routing tier and a named behavioral case).
+Full docs + add-a-case guide: `evals/README.md`.
 
 A case passes when **every** run clears the deterministic `check.mjs` assertions
 **and** the **median** judge score per dimension across runs clears the floor —
@@ -153,6 +154,7 @@ the rubric always meant; the seeded-degraded plan (0–1) fails either way.
 |---|---|---|---|
 | 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
 | 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies |
+| 1b routing | `node evals/routing/run.mjs` | `maximum-effort`'s triage rule sizes tasks and floors risk as intended, from its live `## Triage` section alone | pennies |
 | 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens, minutes |
 
 **The loop (mandatory when asked to change a forge-suite skill):**
