@@ -87,7 +87,7 @@ Complete this directly. Do not spawn agents.
 name: planner
 description: The brain lane of maximum-effort — writes or re-plans .maximum-effort/plan.md for an L task and reviews risky hunks. Writes the plan file only; never implements.
 model: fable
-effort: max
+effort: xhigh
 tools: Read, Grep, Glob, Bash, Write
 ---
 
