@@ -280,6 +280,22 @@ no network.
 
 ## Recorded baselines
 
+- **2026-08-20** · tier 1b routing (15 cases, Haiku): 12/15 → 15/15 after two
+  rule sharpenings (a new test is M; un-recallable side effects and a refactor on a
+  trust boundary are risky). Both hard constraints clean.
+- **2026-08-20** · tier 2 `maximum-effort-m-task` ×3, first baseline: **FAIL**, and
+  the autopsy reshaped both the skill and the check. Re-graded offline with the
+  corrected check, runs 1–2 clear all 19 deterministic checks (run 1 ran every lane
+  through the Codex pool — a legitimate pool pick at Claude 7-day 30% vs Codex 3%;
+  run 2 was the contract to the letter on the Claude pool); run 3 backgrounded its
+  Codex scouts and ended the headless turn with nothing done — now forbidden by the
+  skill. Judge medians plan_quality 7 · **economy_of_means 5 ✗** · brief_fidelity 8:
+  both real runs shipped a factory module with options for a 12-line per-IP window.
+  The plan step now carries the default-deny (no file for one caller, no option for
+  a fixed value, one seam test over five module tests). A second ×3 run against the
+  fixed skill was started and stopped before any run completed (5-hour window at
+  92%) — **not yet green**; re-run with
+  `node evals/behavioral/run.mjs maximum-effort-m-task --runs 3 --no-cache`.
 - **2026-07-11** · tier 1 (forge-only scope, 41 cases): 40/41 (98%) on Haiku —
   the miss was a deliberately soft utterance since reworded ("what are we
   building again?" → "help me pin down exactly what we're building", verified
