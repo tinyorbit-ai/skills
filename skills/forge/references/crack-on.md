@@ -29,6 +29,16 @@ order, run the normal loop — pick the phase, announce it in one line, `forge-b
 `forge-review`, `forge-ship` — then immediately take the next one. No "stop and
 report" between phases; the report is the end summary.
 
+## Lanes
+
+When `maximum-effort` is installed, each remaining phase runs in a worker lane per
+`references/phase-lanes.md` — the same contract the single-phase `/forge` run uses,
+not a crack-on special case. Lanes change only **where** a phase executes: every stop
+condition in this file — un-runnable gate → defer, red gate → stop, one-way door →
+stop and ask, unlocked design → stop — applies exactly as written, because the lane
+returns `BLOCKED(reason)` to the main thread and the main thread applies the rule. The
+end summary is unchanged.
+
 ## Un-runnable gates — skip, never fail
 
 A gate is **un-runnable** when clearing it needs a human or a surface this run

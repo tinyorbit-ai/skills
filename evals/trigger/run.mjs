@@ -3,7 +3,7 @@
 // this suite asserts that a model shown ONLY the current descriptions routes each
 // utterance to the right skill. Descriptions are read live from skills/*/SKILL.md,
 // so editing a description and re-running immediately shows routing regressions.
-// Scope: the forge suite (forge + forge-*) for now; pass --all to include every skill.
+// Scope: the forge suite (forge + forge-*) plus maximum-effort; pass --all to include every skill.
 //
 // Run:  node evals/trigger/run.mjs [--dry-run] [--only <substring>]
 // Env:  EVAL_TRIGGER_MODEL (default claude-haiku-4-5-20251001 — a weak router is a
@@ -26,7 +26,7 @@ const onlyIdx = process.argv.indexOf('--only');
 const only = onlyIdx !== -1 ? process.argv[onlyIdx + 1] : null;
 
 const allScope = process.argv.includes('--all') || process.env.EVALS_SCOPE === 'all';
-const inScope = (name) => allScope || name === 'forge' || name.startsWith('forge-');
+const inScope = (name) => allScope || name === 'forge' || name.startsWith('forge-') || name === 'maximum-effort';
 
 // Collect live name+description from every public skill in scope
 const skills = readdirSync(SKILLS_DIR)
