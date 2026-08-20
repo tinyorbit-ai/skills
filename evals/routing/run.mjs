@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // Tier 1b — routing evals for maximum-effort. The `## Triage` and `## When not to run`
 // sections of SKILL.md are the rule; this suite asserts that a cheap model applying ONLY
-// those sections sizes each task (S/M/L), sets its worker floor (sonnet|opus), and stands
-// down for forge (`tag: "forge"`, expects the single word `forge`) the way the rule
-// intends. Pass: ≥ n-1 overall AND two hard constraints — no `routine` case floors at
-// opus, every `hard` case does. The sections are read live, so editing the rule and
-// re-running shows routing regressions immediately.
+// those sections sizes each task (S/M/L), sets its worker floor (sonnet|opus|fable), and
+// stands down for forge (`tag: "forge"`, expects the single word `forge`) the way the rule
+// intends. Pass: ≥ n-1 overall AND three hard constraints — no `routine` case floors at
+// opus, every `hard` case does, every `design` case floors at fable. The sections are read
+// live, so editing the rule and re-running shows routing regressions immediately.
 //
 // Run:  node evals/routing/run.mjs [--dry-run] [--only <substring>]
 // Env:  EVAL_ROUTING_MODEL (default claude-haiku-4-5-20251001), EVAL_CONCURRENCY (default 4)
@@ -57,8 +57,10 @@ function buildPrompt(task) {
     '',
     'If the "When not to run" rule says forge owns this and you should stand down, reply with exactly',
     'one word and nothing else: forge.',
-    'Otherwise, reply with exactly two words and nothing else: the size (S, M or L) and the worker floor (sonnet or opus).',
-    'The floor is opus only when at least one step is risky as the rule defines it; otherwise sonnet.',
+    'Otherwise, reply with exactly two words and nothing else: the size (S, M or L) and the worker floor (sonnet, opus or fable).',
+    'The floor is fable when the task is a design step — it decides how something looks or feels (layout, colour, typography,',
+    'spacing, motion, the shape of a UI surface) — whatever the size, even if it is also risky.',
+    'Otherwise the floor is opus when at least one step is risky as the rule defines it; otherwise sonnet.',
   ].join('\n');
 }
 
@@ -80,7 +82,7 @@ async function judgeCase(c) {
       return { ...c, answer: 'forge', size_got: 'forge', floor_got: 'forge', pass };
     }
     const size = answer.match(/\b([SML])\b/)?.[1] ?? '?';
-    const floor = answer.match(/\b(sonnet|opus)\b/i)?.[1]?.toLowerCase() ?? '?';
+    const floor = answer.match(/\b(sonnet|opus|fable)\b/i)?.[1]?.toLowerCase() ?? '?';
     const pass = !c.expectForge && c.size.includes(size) && c.floor === floor;
     return { ...c, answer: `${size} ${floor}`, size_got: size, floor_got: floor, pass };
   } catch (e) {
@@ -105,9 +107,10 @@ await Promise.all(Array.from({ length: Math.min(CONCURRENCY, cases.length) }, wo
 const passed = results.filter((r) => r.pass).length;
 const routineHot = results.filter((r) => r.tag === 'routine' && r.floor_got === 'opus');
 const hardCold = results.filter((r) => r.tag === 'hard' && r.floor_got !== 'opus');
+const designCold = results.filter((r) => r.tag === 'design' && r.floor_got !== 'fable');
 const need = Math.max(1, results.length - 1);
 console.log(`\nPass rate: ${passed}/${results.length} · need ≥ ${need}/${results.length}`);
-console.log(`Hard constraints: routine→opus ${routineHot.length} (need 0) · hard→not-opus ${hardCold.length} (need 0)`);
-const ok = passed >= need && routineHot.length === 0 && hardCold.length === 0;
+console.log(`Hard constraints: routine→opus ${routineHot.length} (need 0) · hard→not-opus ${hardCold.length} (need 0) · design→not-fable ${designCold.length} (need 0)`);
+const ok = passed >= need && routineHot.length === 0 && hardCold.length === 0 && designCold.length === 0;
 console.log(ok ? 'Routing evals: PASS' : 'Routing evals: FAIL');
 process.exit(ok ? 0 : 1);

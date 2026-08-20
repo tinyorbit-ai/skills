@@ -67,12 +67,23 @@ refactor there is still risky), has outbound side effects that cannot be recalle
 steps run on the Opus (Sol) worker whatever the size, and the brain reviews their diff
 before close. Everything else never goes above the Sonnet (Terra) worker.
 
+**Design → floor.** A step is *design* when it **decides** how something looks or feels —
+inventing a surface's shape, choosing type/colour/spacing/motion with no precedent to
+follow. **Applying** an already-decided system — existing theme tokens, an existing
+palette, a locked `DESIGN.md`, an established component's conventions — is ordinary
+work and stays on Sonnet, however visual the file looks. Design steps run on the Fable
+(Sol) worker whatever the size: a cheap model returns competent generic defaults, and
+generic is the failure here. Precedence: a step that is both design and risky runs on
+Fable and still gets the brain's risky-hunk review. Not design merely because a step
+touches a file that renders something — wiring an existing component to data is
+ordinary work.
+
 ## Lanes
 
 | Lane | Model | Gets | Returns |
 |---|---|---|---|
 | Scout | Haiku / Luna — fresh context, read-only, parallel | one unknown | files, symbols, callers, tests, one-line risk — ≤ 1 K tokens |
-| Worker | Sonnet / Terra (Opus / Sol on a risky step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
+| Worker | Sonnet / Terra (Opus / Sol on a risky step, Fable / Sol on a design step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
 | Brain | Fable / Sol @ xhigh — L plans, re-plans, risky-hunk review | brief + findings + `forge-principles` | the plan file, or `APPROVE` / `BLOCK`. Never executes. |
 
 The coordinator never reads source files itself — that is what scouts are for. Spawn
