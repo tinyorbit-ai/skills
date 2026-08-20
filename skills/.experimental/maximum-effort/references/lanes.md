@@ -26,7 +26,11 @@ default, or a plan limit moves — it is the only file in the skill that differs
 - Codex-pool lanes from Claude:
   `codex exec -p scout --sandbox read-only --json "<scout prompt>"` and
   `codex exec -p worker --sandbox workspace-write --json "<worker prompt>"`.
-  Profiles are the files `~/.codex/{scout,worker,brain}.config.toml`.
+  Profiles are the files `~/.codex/{scout,worker,brain}.config.toml`. Run them in the
+  foreground and wait — a backgrounded `codex exec` plus a later turn ends a headless
+  session with nothing done. `workspace-write` denies `listen`, so a step whose check
+  starts a server stays on the Claude pool (observed: a Codex worker `BLOCKED(EPERM)`
+  on `npm test` for an HTTP server).
 
 ## Codex
 

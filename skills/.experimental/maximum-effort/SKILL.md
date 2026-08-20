@@ -84,19 +84,25 @@ mechanics per tool, the role preambles, and the fallback when a role agent is mi
    `.maximum-effort/` to `.git/info/exclude` (never the repo's `.gitignore`). One line
    per step:
    `- [ ] N. <what> — files: <paths> — check: <command → expected> — rollback: <how> — risky: <yes|no>`
-   Steps that share no file may carry `(independent of N)`. L only: stop and ask the
-   user to approve (AskUserQuestion / request_user_input) before anything runs.
+   Steps that share no file may carry `(independent of N)`. Every step passes the
+   default-deny before it is written: no new file for a single caller (inline until a
+   second caller exists), no option for a value the brief fixes, one test across the
+   real seam over five that mirror the module. L only: stop and ask the user to approve
+   (AskUserQuestion / request_user_input) before anything runs.
 4. **Execute.** One worker per step, in order unless marked independent. Every worker
    prompt ends with the leaf boundary: `Complete this directly. Do not spawn agents.`
    The worker runs the step's check before it answers. Tick the box on `DONE`, log the
-   run in the plan's `## Log`.
+   run in the plan's `## Log`. A lane run is awaited in the turn that spawned it —
+   parallel means parallel calls in one message, never a background job picked up in a
+   later turn.
 5. **Blocked.** Same reason twice → the brain re-plans the remaining steps from the
    plan plus a five-line state summary — never the raw transcript. Back to 4.
    Escalation is a diagnosis, not a reflex:
    - understood the problem, skipped files / tests / edges → same model, more effort
    - had the full context and still misread it → bigger model
    - the step was underspecified → fix the step; never buy context with model
-6. **Close.** Risky hunks → brain review. Then one receipt line, exactly this shape:
+6. **Close.** Risky hunks → brain review; a `BLOCK` becomes a new step for a worker,
+   never a patch by the coordinator. Then one receipt line, exactly this shape:
    `Route: <S|M|L> · scouts <model>×<n> · plan <model> · workers <model>×<n> (<step> <model>: <why>) · fable <n>`
    Append one JSON line per lane run to `~/.maximum-effort/ledger.jsonl` —
    `{"ts","tool","cwd","task","size","lane","model","effort","outcome","escalated_why"}` —
@@ -113,12 +119,15 @@ qualify because each one keeps file contents out of the main thread.
 Both tools can run each other's lanes. When this tool's 7-day usage is higher than the
 other's by 15 points or more (`~/.claude/rate-limits.json` vs the last `rate_limits` in
 `~/.codex/sessions`), scouts and workers go through the other pool — commands in
-`references/lanes.md`. The brain stays home. The receipt says `(codex pool)` or
-`(claude pool)`.
+`references/lanes.md`. The brain stays home, and so does any step whose check binds a
+port or needs the network (the foreign pool runs sandboxed). The receipt says
+`(codex pool)` or `(claude pool)`.
 
 ## Guardrails
 
 - A model or effort the user picked by hand always wins.
+- The coordinator's only writes are `.maximum-effort/plan.md` and `.git/info/exclude`.
+  Source changes come from workers, every time — including the fix for a review finding.
 - Stay inside the two subscriptions — never route to a pay-per-token key without saying so.
 - Never keep the frontier model running because it was needed earlier — downgrade after
   the hard part.

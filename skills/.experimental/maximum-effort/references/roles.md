@@ -98,7 +98,9 @@ session.
 - A step without a runnable check is not a step. `typecheck && test` as the whole check
   is a zero.
 - Fewer parts. A dependency, abstraction, or config surface has to earn its line
-  against the brief.
+  against the brief: no new file for a single caller (inline until a second caller
+  exists), no option for a value the brief fixes, one test across the real seam over
+  five that mirror the module.
 - Open questions go under `## Questions` — never resolved by assumption when the answer
   changes the shape.
 - On a risky-hunk review: read that step's diff, answer `APPROVE` or
