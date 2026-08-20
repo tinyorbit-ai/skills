@@ -36,7 +36,7 @@ const opt = (name, dflt) => {
   return i !== -1 ? argv[i + 1] : dflt;
 };
 const runs = Number(opt('--runs', 1));
-const jobs = Number(opt('--jobs', 3));      // concurrent runs; provider overload is the real ceiling
+const jobs = Number(opt('--jobs', 6));      // concurrent agent runs, suite-wide; provider overload is the real ceiling
 const noCache = flag('--no-cache');         // force re-run even if the inputs are unchanged
 const modelOverride = opt('--model', null);
 const keep = flag('--keep');
@@ -183,7 +183,28 @@ mkdirSync(RESULTS_DIR, { recursive: true });
 const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 let suiteFailed = false;
 
-for (const name of caseNames) {
+// One suite-wide slot pool. Cases and the runs inside them are all independent, so
+// the only thing worth serialising is how many headless sessions the provider sees
+// at once; running cases one after another left most of those slots idle.
+const slots = (limit) => {
+  let active = 0;
+  const waiting = [];
+  return async (fn) => {
+    if (active >= limit) await new Promise((r) => waiting.push(r)); else active++;
+    try { return await fn(); } finally { active--; const next = waiting.shift(); if (next) { active++; next(); } }
+  };
+};
+const gate = slots(Math.max(1, jobs));
+
+const runCase = async (name) => {
+  // Cases and their runs interleave, so every line is buffered — per run, then the
+  // case verdict — and flushed as one ordered block when the case finishes. Only a
+  // per-run heartbeat streams live.
+  const lines = [];
+  const runLines = new Map();
+  const say = (msg) => lines.push(msg);
+  const flush = () => console.log(
+    [...[...runLines.entries()].sort((a, b) => a[0] - b[0]).flatMap(([, l]) => l), ...lines].join('\n'));
   const caseDir = join(CASES_DIR, name);
   const config = JSON.parse(readFileSync(join(caseDir, 'config.json'), 'utf8'));
   const skipAgent = config.agent === false; // judge-only cases (e.g. calibration) run no agent
@@ -194,25 +215,29 @@ for (const name of caseNames) {
   const fp = fingerprint(caseDir, config);
   const cached = !noCache && existsSync(cachePath(name, fp)) ? JSON.parse(readFileSync(cachePath(name, fp), 'utf8')) : null;
   if (cached && cached.runs >= runs) {
-    console.log(`\n=== ${name} — cached (fingerprint ${fp}, ${cached.runs} run(s)) ===`);
-    console.log(`  ${cached.casePass ? 'PASS' : cached.inconclusive ? 'INCONCLUSIVE' : 'FAIL'}`
+    say(`\n=== ${name} — cached (fingerprint ${fp}, ${cached.runs} run(s)) ===`);
+    say(`  ${cached.casePass ? 'PASS' : cached.inconclusive ? 'INCONCLUSIVE' : 'FAIL'}`
       + (Object.keys(cached.medians ?? {}).length ? ` · medians ${Object.entries(cached.medians).map(([k, v]) => `${k} ${v}`).join(' · ')}` : '')
       + `\n  skills and case unchanged since that run — pass --no-cache to force`);
     if (!cached.casePass) suiteFailed = true;
-    continue;
+    flush();
+    return;
   }
 
   const runOne = async (i) => {
-    console.log(`\n=== ${name} · run ${i}/${runs} ===`);
+    const out = [];
+    const say = (msg) => out.push(msg);
+    runLines.set(i, out);
+    say(`\n=== ${name} · run ${i}/${runs} ===`);
     const workdir = setUpWorkdir(caseDir, config);
     const runDir = join(RESULTS_DIR, `${stamp}-${name}`, `run-${i}`);
     mkdirSync(runDir, { recursive: true });
-    console.log(`  workdir: ${workdir}`);
+    say(`  workdir: ${workdir}`);
 
     const { transcript, agentError } = skipAgent
       ? { transcript: '', agentError: null }
       : await runAgent(workdir, task, config, join(runDir, 'transcript.jsonl'));
-    if (agentError) console.log(`  agent: ${agentError}`);
+    if (agentError) say(`  agent: ${agentError}`);
 
     const checkModule = await import(join(caseDir, 'check.mjs'));
     const exec = (cmd) => {
@@ -226,7 +251,7 @@ for (const name of caseNames) {
       checks = [{ name: 'check.mjs ran', pass: false, required: true, detail: e.message }];
     }
     for (const c of checks) {
-      console.log(`  ${c.pass ? 'PASS' : c.required === false ? 'info' : 'FAIL'}  ${c.name}${c.detail ? ` — ${c.detail}` : ''}`);
+      say(`  ${c.pass ? 'PASS' : c.required === false ? 'info' : 'FAIL'}  ${c.name}${c.detail ? ` — ${c.detail}` : ''}`);
     }
 
     const verdict = await judge(caseDir, config, workdir);
@@ -234,7 +259,7 @@ for (const name of caseNames) {
       const scores = verdict.scores && Object.keys(verdict.scores).length
         ? Object.entries(verdict.scores).map(([k, v]) => `${k} ${v}`).join(' · ')
         : `score ${verdict.score ?? '?'}/10`;
-      console.log(`  judge: ${scores} · ${verdict.pass ? 'PASS' : 'FAIL'} · ${verdict.reasons?.join(' · ')}`);
+      say(`  judge: ${scores} · ${verdict.pass ? 'PASS' : 'FAIL'} · ${verdict.reasons?.join(' · ')}`);
     }
 
     // Deterministic checks are objective: an intermittent failure is a real
@@ -243,16 +268,15 @@ for (const name of caseNames) {
     const hardPass = !agentError && checks.every((c) => c.pass || c.required === false);
     const pass = hardPass && (verdict ? verdict.pass : true);
     caseResults.push({ run: i, pass, hardPass, agentError, checks, judge: verdict, workdir: keep ? workdir : undefined });
-    console.log(`  run verdict: ${pass ? 'PASS' : 'FAIL'}${pass === hardPass ? '' : ' (deterministic checks green; judge below floor)'}`);
+    say(`  run verdict: ${pass ? 'PASS' : 'FAIL'}${pass === hardPass ? '' : ' (deterministic checks green; judge below floor)'}`);
+    console.log(`· ${name} run ${i}/${runs}: ${pass ? 'PASS' : 'FAIL'}`);
     if (!keep) execSync(`rm -rf ${JSON.stringify(workdir)}`);
   };
 
-  // Runs are independent, so overlap them. The ceiling is provider overload, not
-  // CPU — hence a modest default and the 529 backoff in runAgent.
-  const queue = Array.from({ length: runs }, (_, k) => k + 1);
-  await Promise.all(Array.from({ length: Math.min(jobs, runs) }, async () => {
-    for (let i = queue.shift(); i !== undefined; i = queue.shift()) await runOne(i);
-  }));
+  // Runs are independent, so overlap them — through the suite-wide gate, so a case
+  // never claims more of the provider than the whole run is allowed. The ceiling is
+  // provider overload, not CPU; the 529 backoff in runAgent covers the rest.
+  await Promise.all(Array.from({ length: runs }, (_, k) => gate(() => runOne(k + 1))));
   caseResults.sort((a, b) => a.run - b.run);
 
   // ---- case verdict ----
@@ -300,16 +324,19 @@ for (const name of caseNames) {
 
   if (Object.keys(medians).length) {
     const line = Object.entries(medians).map(([k, m]) => `${k} ${m}${m >= floor ? '' : ' ✗'}`).join(' · ');
-    console.log(`\n  judge medians (floor ${floor}): ${line}`);
+    say(`\n  judge medians (floor ${floor}): ${line}`);
   }
   const errNote = errored.length ? ` · ${errored.length}/${caseResults.length} run(s) errored (${errored[0].agentError}) — excluded` : '';
   if (inconclusive) {
-    console.log(`${name}: INCONCLUSIVE — only ${graded.length}/${caseResults.length} run(s) completed${errNote}. Re-run; lower concurrency if these are 529s.`);
+    say(`${name}: INCONCLUSIVE — only ${graded.length}/${caseResults.length} run(s) completed${errNote}. Re-run; lower concurrency if these are 529s.`);
   } else {
-    console.log(`${name}: ${casePass ? 'PASS' : 'FAIL'} — deterministic ${(hardRate * 100).toFixed(0)}% of ${graded.length} graded run(s)`
+    say(`${name}: ${casePass ? 'PASS' : 'FAIL'} — deterministic ${(hardRate * 100).toFixed(0)}% of ${graded.length} graded run(s)`
       + `, judge ${judgePass ? 'clears' : 'below'} floor${errNote} → evals/results/${stamp}-${name}/`);
   }
   if (!casePass) suiteFailed = true;
-}
+  flush();
+};
+
+await Promise.all(caseNames.map(runCase));
 
 process.exit(suiteFailed ? 1 : 0);
