@@ -10,8 +10,8 @@ default, or a plan limit moves — it is the only file in the skill that differs
 |---|---|---|
 | Scout | `Agent(subagent_type: "scout", prompt)` | `~/.claude/agents/scout.md` — `model: haiku`, read-only tools |
 | Worker | `Agent(subagent_type: "worker", prompt)` | `worker.md` — `model: sonnet`, `effort: medium` |
-| Worker, risky step | `Agent(subagent_type: "worker", model: "opus", prompt)` | the call's `model` beats the file's (resolution order — env var, call, file, session). Effort stays the file's `medium`; xhigh belongs to the brain's review. |
-| Brain | `Agent(subagent_type: "planner", prompt)` | `planner.md` — `model: fable`, `effort: xhigh`, no Edit |
+| Worker, risky step | `Agent(subagent_type: "worker", model: "opus", prompt)` | the call's `model` beats the file's (resolution order — env var, call, file, session). Effort stays the file's `medium`; `max` belongs to the brain. |
+| Brain | `Agent(subagent_type: "planner", prompt)` | `planner.md` — `model: fable`, `effort: max`, no Edit |
 | Fan-out | `Workflow` | L only, ≥ 3 separable tracks |
 
 - The `Agent` tool pins `model` per call and never `effort` — effort lives only in the
@@ -49,7 +49,7 @@ default, or a plan limit moves — it is the only file in the skill that differs
 | Scout | `spawn_agent` with `model: "gpt-5.6-luna"`, `reasoning_effort: "low"`, `fork_turns: "none"` | `fork_turns: "none"` is required — a full-history fork rejects `model` / `reasoning_effort` overrides |
 | Worker | `spawn_agent` with `fork_turns: "none"` | `[agents] default_subagent_model = "gpt-5.6-terra"`, `default_subagent_reasoning_effort = "medium"` |
 | Worker, risky step | `spawn_agent` with `model: "gpt-5.6-sol"`, `reasoning_effort: "high"`, `fork_turns: "none"` | per call |
-| Brain | `spawn_agent` with `model: "gpt-5.6-sol"`, `reasoning_effort: "xhigh"`, `fork_turns: "none"` — or a separate `codex -p brain` session | `~/.codex/brain.config.toml` |
+| Brain | `spawn_agent` with `model: "gpt-5.6-sol"`, `reasoning_effort: "ultra"`, `fork_turns: "none"` — or a separate `codex -p brain` session | `~/.codex/brain.config.toml`. `ultra` is eligible-accounts-only; fall back to `xhigh` if it is rejected. |
 | Fan-out | Ultra is an effort tier — `model_reasoning_effort = "ultra"`, eligible accounts only | L only |
 
 - Concurrency: `agents.max_concurrent_threads_per_session` (source default 6, excludes

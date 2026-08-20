@@ -73,7 +73,7 @@ before close. Everything else never goes above the Sonnet (Terra) worker.
 |---|---|---|---|
 | Scout | Haiku / Luna — fresh context, read-only, parallel | one unknown | files, symbols, callers, tests, one-line risk — ≤ 1 K tokens |
 | Worker | Sonnet / Terra (Opus / Sol on a risky step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
-| Brain | Fable / Sol @ xhigh — L plans, re-plans, risky-hunk review | brief + findings + `forge-principles` | the plan file, or `APPROVE` / `BLOCK`. Never executes. |
+| Brain | Fable / Sol @ max — L plans, re-plans, risky-hunk review | brief + findings + `forge-principles` | the plan file, or `APPROVE` / `BLOCK`. Never executes. |
 
 The coordinator never reads source files itself — that is what scouts are for. Spawn
 mechanics per tool, the role preambles, and the fallback when a role agent is missing:
