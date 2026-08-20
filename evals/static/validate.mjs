@@ -4,9 +4,10 @@
 // Deterministic, no tokens. Run: node evals/static/validate.mjs
 // Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check mandatory.
 
-import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync, rmSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { join, basename } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const ROOT = new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
 const SKILLS_DIR = join(ROOT, 'skills');
@@ -167,9 +168,14 @@ for (const name of indexed) {
 }
 
 // `npx skills add . --list` discovery oracle — the ground truth for "will it install"
+// Captured via a file, not a pipe: the CLI ends on `process.exit()`, which drops
+// whatever is still buffered in a piped stdout, so reading it directly truncated the
+// tail of the list at random and failed the last few skills for no reason.
 const requireCli = process.env.EVALS_REQUIRE_CLI === '1';
+const listFile = join(tmpdir(), `skills-list-${process.pid}.txt`);
 try {
-  const out = execSync('npx -y skills add . --list', { cwd: ROOT, timeout: 180_000, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  execSync(`npx -y skills add . --list > ${JSON.stringify(listFile)} 2>/dev/null`, { cwd: ROOT, timeout: 180_000, stdio: ['ignore', 'ignore', 'pipe'] });
+  const out = readFileSync(listFile, 'utf8');
   for (const s of publicSkills) {
     if (!out.includes(s.name)) fail(s.name, 'not discovered by `npx skills add . --list` — it will silently not install');
   }
@@ -177,6 +183,8 @@ try {
   const msg = `could not run \`npx skills add . --list\` (${e.code || e.status || 'error'}) — discovery oracle skipped`;
   if (requireCli) failures.push(`cli-check: ${msg}`);
   else warnings.push(`cli-check: ${msg}`);
+} finally {
+  rmSync(listFile, { force: true });
 }
 
 // Report
