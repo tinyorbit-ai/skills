@@ -48,3 +48,18 @@ itself (missing vitest imports, an unread `channel` field), both real and both m
 so the fixture was cleaned and the case re-run rather than counted around. And the
 case's `expected_tier` was corrected from `standard` to also accept `deep` — an auth
 surface always promotes to T3, so the skill was right and the golden answer was wrong.
+| 2026-08-20 | rolling-20260820 | default | 9/9 | 0 | 0 | 100% |
+| 2026-08-20 | rolling-20260820 | default | 9/9 | 0 | 0 | 100% |
+
+The eval-harness speedups, run as a regression check on the skill they measure —
+nothing under `skills/lizard/` changed, so this row confirms the runner rewrite
+did not alter what the suite sees. All 9 cases in one wave, 9m38s wall clock
+against roughly half an hour batched.
+
+Two cases produced no payload on the first wave and were re-run: `nit-only` hit a
+provider safeguard error, and `lizard-fix-breaks-caller` ended its turn while its
+codex adversary was still reading files. Neither was a verdict, both passed on the
+second attempt, and both are now retried automatically with the failure kind named
+in the error line. The T3 adversary case takes ~14 minutes on its own, which is
+what sets the suite's floor.
+
