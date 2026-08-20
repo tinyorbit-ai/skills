@@ -105,8 +105,8 @@ mechanics per tool, the role preambles, and the fallback when a role agent is mi
    never a patch by the coordinator. Then one receipt line, exactly this shape:
    `Route: <S|M|L> · scouts <model>×<n> · plan <model> · workers <model>×<n> (<step> <model>: <why>) · fable <n>`
    Append one JSON line per lane run to `~/.maximum-effort/ledger.jsonl` —
-   `{"ts","tool","cwd","task","size","lane","model","effort","outcome","escalated_why"}` —
-   no prompts, no code, no secrets. Hand off: `lizard` before the PR, `shepherd` for it.
+   `{"ts","tool","cwd","task","size","lane","model","effort","outcome","escalated_why"}`,
+   `ts` as ISO-8601 UTC (`2026-08-20T12:00:00Z`) — no prompts, no code, no secrets. Hand off: `lizard` before the PR, `shepherd` for it.
 
 ## Context hygiene
 

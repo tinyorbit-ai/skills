@@ -56,7 +56,8 @@ echo "── Ledger (~/.maximum-effort/ledger.jsonl) ─────────
 led="$HOME/.maximum-effort/ledger.jsonl"
 if [ -s "$led" ]; then
   jq -s -r --argjson c "$cutoff" '
-    map(select(((.ts | fromdateiso8601?) // 0) >= $c and ((.cwd // "") | test("forge-eval-") | not)))
+    def epoch: if type == "number" then . else (sub("\\.[0-9]+"; "") | if length == 10 then . + "T00:00:00Z" else . end | fromdateiso8601?) // 0 end;
+    map(select(((.ts // 0) | epoch) >= $c and ((.cwd // "") | test("forge-eval-") | not)))
     | if length == 0 then "no lane runs in window" else
       (length | if . == 0 then 1 else . end) as $n
       | "lane runs \(length) · tasks \(map(.task) | unique | length) · escalations \(map(select((.escalated_why // "") != "")) | length) · rework \(map(select(.outcome == "rework")) | length)",

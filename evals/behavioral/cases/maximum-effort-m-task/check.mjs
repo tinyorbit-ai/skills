@@ -133,18 +133,18 @@ async function probeLimit(workdir) {
   const port = await freePort();
   const child = spawn('node', ['src/server.js'], { cwd: workdir, env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
   let out = '';
-  const started = await new Promise((resolve) => {
-    const timer = setTimeout(() => resolve(false), 8000);
-    const onData = (d) => {
-      out += d;
-      if (/listening on/.test(out)) { clearTimeout(timer); resolve(true); }
-    };
-    child.stdout.on('data', onData);
-    child.stderr.on('data', (d) => { out += d; });
-    child.on('exit', () => { clearTimeout(timer); resolve(false); });
-  });
+  let exited = false;
+  child.stdout.on('data', (d) => { out += d; });
+  child.stderr.on('data', (d) => { out += d; });
+  child.on('exit', () => { exited = true; });
+  const deadline = Date.now() + 8000;
+  let started = false;
+  while (!started && !exited && Date.now() < deadline) {
+    started = await fetch(`http://127.0.0.1:${port}/health`).then((r) => r.ok, () => false);
+    if (!started) await new Promise((r) => setTimeout(r, 200));
+  }
   try {
-    if (!started) return { ok: false, detail: `server did not start: ${out.slice(-200)}` };
+    if (!started) return { ok: false, detail: `server did not answer /health on :${port}: ${out.slice(-200)}` };
     const statuses = [];
     let retryAfter = null;
     for (let i = 0; i < 6; i++) {

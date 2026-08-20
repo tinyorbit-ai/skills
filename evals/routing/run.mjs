@@ -88,8 +88,9 @@ await Promise.all(Array.from({ length: Math.min(CONCURRENCY, cases.length) }, wo
 const passed = results.filter((r) => r.pass).length;
 const routineHot = results.filter((r) => r.tag === 'routine' && r.floor_got === 'opus');
 const hardCold = results.filter((r) => r.tag === 'hard' && r.floor_got !== 'opus');
-console.log(`\nPass rate: ${passed}/${results.length} · need ≥ 14/15`);
+const need = Math.max(1, results.length - 1);
+console.log(`\nPass rate: ${passed}/${results.length} · need ≥ ${need}/${results.length}`);
 console.log(`Hard constraints: routine→opus ${routineHot.length} (need 0) · hard→not-opus ${hardCold.length} (need 0)`);
-const ok = passed >= 14 && routineHot.length === 0 && hardCold.length === 0;
+const ok = passed >= need && routineHot.length === 0 && hardCold.length === 0;
 console.log(ok ? 'Routing evals: PASS' : 'Routing evals: FAIL');
 process.exit(ok ? 0 : 1);
