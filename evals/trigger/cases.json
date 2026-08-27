@@ -1,5 +1,5 @@
 {
-  "_comment": "Trigger routing cases — forge suite scope. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs are the point — they catch description regressions that steal or lose routing. `forge-principles` names economy/security/tests/robustness, so the cases pinned to forge-review / forge-harden-scope / forge-ambition exist to prove the worldview skill doesn't steal the doing-skills' routing. Lizard cases return when the suite widens beyond forge (run.mjs --all).",
+  "_comment": "Trigger routing cases — forge suite plus explicit maximum-effort invocations. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs catch descriptions that steal or lose routing. Maximum-effort is explicit-only by description: ordinary work without a Maximum Effort or cheap-agent request must not trigger it.",
   "cases": [
     { "utterance": "I have an idea for a tool that renames my screenshots — help me shape it", "expect": ["forge-discovery"] },
     { "utterance": "help me pin down exactly what we're building", "expect": ["forge-discovery", "forge"] },
@@ -48,6 +48,11 @@
     { "utterance": "pick up the half-done maximum-effort plan", "expect": ["maximum-effort"] },
     { "utterance": "ship all the remaining phases", "expect": ["forge"] },
     { "utterance": "route this to cheap agents", "expect": ["maximum-effort"] },
+    { "utterance": "maximum effort this auth refactor", "expect": ["maximum-effort"] },
+    { "utterance": "use max effort to add the rate limiter and its tests", "expect": ["maximum-effort"] },
+    { "utterance": "maximum effort: keep Sol on the decisions and use smaller models for the mechanical work", "expect": ["maximum-effort"] },
+    { "utterance": "continue the unfinished .maximum-effort plan", "expect": ["maximum-effort"] },
+    { "utterance": "update the auth handler and its tests across these three files", "expect": ["none"] },
     { "utterance": "what's the weather in Tokyo?", "expect": ["none"] },
     { "utterance": "convert this png to webp", "expect": ["none"] },
     { "utterance": "write a limerick about gophers", "expect": ["none"] },

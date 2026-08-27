@@ -1,161 +1,156 @@
 ---
 name: maximum-effort
-description: Token-frugal task runner — triages any task by size and risk, sends read-only scouting to the cheapest model, implementation to a mid-tier worker, and only the hard decision (the plan, the root cause, the review of a risky hunk) to the frontier model, then hands off to lizard and shepherd. Same flow in Claude Code and Codex. Invoked by name, not by inference — use when asked to "maximum effort", "max effort this", "plan this then do it", "route this to cheap agents", or to resume a half-done `.maximum-effort/plan.md`. Stands down for forge — in a repo with a forge plan, forge owns the phases and spawns these lanes itself, so bare "continue", "keep going", "where were we", "next phase" and "build the next phase" go to forge, never here.
+description: Frontier-led task runner for accepted quality per token — a Sol or Opus owner keeps judgment and final accountability while delegating bounded factual lookup to Luna or Haiku and exact reversible work to Terra or Sonnet. Invoked by name, not inference. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume an unfinished `.maximum-effort/plan.md`.
 model: opus
 effort: medium
 ---
 
 # Maximum Effort
 
-> Maximum effort, spent only where it counts.
+> The strongest model thinks. The right-sized models lift.
 
-One coordinator, three lanes. Reading goes to the cheapest model, implementation to a
-mid-tier worker, and only the hard decision — the plan, the root cause, the review of a
-risky hunk — to the frontier model. Same flow in Claude Code and Codex; the per-tool
-mechanics live in `references/lanes.md`.
+A frontier owner holds the goal, reads decision-critical source, makes the plan, assigns
+only bounded leaf work, reviews every result, and proves the final outcome. Smaller
+models earn work when their task is factual or mechanical enough that the handoff plus
+review costs less than having the owner do it.
 
-**Announce at start:** `Maximum effort — triaging.` Then go quiet until the brief.
+**Announce at start:** `Maximum effort — frontier-led.`
 
 If the user asks "why maximum effort" (any phrasing), reply exactly
-`building features be like https://www.youtube.com/watch?v=qxZtLIjuS9o` — in the
-session only, never in a file or on GitHub.
+`building features be like https://www.youtube.com/watch?v=qxZtLIjuS9o` in the session
+only, never in a file or on GitHub.
 
 ## Charter
 
-The bar is `forge-principles` — economy of means, evidence over claims, root cause over
-symptom. A cheaper model is never permission to skip a test or a step's check. Going
-cheaper is free; going up needs a named failure.
+The owner is Opus or Fable on Claude and Sol on Codex, unless the user explicitly chose
+another model or effort. It owns every judgment call and the accepted result. Delegation
+removes menial tokens from its context; it never lowers the quality bar or turns the
+owner into a passive planner.
 
-Frugality governs *where* reading happens, never *how much*: scouts are more reading,
-just placed in a cheaper window — forge's "context is welcome" stance is honoured, not inverted.
+The bar is `forge-principles`: economy of means, root cause over symptom, strict by
+construction, and evidence over claims. Count the task packet, duplicated reads,
+review, failed attempts, and human correction as spent tokens. The cheapest call is not
+the cheapest task when it creates another round.
 
 ## When not to run
 
-- `wiki/plan.md` or `wiki/.forge/` exists and `forge` is installed → forge owns it. Stop.
-  forge spawns these same lanes itself when it wants them (`forge/references/phase-lanes.md`)
-  — standing down loses nothing. Unless the user asked for maximum effort by name, which
-  always wins (Guardrail: a model or effort the user picked by hand always wins).
-  Fallback: no `forge` installed → triage as normal.
-- The ask is a PR → `shepherd`. A review → `lizard`.
-- S-size (one file, you already know the change) → do it on the main thread. Say
-  `Route: S` and nothing else.
+- A repo with `wiki/plan.md` or `wiki/.forge/` stays with `forge` for bare "continue",
+  "keep going", "where were we", and "build the next phase" requests.
+- Inside a Forge build, Forge keeps its plan, branch, gate, review, and ship lifecycle.
+  Maximum Effort may govern leaf allocation but never creates `.maximum-effort/plan.md`.
+- An explicit request for Maximum Effort wins for a standalone task, even in a Forge
+  repo. A PR goes to `shepherd`; a review goes to `lizard`.
+- A model or effort the user picked by hand wins.
+- Stay inside the Claude and Codex subscriptions. Never use a pay-per-token key without
+  saying so first. Keep one task in one pool; compare headroom between tasks.
+
+Read `references/runtime.md` for Claude/Codex model mechanics or subscription headroom.
+Read `references/delegation.md` before assigning a scout or mechanical worker.
 
 ## Triage
 
-Write the brief first — five lines, nothing else:
+Write this five-line brief before source work:
 
 ```
 Goal:        <one sentence>
 Done when:   <observable>
 Constraints: <what must not change>
-Risk:        <none | the risky steps, named>
-Unknowns:    <questions a scout answers, one per line>
+Risk:        <none | hard-to-reverse, auth, security controls, money, data, secrets, outbound side effects>
+Unknowns:    <what source reading or a factual scout must answer>
 ```
 
-**Size → flow.**
-
-| Size | Looks like | Flow |
+| Size | Looks like | Plan |
 |---|---|---|
-| S | one file, an edit you could dictate — no new test, nothing to look up | main thread does it. No scouts, no plan file. |
-| M | a few files or a new test; a pattern you know; nothing to discover; a small feature built on existing patterns, even if it is only one page | scouts → plan (no stop) → workers |
-| L | many files, cross-service, unclear cause, a data/schema migration or a backfill, or any step the user must approve | scouts → brain writes the plan → **user approves** → workers → brain reviews risky hunks |
+| S | one known edit; no discovery or new behavior | no plan |
+| M | a few files, a test, or a familiar feature | short plan in owner context |
+| L | many files, cross-system state, unclear cause, migration, or approval | `.maximum-effort/plan.md` |
 
-**Risk → floor.** A step is *risky* when it is hard to reverse, touches auth / money /
-data loss / secrets (the surface decides, not the intent — a behaviour-preserving
-refactor there is still risky), has outbound side effects that cannot be recalled
-(email, payments, webhooks, messages), or crosses systems with unclear state. Risky
-steps run on the Opus (Sol) worker whatever the size, and the brain reviews their diff
-before close. Everything else never goes above the Sonnet (Terra) worker.
+Size controls planning, not model choice. Assign each slice by judgment:
 
-**Design → floor.** A step is *design* when it **decides** how something looks or feels —
-inventing a surface's shape, choosing type/colour/spacing/motion with no precedent to
-follow. **Applying** an already-decided system — existing theme tokens, an existing
-palette, a locked `DESIGN.md`, an established component's conventions — is ordinary
-work and stays on Sonnet, however visual the file looks. Design steps run on the Fable
-(Sol) worker whatever the size: a cheap model returns competent generic defaults, and
-generic is the failure here. Precedence: a step that is both design and risky runs on
-Fable and still gets the brain's risky-hunk review. Not design merely because a step
-touches a file that renders something — wiring an existing component to data is
-ordinary work.
+Use this first-match order:
 
-## Lanes
+1. Risk, ambiguity, root cause, original design, or a decision → `owner`.
+2. One bounded read-only fact → `scout`.
+3. Locked, reversible, non-risky propagation with known files and a check → `mechanic`.
+4. Everything else → `owner`.
 
-| Lane | Model | Gets | Returns |
-|---|---|---|---|
-| Scout | Haiku / Luna — fresh context, read-only, parallel | one unknown | files, symbols, callers, tests, one-line risk — ≤ 1 K tokens |
-| Worker | Sonnet / Terra (Opus / Sol on a risky step, Fable / Sol on a design step) | brief + plan + its step + the scout findings it needs | `DONE` or `BLOCKED(reason)` |
-| Brain | Fable / Sol @ xhigh — L plans, re-plans, risky-hunk review | brief + findings + `forge-principles` | the plan file, or `APPROVE` / `BLOCK`. Never executes. |
+| Lane | Use when | Never use for |
+|---|---|---|
+| Owner — frontier | ambiguity, root cause, architecture, behavior, integration, final diff | work a lower lane can prove more cheaply |
+| Scout — Haiku/Luna | one bounded factual lookup: callers, files, tests, existing pattern | conclusions, plans, edits, broad summaries |
+| Mechanic — Sonnet/Terra | exact reversible change, known files, locked behavior, deterministic check | auth/security/money/data/secrets, migrations, public-API decisions, design choices, unclear failures, tests that decide behavior |
 
-The coordinator never reads source files itself — that is what scouts are for. Spawn
-mechanics per tool, the role preambles, and the fallback when a role agent is missing:
-`references/lanes.md` and `references/roles.md`.
+Applying a decision already made can be mechanical even when making that decision was
+not. Examples: propagate an exact rename, apply an existing pattern to several known
+sites, update generated artifacts, or add fully specified cases to an existing table.
 
-## The flow
+Delegate only when all are true:
 
-1. **Triage.** Brief, size, risky steps. If `.maximum-effort/plan.md` exists with open
-   checkboxes, this is a continuation — skip to step 4. Fully ticked → overwrite it.
-2. **Scout.** One scout per unknown, all in parallel. No unknowns → no scouts. Every
-   lane prompt — scout, worker, brain — ends with the leaf boundary: `Complete this
-   directly. Do not spawn agents.`
-3. **Plan.** M: the coordinator writes it. L: the brain writes it. Both land in
-   `.maximum-effort/plan.md` in the shape of `references/plan-template.md`; add
-   `.maximum-effort/` to `.git/info/exclude` (never the repo's `.gitignore`). One line
-   per step:
-   `- [ ] N. <what> — files: <paths> — check: <command → expected> — rollback: <how> — risky: <yes|no>`
-   Steps that share no file may carry `(independent of N)`. Every step passes the
-   default-deny before it is written: no new file for a single caller (inline until a
-   second caller exists), no option for a value the brief fixes, one test across the
-   real seam over five that mirror the module. L only: stop and ask the user to approve
-   (AskUserQuestion / request_user_input) before anything runs.
-4. **Execute.** One worker per step, in order unless marked independent. The worker
-   runs the step's check before it answers. Spawn, then collect every lane's
-   answer before the turn ends — parallel means parallel calls in one message, not a
-   background job picked up later (mechanics: `references/lanes.md`). Only once an
-   answer is in hand: tick the box on `DONE`, log the run in the plan's `## Log`. A
-   turn that ends with a lane still out orphans it.
-5. **Blocked.** Same reason twice → the brain re-plans the remaining steps from the
-   plan plus a five-line state summary — never the raw transcript. Back to 4.
-   Escalation is a diagnosis, not a reflex:
-   - understood the problem, skipped files / tests / edges → same model, more effort
-   - had the full context and still misread it → bigger model
-   - the step was underspecified → fix the step; never buy context with model
-6. **Close.** Risky hunks → brain review; a `BLOCK` becomes a new step for a worker,
-   never a patch by the coordinator. Before the receipt, re-read the plan: every box
-   ticked or no receipt — an open box is either a lane still to collect or a tick that
-   never landed. Then one receipt line, exactly this shape:
-   `Route: <S|M|L> · scouts <model>×<n> · plan <model> · workers <model>×<n> (<step> <model>: <why>) · fable <n>`
-   Append one JSON line per lane run to `~/.maximum-effort/ledger.jsonl` —
-   `{"ts","tool","cwd","task","size","lane","model","effort","outcome","escalated_why"}`,
-   `ts` as ISO-8601 UTC (`2026-08-20T12:00:00Z`) — no prompts, no code, no secrets. Hand off: `lizard` before the PR, `shepherd` for it.
+1. The owner can specify the result without asking the worker to interpret intent.
+2. Files or search boundary are known and do not overlap another live worker.
+3. A deterministic check can reject bad work.
+4. The task packet plus result review is likely cheaper than direct owner execution.
 
-## Context hygiene
+If any condition fails, the owner does it. S tasks normally stay with the owner because
+handoff overhead outweighs the work.
 
-One task per session. `/compact` before step 4 on L. Workers get the plan, never the
-transcript. Parallel is for wall-time on independent work, not a token trick — scouts
-qualify because each one keeps file contents out of the main thread.
+Routing invariants:
 
-## Two pools
+- Risk, ambiguity, root cause, original design, and decisions always stay with the
+  frontier owner. A smaller model may apply a locked decision only outside a risky
+  surface.
+- Auth, security controls, money, data, secrets, migrations, outbound side effects, and
+  unclear failures can never use the mechanic lane.
+- S stays with the owner unless the edit is repetitive across several known sites.
+- Review is `self` for ordinary S/M, `frontier` for risky M, original design, and all L.
 
-Both tools can run each other's lanes. When this tool's 7-day usage is higher than the
-other's by 15 points or more (`~/.claude/rate-limits.json` vs the last `rate_limits` in
-`~/.codex/sessions`), scouts and workers go through the other pool — commands in
-`references/lanes.md`. The brain stays home, and so does any step whose check binds a
-port or needs the network (the foreign pool runs sandboxed). The receipt says
-`(codex pool)` or `(claude pool)`.
+## Work
 
-A foreign-pool lane that returns nothing, errors, or runs past 10 minutes is re-run
-once in the home pool. A scout that still returns nothing leaves its unknown open —
-never read as "no findings".
+1. **Resume before restarting.** If `.maximum-effort/plan.md` has open checkboxes, read
+   it before source work. Preserve its brief, decisions, completed steps, and log;
+   validate the remaining slices against the current request and source; resume only
+   the open slices. A changed constraint or stale decision is owner work, not permission
+   to repeat completed slices.
+2. **Inspect and decide.** The owner reads repo guidance and decision-critical source.
+   It may send peripheral factual unknowns to scouts, but never substitutes their
+   summary for reading the code it must judge.
+3. **Name the cause or shape.** State the root cause before a bug fix. For a feature,
+   name the smallest end-to-end shape, its locked decisions, and risky edges.
+4. **Plan and assign.** S has no plan. M stays in context. A fresh L task uses
+   `references/plan-template.md` at `.maximum-effort/plan.md`, excluded through
+   `.git/info/exclude`. Mark each slice `owner` or `mechanic`; scouts answer unknowns.
+5. **Execute leaves.** Independent scouts may run in parallel. Mechanical workers may
+   run in parallel only with disjoint files. Every delegate receives one leaf task and
+   cannot delegate again.
+6. **Take over on friction.** A delegate gets one attempt. Ambiguity, a changed file
+   boundary, missing evidence, or a red check returns control to the frontier owner.
+   The owner fixes or completes it directly; never start a weak-model repair loop.
+7. **Integrate and prove.** The owner reads every delegated diff, resolves interactions,
+   runs focused checks while working, then runs the complete scoped lint, typecheck,
+   and tests once when the repo requires them. It reviews the final diff itself.
+8. **Review once.** Risky M, original design work, and L use one independent frontier
+   reviewer. The owner fixes valid findings in one pass. Skip this extra review for a
+   PR because `lizard` owns it.
+
+## Receipt and measurement
+
+End completed work with one line:
+
+`Route: <S|M|L> · owner <model>@<effort> · scouts <model>×<n> · mechanics <model>×<n> · takeovers <n> · review <self|frontier> · PR <none|lizard> · rework <n> · next <same|claude|codex>`
+
+Append one task-level JSON line to `~/.maximum-effort/ledger.jsonl`:
+
+`{"ts","tool","cwd","task","size","owner_model","owner_effort","pool","scouts","mechanics","takeovers","review","pr_review","next_pool","outcome","rework_rounds"}`
+
+Use ISO-8601 UTC for `ts`; use `done`, `blocked`, or `rework` for `outcome`. Store
+`scouts` and `mechanics` as model-to-count objects such as `{"luna":1}` and
+`{"terra":2}`. Never store prompts, code, secrets, or raw user text.
 
 ## Guardrails
 
-- A model or effort the user picked by hand always wins.
-- The coordinator's only writes are `.maximum-effort/plan.md` and `.git/info/exclude`.
-  Source changes come from workers, every time — including the fix for a review finding.
-- Stay inside the two subscriptions — never route to a pay-per-token key without saying so.
-- Never keep the frontier model running because it was needed earlier — downgrade after
-  the hard part.
-- The check is the step. A worker that answers `DONE` without its check output is
-  `BLOCKED`.
-- A lane whose answer you never collected is `BLOCKED`, not `DONE` — go get it before
-  you close.
+- The owner never delegates a decision it must later reconstruct from a summary.
+- No weak-model work on risky surfaces, even when the requested change sounds routine.
+- No uncollected delegate result and no `DONE` without the real check output.
+- No second weak-model attempt. Takeover is the quality and token circuit breaker.
+- Pool balancing happens before the next task. A failed handoff is never retried in the
+  other tool.

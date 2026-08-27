@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# One scorecard for both pools over the last N days (default 7): Claude model split and
-# cache-read share (ccusage), Claude 7-day headroom (statusline feed), Codex model×effort
-# per session and 7-day headroom (session logs), and the maximum-effort ledger.
+# One scorecard for both pools over the last N days (default 7): model split, cache-read
+# share, subscription headroom, and maximum-effort task outcomes.
 # Usage: usage.sh [days]
 set -euo pipefail
 
@@ -58,11 +57,13 @@ if [ -s "$led" ]; then
   jq -s -r --argjson c "$cutoff" '
     def epoch: if type == "number" then . else (sub("\\.[0-9]+"; "") | if length == 10 then . + "T00:00:00Z" else . end | fromdateiso8601?) // 0 end;
     map(select(((.ts // 0) | epoch) >= $c and ((.cwd // "") | test("forge-eval-") | not)))
-    | if length == 0 then "no lane runs in window" else
-      (length | if . == 0 then 1 else . end) as $n
-      | "lane runs \(length) · tasks \(map(.task) | unique | length) · escalations \(map(select((.escalated_why // "") != "")) | length) · rework \(map(select(.outcome == "rework")) | length)",
-        "cheap-lane share (haiku/luna/sonnet/terra): \(map(select(.model | test("haiku|luna|sonnet|terra"))) | length * 100 / $n | floor)%",
-        (group_by(.lane, .model) | sort_by(-length)[] | "  \(.[0].lane)\t\(.[0].model)\t\(length)")
+    | if length == 0 then "no task runs in window" else
+      (map(select(.owner_model != null))) as $tasks
+      | (map(select(.owner_model == null))) as $legacy
+      | "task runs \($tasks | length) · tasks \($tasks | map(.task) | unique | length) · blocked \($tasks | map(select(.outcome == "blocked")) | length) · rework \($tasks | map(select(.outcome == "rework")) | length)",
+        "scouts \($tasks | map((.scouts // {}) | [.[]] | add // 0) | add // 0) · mechanics \($tasks | map((.mechanics // {}) | [.[]] | add // 0) | add // 0) · takeovers \($tasks | map(.takeovers // 0) | add // 0) · frontier reviews \($tasks | map(select(.review == "frontier" or .review == "lizard")) | length)",
+        ($tasks | group_by(.owner_model, .owner_effort) | sort_by(-length)[] | "  owner\t\(.[0].owner_model)@\(.[0].owner_effort // "?")\t\(length)"),
+        (if ($legacy | length) > 0 then "legacy lane rows \($legacy | length) — excluded from task metrics" else empty end)
       end' "$led"
 else
   echo "empty — no tasks run yet"
