@@ -4,16 +4,15 @@ Skills are prompts, so "does it work" means different things at different layers
 There is deliberately **no CI**: the evals are part of the skill-editing loop in
 this repo, run by whoever (human or agent) is making the change.
 
-**Scope: the forge suite only, for now** — `forge` + `forge-*`. Lizard and any
-future non-forge skills are excluded until deliberately added; `validate.mjs` and
-`trigger/run.mjs` both accept `--all` (or `EVALS_SCOPE=all`) to widen, and the
-lizard trigger cases return with that widening.
+**Scope: the forge suite plus `maximum-effort`** — `forge`, `forge-*`, and the
+frontier-led runner. Lizard and future skills are excluded until deliberately added;
+`validate.mjs` and `trigger/run.mjs` accept `--all` (or `EVALS_SCOPE=all`) to widen.
 
 | Tier | What it proves | Cost | When |
 |---|---|---|---|
 | **0 static** | frontmatter parses, discovery works, references resolve, index in sync | free, seconds | every change, before pushing |
 | **1 trigger** | user utterances route to the right skill from `description` alone | ~45 haiku calls, pennies | when any `description` changes |
-| **1b routing** | `maximum-effort`'s triage rule sizes tasks (S/M/L) and floors risk (sonnet/opus) as intended, from its live `## Triage` section alone | 15 haiku calls, pennies | when the triage rule changes |
+| **1b routing** | `maximum-effort` sizes tasks, assigns owner/scout/mechanic, and reserves frontier review for risky, original-design, and L work | 25 haiku calls, pennies | when the triage rule changes |
 | **2 behavioral** | the skill, run end-to-end headless, produces its contracted artifacts | real tokens, minutes/case | when a skill's body changes |
 
 ## The edit loop (how these are actually used)
@@ -68,20 +67,18 @@ use — the miss becomes a case, like a regression test.
 ## Tier 1b — routing (maximum-effort)
 
 ```bash
-node evals/routing/run.mjs              # 15 cases
+node evals/routing/run.mjs              # 25 cases
 node evals/routing/run.mjs --dry-run    # print the assembled prompt, no calls
 node evals/routing/run.mjs --only stripe
 ```
 
-Same shape as tier 1, different question: not *which skill*, but *which lane*. Reads
-the live `## Triage` section of `maximum-effort`'s SKILL.md (experimental or promoted,
-whichever exists), shows Haiku ONLY that section plus one task, and asserts the size
-(S/M/L) and the worker floor (sonnet/opus). Passes at ≥ 14/15 **and** two hard
-constraints — no `routine` case may floor at opus, every `hard` case must. The misses
-that shaped the rule on day one: "add X and cover it with tests" reading as S (a new
-test is now M), "double-sends emails" not reading as risky (outbound side effects are
-now named), and an auth *refactor* reading as safe (the surface decides, not the
-intent). Cases in `routing/cases.json`; a real mis-route becomes a case.
+Same shape as tier 1, different question: task size, primary leaf lane, and whether an
+independent frontier review earns its tokens. It reads the live `## When not to run`
+and `## Triage` sections of `maximum-effort`, shows Haiku only those rules plus one
+task, and asserts `forge` or `S|M|L`, `owner|scout|mechanic`, and `self|frontier`.
+Passes at ≥ 24/25 with hard constraints: tiny work stays self-reviewed, menial work
+leaves the owner, design and risky work stay owner-led, risky work gets frontier
+review, and Forge continuation never leaks into Maximum Effort.
 
 ## Tier 2 — behavioral
 
@@ -245,20 +242,13 @@ Set `judgeFloor` in `config.json` to override the floor parsed from `rubric.md`.
   items reported-but-untouched (nested file not moved, broken link not silently
   deleted) — plus no collateral damage to healthy articles.
 
-- **`maximum-effort-m-task`** — the lane contract, graded from the transcript's
-  top-level tool calls (a subagent's own calls never surface there, which is the
-  point). A tiny zero-dep login server; the task adds per-IP rate limiting to
-  `POST /login` — M-sized, one unknown (where the handler and its tests live), one
-  risky step (it sits on the auth surface). Checks: a scout before the first worker, a
-  worker on Sonnet, the risky step's worker on Opus, no planner/Fable on an M task, the
-  leaf boundary in every spawn prompt, the coordinator editing nothing but
-  `.maximum-effort/`, a plan with a `check:` per step and every box ticked,
-  `.git/info/exclude` rather than `.gitignore`, a receipt line, the suite green, a test
-  naming 429, and a live probe (six logins from one IP → the sixth is 429 with
-  `Retry-After`). Judge: plan quality, economy of the limiter, brief fidelity. Reads
-  the role agents from `~/.claude/agents/` (headless loads them) but accepts the
-  `model:` fallback, so it passes without them; that machine state is outside the
-  fingerprint — pass `--no-cache` after touching the agent files.
+- **`maximum-effort-m-task`** — the frontier-led delegation contract. Product has
+  already locked an exact `orbit-core` → `orbit-api` identifier propagation across
+  source, tests, example, and docs. The Opus owner must inspect the files, give exactly
+  one Sonnet mechanic a closed packet and deterministic check, collect it, inspect the
+  diff, and run the final suite. A scout, frontier reviewer, second mechanic, persistent
+  plan, or uncollected result fails. Live probes prove the new identifier and unchanged
+  health response shape. Judge: correctness, economy of delegation, and brief fidelity.
 
 ### Add a case
 
@@ -295,17 +285,37 @@ no network.
   loop on purpose: no crack-on baseline exists to protect, and its deterministic
   checks would measure build variance rather than the wiring. First lane-powered
   crack-on run is attended; a real miss becomes the permanent case.
-- **Harness note (measured, unfixed).** Every tier-1/1b case shells out a full
+- **Harness note.** Every tier-1/1b case shells out a full
   `claude -p` boot — 7.3s wall and 4.3s CPU per case, most of it connecting MCP
   servers, so a routing run is ~100s and a trigger run ~3min. Raising
   `EVAL_CONCURRENCY` barely helps (4 → 12 was 99s → 87s) because it is CPU-bound on
   process boot, not network. The intermittent
   `clientlisttools() called but server does not advertise tools capability` "failures"
-  are MCP handshake noise leaking into the router's answer, not routing misses —
-  which is why verdicts here are taken over repeated runs. Passing
-  `--strict-mcp-config --mcp-config '{"mcpServers":{}}'` measures 3.8s wall / 0.9s CPU
-  and would remove both the cost and the flake.
+  were MCP handshake noise leaking into the router's answer, not routing misses.
+  The runners now pass
+  `--strict-mcp-config --mcp-config '{"mcpServers":{}}'`. That measures 3.8s wall /
+  0.9s CPU and removes both the cost and the flake.
 
+- **2026-08-27** · `maximum-effort` frontier-led delegation correction. The prior
+  one-owner baseline passed static validation; provider-backed trigger and routing were
+  unavailable because every call exited with the same provider error, and the ×3
+  behavioral run was inconclusive after every attempt exhausted its 429 retries. The
+  corrected skill passes strict static validation, script syntax, fixture tests, all 17
+  deterministic behavioral assertions against a synthetic completed transcript, and
+  the live trigger suite at **56/56**. A later live routing attempt completed 0/25
+  because all calls exited at the provider, and the ×3 behavioral run again exhausted
+  its 429 retries before task execution. Those two tiers remain inconclusive rather
+  than behavioral failures.
+- **2026-08-24** · `maximum-effort` frontier-owner rewrite. Pre-change static validation
+  passed and routing scored 14/15; the Claude ×3 behavioral baseline was inconclusive
+  because every run hit 429 after all retries. Post-change strict static validation
+  passes. Provider-backed trigger, routing, and behavioral runs remain ungraded for the
+  same subscription 429. An isolated Sol execution completed the M auth task with 10/10
+  tests, a pinned Sol/high review, a valid task ledger row, and live proof of 429,
+  `Retry-After`, IP isolation, and reset. It also added a test-only `createServer` clock
+  option; the new deterministic economy check rejects that surface, turning the
+  forward-test miss into a regression case. Re-run the three provider-backed tiers
+  after Claude resets.
 - **2026-08-20** · tier 1b routing (15 cases, Haiku): 12/15 → 15/15 after two
   rule sharpenings (a new test is M; un-recallable side effects and a refactor on a
   trust boundary are risky). Both hard constraints clean.
