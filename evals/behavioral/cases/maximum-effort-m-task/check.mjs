@@ -1,177 +1,182 @@
-import { readFileSync, existsSync, readdirSync, realpathSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join, relative, isAbsolute } from 'node:path';
-import { spawn } from 'node:child_process';
-import { createServer } from 'node:net';
 import { homedir } from 'node:os';
+import { pathToFileURL } from 'node:url';
 
-// Lane contract for maximum-effort, graded from the coordinator's own tool calls. With
-// --verbose stream-json a subagent's calls appear too, tagged parent_tool_use_id — those
-// are dropped, so what remains is exactly what the coordinator did itself. Lanes may run
-// through the Codex pool (`codex exec -p scout|worker|brain` from Bash); they count as
-// lanes with the profile's model.
-const PROFILE_MODEL = { scout: 'luna', worker: 'terra', brain: 'sol' };
-const LANE_OF_PROFILE = { scout: 'scout', worker: 'worker', brain: 'planner' };
-const MID = new Set(['sonnet', 'terra']);
-const HOT = new Set(['opus', 'sol']);
+const MECHANIC = /sonnet|terra/i;
+const FRONTIER = /opus|fable|sol/i;
+const SOURCE_PATH = /(?:src|test|examples|docs)\//;
+const BASH_WRITE = /\b(?:apply_patch|sed\s+-i|perl\s+-pi|tee|cp|mv)\b|(?:^|\s)>\s*(?!\/dev\/null)/m;
 
-export default async function check({ workdir, transcript, exec }) {
+export default async function check({ workdir, transcript, exec, home = homedir() }) {
   const checks = [];
   const add = (name, pass, detail, required = true) => checks.push({ name, pass, detail, required });
-
-  const events = transcript.split('\n').flatMap((l) => { try { return l ? [JSON.parse(l)] : []; } catch { return []; } });
+  const events = transcript.split('\n').flatMap((line) => {
+    try { return line ? [JSON.parse(line)] : []; } catch { return []; }
+  });
   const calls = [];
   const texts = [];
-  for (const ev of events) {
-    if (ev.type !== 'assistant' || ev.parent_tool_use_id) continue;
-    for (const block of ev.message?.content ?? []) {
-      if (block.type === 'tool_use') calls.push({ name: block.name, input: block.input ?? {}, id: block.id, i: calls.length });
-      else if (block.type === 'text') texts.push(block.text);
-    }
-  }
   const results = new Map();
-  for (const ev of events) {
-    if (ev.type !== 'user' || ev.parent_tool_use_id) continue;
-    for (const block of ev.message?.content ?? []) {
-      if (block.type === 'tool_result' && block.tool_use_id) results.set(block.tool_use_id, block.content);
+  for (const [eventIndex, event] of events.entries()) {
+    if (event.type === 'assistant' && !event.parent_tool_use_id) {
+      for (const block of event.message?.content ?? []) {
+        if (block.type === 'tool_use') {
+          calls.push({ name: block.name, input: block.input ?? {}, id: block.id, eventIndex });
+        }
+        if (block.type === 'text') texts.push(block.text);
+      }
     }
-  }
-  const finalText = events.findLast((e) => e.type === 'result')?.result || texts.at(-1) || '';
-  const prose = texts.join('\n');
-  const planPath = join(workdir, '.maximum-effort/plan.md');
-  const plan = existsSync(planPath) ? readFileSync(planPath, 'utf8') : '';
-
-  const spawns = [];
-  for (const c of calls) {
-    if (c.name === 'Agent' || c.name === 'Task') {
-      const type = String(c.input.subagent_type ?? '').toLowerCase();
-      const model = String(c.input.model ?? '').toLowerCase() || { scout: 'haiku', worker: 'sonnet', planner: 'fable' }[type] || 'inherit';
-      const lane = type === 'planner' || model === 'fable' ? 'planner'
-        : type === 'scout' || model === 'haiku' ? 'scout'
-        : type === 'worker' || MID.has(model) || HOT.has(model) ? 'worker' : 'other';
-      spawns.push({ i: c.i, id: c.id, lane, model, pool: 'claude', boundary: /do not spawn agents/i.test(String(c.input.prompt ?? '')) });
-    } else if (c.name === 'Bash') {
-      const cmd = String(c.input.command ?? '');
-      for (const m of cmd.matchAll(/codex exec\s+([^\n;&|)]*)/g)) {
-        const profile = m[1].match(/(?:^|\s)(?:-p|--profile)\s+(\w+)/)?.[1];
-        if (!profile) continue;
-        const model = (m[1].match(/(?:^|\s)(?:-m|--model)\s+(\S+)/)?.[1] ?? `gpt-5.6-${PROFILE_MODEL[profile] ?? ''}`).replace(/^gpt-5\.6-/, '');
-        spawns.push({ i: c.i, lane: LANE_OF_PROFILE[profile] ?? 'other', model, pool: 'codex', boundary: /do not spawn agents/i.test(cmd) });
+    if (event.type === 'user' && !event.parent_tool_use_id) {
+      for (const block of event.message?.content ?? []) {
+        if (block.type === 'tool_result' && block.tool_use_id) {
+          results.set(block.tool_use_id, { content: block.content, eventIndex });
+        }
       }
     }
   }
-  const scouts = spawns.filter((s) => s.lane === 'scout');
-  const workers = spawns.filter((s) => s.lane === 'worker');
-  const planners = spawns.filter((s) => s.lane === 'planner');
-  const describe = (xs) => xs.map((s) => `${s.lane}:${s.model}${s.pool === 'codex' ? '@codex' : ''}`).join(', ') || 'none';
-  const bashText = calls.filter((c) => c.name === 'Bash').map((c) => String(c.input.command ?? '')).join('\n');
-  const boundaryOk = (s) => s.boundary || (s.pool === 'codex' && /do not spawn agents/i.test(bashText));
 
-  add('skill invoked', /maximum-effort/.test(JSON.stringify(calls)) || /Maximum effort — triaging/.test(prose));
+  const resultText = (id) => {
+    const content = results.get(id)?.content;
+    return typeof content === 'string' ? content : JSON.stringify(content ?? '');
+  };
+  const finalText = events.findLast((event) => event.type === 'result')?.result || texts.at(-1) || '';
+  const prose = texts.join('\n');
+  const pathOf = (call) => String(call.input.file_path ?? call.input.notebook_path ?? '');
+  const relativePath = (path) => relative(workdir, isAbsolute(path) ? path : join(workdir, path));
+  const bash = calls
+    .filter((call) => call.name === 'Bash')
+    .map((call) => ({ ...call, command: String(call.input.command ?? '') }));
+  const spawns = calls
+    .filter((call) => call.name === 'Agent' || call.name === 'Task')
+    .map((call) => ({ ...call, model: String(call.input.model ?? 'inherit'), prompt: String(call.input.prompt ?? '') }));
+  const mechanics = spawns.filter((spawn) => MECHANIC.test(spawn.model));
+  const reviewers = spawns.filter((spawn) => FRONTIER.test(spawn.model));
+  const mechanic = mechanics[0];
+  const mechanicResult = mechanic ? results.get(mechanic.id) : null;
+  const mechanicText = mechanic ? resultText(mechanic.id) : '';
+
+  add('skill invoked', /Maximum effort — frontier-led/.test(prose));
   add('brief written (Goal / Done when / Constraints / Risk / Unknowns)',
-    /Goal:[\s\S]{0,400}Done when:[\s\S]{0,400}Constraints:[\s\S]{0,400}Risk:[\s\S]{0,400}Unknowns:/.test(prose + '\n' + plan));
-  add('≥1 scout, and the first scout runs before the first worker',
-    scouts.length >= 1 && workers.length >= 1 && scouts[0].i < workers[0].i, `spawns: ${describe(spawns)}`);
-  add('≥1 worker on the mid tier (sonnet / terra)', workers.some((s) => MID.has(s.model)), `workers: ${describe(workers)}`);
-  add('the risky (auth) step runs on opus / sol', workers.some((s) => HOT.has(s.model)), `workers: ${describe(workers)}`);
-  add('no planner before the first worker on an M task (review after is fine)',
-    workers.length > 0 && planners.every((p) => p.i > workers[0].i), `planners: ${describe(planners)}`);
-  add('every spawn prompt carries the leaf boundary', spawns.length > 0 && spawns.every(boundaryOk), `${spawns.filter((s) => !boundaryOk(s)).length} without`);
-  const backgrounded = calls
-    .filter((c) => c.name === 'Bash')
-    .map((c) => String(c.input.command ?? ''))
-    .filter((cmd) => /codex exec/.test(cmd) && /(\)\s*&(?!&)|[^&]&\s*$)/m.test(cmd));
-  const unwaited = backgrounded.filter((cmd) => !/\bwait\b/.test(cmd));
-  const noAnswer = (content) => {
-    if (content == null) return true;
-    const text = typeof content === 'string' ? content : JSON.stringify(content);
-    return !text || /<retrieval_status>\s*timeout\s*<\/retrieval_status>/i.test(text) || /launched successfully/i.test(text);
-  };
-  const deferred = calls
-    .filter((c) => c.name === 'Monitor' || c.name === 'TaskOutput')
-    .filter((c) => noAnswer(results.get(c.id)));
-  const orphaned = spawns.filter((s) => s.pool === 'claude' && noAnswer(results.get(s.id)));
-  add('lanes awaited in the turn that spawned them', unwaited.length === 0 && deferred.length === 0 && orphaned.length === 0,
-    `${unwaited.length} backgrounded codex exec without wait · ${deferred.length} Monitor/TaskOutput calls with no answer · ${orphaned.length} Agent spawns with no result in transcript`);
+    /Goal:[\s\S]{0,500}Done when:[\s\S]{0,500}Constraints:[\s\S]{0,500}Risk:[\s\S]{0,500}Unknowns:/.test(prose));
 
-  const wd = realpathSync(workdir);
-  const rel = (p) => {
-    const abs = isAbsolute(p) ? p : join(wd, p);
-    let real = abs;
-    try { real = realpathSync(abs); } catch { real = abs.replace(/^\/private\//, '/'); }
-    return relative(wd, real);
-  };
-  const allowed = (p) => p.startsWith('.maximum-effort/') || p === '.git/info/exclude';
-  const stray = calls
-    .filter((c) => ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(c.name))
-    .map((c) => rel(String(c.input.file_path ?? c.input.notebook_path ?? '')))
-    .filter((p) => !allowed(p));
-  add('coordinator edited nothing but .maximum-effort/', stray.length === 0, stray.length ? `edited: ${stray.join(', ')}` : undefined);
-  const sourceReads = calls.filter((c) => ['Read', 'Grep', 'Glob'].includes(c.name) && !/\.maximum-effort|SKILL\.md|references\//.test(JSON.stringify(c.input)));
-  add('coordinator read no source files itself', sourceReads.length === 0, `${sourceReads.length} top-level source reads`, false);
+  const requiredReads = ['src/service.js', 'test/service.test.js', 'test/server.test.js'];
+  const readsBeforeMechanic = calls
+    .filter((call) => call.name === 'Read' && call.eventIndex < (mechanic?.eventIndex ?? -1))
+    .map((call) => relativePath(pathOf(call)));
+  add('frontier owner reads decision-critical source and tests before delegating',
+    requiredReads.every((path) => readsBeforeMechanic.includes(path)),
+    readsBeforeMechanic.join(', ') || 'none');
+  add('exactly one Sonnet/Terra mechanic and no other agents',
+    mechanics.length === 1 && spawns.length === 1,
+    spawns.map((spawn) => spawn.model).join(', ') || 'none');
 
-  const steps = plan.split('\n').filter((l) => /^- \[[ x]\] \d+\./i.test(l));
-  add('plan file with ≥2 steps, each with a check', steps.length >= 2 && steps.every((l) => /check:/.test(l)), `${steps.length} steps`);
-  add('plan marks the login-route step risky', steps.some((l) => /risky:\s*yes/i.test(l)));
-  add('every step ticked', steps.length > 0 && steps.every((l) => /^- \[x\]/i.test(l)), `${steps.filter((l) => /^- \[ \]/.test(l)).length} open`);
-  const exclude = existsSync(join(workdir, '.git/info/exclude')) ? readFileSync(join(workdir, '.git/info/exclude'), 'utf8') : '';
-  const gitignore = existsSync(join(workdir, '.gitignore')) ? readFileSync(join(workdir, '.gitignore'), 'utf8') : '';
-  add('.maximum-effort/ excluded via .git/info/exclude, not .gitignore', /\.maximum-effort/.test(exclude) && !/\.maximum-effort/.test(gitignore));
-  add('receipt line in the final message', /Route:\s*[SML]\s*·/.test(finalText), finalText.match(/Route:[^\n]*/)?.[0]);
+  const packet = mechanic?.prompt ?? '';
+  add('mechanical packet locks scope, behavior, check, and leaf boundary',
+    /src\/service\.js/.test(packet)
+      && /test\/service\.test\.js/.test(packet)
+      && /test\/server\.test\.js/.test(packet)
+      && /examples\/client\.js/.test(packet)
+      && /docs\/api\.md/.test(packet)
+      && /locked behavior|already approved|exact propagation/i.test(packet)
+      && /npm test|node --test/.test(packet)
+      && /do not (?:guess|broaden scope|spawn agents)/i.test(packet));
+  add('mechanic result collected with successful check evidence',
+    mechanicResult != null
+      && /\bDONE\b/i.test(mechanicText)
+      && !/\bBLOCKED\b|# fail\s+[1-9]|\bfailed\b|\bfailure\b|\bnot ok\b/i.test(mechanicText)
+      && /npm test|node --test/i.test(mechanicText)
+      && /# pass\s+[1-9]|\b[1-9]\d*\s+(?:tests?\s+)?pass(?:ed)?\b|\bPASS\b/i.test(mechanicText)
+      && !/launched successfully|retrieval_status[\s\S]*timeout/i.test(mechanicText));
+
+  const structuredWrites = calls
+    .filter((call) => ['Edit', 'Write', 'MultiEdit', 'NotebookEdit'].includes(call.name))
+    .filter((call) => !relativePath(pathOf(call)).startsWith('.maximum-effort/'));
+  const shellWrites = bash.filter((call) => SOURCE_PATH.test(call.command) && BASH_WRITE.test(call.command));
+  add('owner does not duplicate a successful mechanical edit',
+    structuredWrites.length === 0 && shellWrites.length === 0,
+    `${structuredWrites.length} structured · ${shellWrites.length} shell writes`);
+  add('no scout or frontier reviewer for a locked non-risky M task',
+    reviewers.length === 0 && spawns.length === mechanics.length);
+
+  const diffAfterMechanic = bash.find((call) =>
+    /git diff/.test(call.command)
+      && call.eventIndex > (mechanicResult?.eventIndex ?? Number.POSITIVE_INFINITY));
+  add('owner inspects diff after collecting the mechanic', diffAfterMechanic != null);
+  const finalSuite = bash.find((call) =>
+    /npm test|node --test/.test(call.command)
+      && call.eventIndex > (diffAfterMechanic?.eventIndex ?? Number.POSITIVE_INFINITY));
+  const finalSuiteText = finalSuite ? resultText(finalSuite.id) : '';
+  add('owner runs a successful final suite after integration',
+    finalSuite != null
+      && /# pass\s+[1-9]|\b[1-9]\d*\s+(?:tests?\s+)?pass(?:ed)?\b|\bPASS\b/i.test(finalSuiteText)
+      && !/# fail\s+[1-9]|\bfailed\b|\bfailure\b|\bnot ok\b/i.test(finalSuiteText));
+  add('M task creates no persistent plan', !existsSync(join(workdir, '.maximum-effort/plan.md')));
+  add('receipt records one mechanic and no takeover',
+    /Route:\s*M\s*·\s*owner\s+(?:opus|fable|sol)[^·]*·\s*scouts\s+[^·]*×0\s*·\s*mechanics\s+(?:sonnet|terra)[^·]*×1\s*·\s*takeovers\s+0\s*·\s*review\s+self/i.test(finalText),
+    finalText.match(/Route:[^\n]*/)?.[0]);
 
   const tests = exec('npm test');
-  add('test suite green (existing + new)', tests.ok, tests.ok ? tests.out.match(/# pass \d+/)?.[0] : tests.out.slice(-300));
-  const testDir = join(workdir, 'test');
-  const testSrc = existsSync(testDir) ? readdirSync(testDir).map((f) => readFileSync(join(testDir, f), 'utf8')).join('\n') : '';
-  add('a test covers the 429', /429/.test(testSrc));
-  const probe = await probeLimit(workdir);
-  add('limit enforced at runtime (6th login from one IP → 429 + Retry-After)', probe.ok, probe.detail);
+  add('test suite green', tests.ok, tests.ok ? tests.out.match(/# pass \d+/)?.[0] : tests.out.slice(-300));
+  const artifactPaths = [
+    'src/service.js',
+    'test/service.test.js',
+    'test/server.test.js',
+    'examples/client.js',
+    'docs/api.md',
+  ];
+  const artifacts = artifactPaths.map((path) => [path, readFileSync(join(workdir, path), 'utf8')]);
+  add('every named artifact uses only the approved identifier',
+    artifacts.every(([, source]) => source.includes('orbit-api') && !source.includes('orbit-core')),
+    artifacts.filter(([, source]) => !source.includes('orbit-api') || source.includes('orbit-core')).map(([path]) => path).join(', ') || 'all');
+  const serviceTest = readFileSync(join(workdir, 'test/service.test.js'), 'utf8');
+  const serverTest = readFileSync(join(workdir, 'test/server.test.js'), 'utf8');
+  add('tests assert the new identifier through unit and HTTP seams',
+    /assert\.equal\(SERVICE_ID, ['"]orbit-api['"]\)/.test(serviceTest)
+      && /assert\.deepEqual\([\s\S]*service:\s*['"]orbit-api['"]/.test(serverTest));
+  const probe = await probeHealth(workdir);
+  add('live health response proves the identifier and unchanged shape', probe.ok, probe.detail);
 
-  const ledger = join(homedir(), '.maximum-effort/ledger.jsonl');
-  const ledgerLines = existsSync(ledger) ? readFileSync(ledger, 'utf8').split('\n').filter((l) => l.includes(workdir) || l.includes(wd)) : [];
-  add('ledger lines appended for this run', ledgerLines.length > 0, `${ledgerLines.length} lines`, false);
-
+  const ledger = join(home, '.maximum-effort/ledger.jsonl');
+  const rows = existsSync(ledger)
+    ? readFileSync(ledger, 'utf8').split('\n').flatMap((line) => {
+      try { return line ? [JSON.parse(line)] : []; } catch { return []; }
+    }).filter((row) => row.cwd === workdir)
+    : [];
+  const keys = ['ts', 'tool', 'cwd', 'task', 'size', 'owner_model', 'owner_effort', 'pool', 'scouts', 'mechanics', 'takeovers', 'review', 'pr_review', 'next_pool', 'outcome', 'rework_rounds'];
+  const modelCount = (value, pattern) => value && typeof value === 'object' && !Array.isArray(value)
+    ? Object.entries(value).filter(([model]) => pattern.test(model)).reduce((sum, [, count]) => sum + count, 0)
+    : -1;
+  add('task ledger records typed delegation counts',
+    rows.some((row) => keys.every((key) => Object.hasOwn(row, key))
+      && modelCount(row.scouts, /haiku|luna/i) === 0
+      && modelCount(row.mechanics, /sonnet|terra/i) === 1
+      && row.takeovers === 0
+      && row.review === 'self'),
+    `${rows.length} matching rows`);
   return checks;
 }
 
-function freePort() {
-  return new Promise((resolve, reject) => {
-    const srv = createServer();
-    srv.listen(0, '127.0.0.1', () => {
-      const { port } = srv.address();
-      srv.close(() => resolve(port));
-    });
-    srv.on('error', reject);
-  });
-}
-
-async function probeLimit(workdir) {
-  const port = await freePort();
-  const child = spawn('node', ['src/server.js'], { cwd: workdir, env: { ...process.env, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
-  let out = '';
-  let exited = false;
-  child.stdout.on('data', (d) => { out += d; });
-  child.stderr.on('data', (d) => { out += d; });
-  child.on('exit', () => { exited = true; });
-  const deadline = Date.now() + 8000;
-  let started = false;
-  while (!started && !exited && Date.now() < deadline) {
-    started = await fetch(`http://127.0.0.1:${port}/health`).then((r) => r.ok, () => false);
-    if (!started) await new Promise((r) => setTimeout(r, 200));
-  }
+async function probeHealth(workdir) {
+  let server;
   try {
-    if (!started) return { ok: false, detail: `server did not answer /health on :${port}: ${out.slice(-200)}` };
-    const statuses = [];
-    let retryAfter = null;
-    for (let i = 0; i < 6; i++) {
-      const res = await fetch(`http://127.0.0.1:${port}/login`, { method: 'POST', body: JSON.stringify({ username: 'ada', password: 'nope' }) });
-      statuses.push(res.status);
-      if (i === 5) retryAfter = res.headers.get('retry-after');
-    }
-    const ok = statuses.slice(0, 5).every((s) => s === 401) && statuses[5] === 429 && retryAfter !== null;
-    return { ok, detail: `statuses ${statuses.join(',')} · retry-after ${retryAfter ?? 'missing'}` };
-  } catch (e) {
-    return { ok: false, detail: e.message };
+    const moduleUrl = `${pathToFileURL(join(workdir, 'src/server.js')).href}?eval=${Date.now()}`;
+    const { createServer } = await import(moduleUrl);
+    server = createServer();
+    await new Promise((resolve, reject) => {
+      server.once('error', reject);
+      server.listen(0, '127.0.0.1', resolve);
+    });
+    const base = `http://127.0.0.1:${server.address().port}`;
+    const health = await fetch(`${base}/health`);
+    const missing = await fetch(`${base}/missing`);
+    const body = await health.json();
+    const ok = health.status === 200
+      && missing.status === 404
+      && JSON.stringify(body) === JSON.stringify({ ok: true, service: 'orbit-api' });
+    return { ok, detail: `health ${health.status} ${JSON.stringify(body)} · missing ${missing.status}` };
+  } catch (error) {
+    return { ok: false, detail: error.message };
   } finally {
-    child.kill();
+    if (server?.listening) await new Promise((resolve) => server.close(resolve));
   }
 }

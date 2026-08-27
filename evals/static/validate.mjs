@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Tier 0 — static validation of SKILL.md files.
-// Scope: the forge suite (forge + forge-*) for now; pass --all to validate every skill.
+// Scope: the forge suite plus maximum-effort; pass --all to validate every skill.
 // Deterministic, no tokens. Run: node evals/static/validate.mjs
 // Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check mandatory.
 
@@ -26,7 +26,7 @@ function skillDirs(base, internal = false) {
 }
 
 const allScope = process.argv.includes('--all') || process.env.EVALS_SCOPE === 'all';
-const inScope = (name) => allScope || name === 'forge' || name.startsWith('forge-');
+const inScope = (name) => allScope || name === 'maximum-effort' || name === 'forge' || name.startsWith('forge-');
 
 const skills = [
   ...skillDirs(SKILLS_DIR),
@@ -188,7 +188,7 @@ try {
 }
 
 // Report
-console.log(`Checked ${skills.length} skills (${publicSkills.length} public, scope: ${allScope ? 'all' : 'forge suite'}).`);
+console.log(`Checked ${skills.length} skills (${publicSkills.length} public, scope: ${allScope ? 'all' : 'forge suite + maximum-effort'}).`);
 for (const w of warnings) console.log(`  WARN  ${w}`);
 for (const f of failures) console.log(`  FAIL  ${f}`);
 if (failures.length === 0) {

@@ -1,14 +1,7 @@
 #!/usr/bin/env node
-// Tier 1b — routing evals for maximum-effort. The `## Triage` and `## When not to run`
-// sections of SKILL.md are the rule; this suite asserts that a cheap model applying ONLY
-// those sections sizes each task (S/M/L), sets its worker floor (sonnet|opus|fable), and
-// stands down for forge (`tag: "forge"`, expects the single word `forge`) the way the rule
-// intends. Pass: ≥ n-1 overall AND three hard constraints — no `routine` case floors at
-// opus, every `hard` case does, every `design` case floors at fable. The sections are read
-// live, so editing the rule and re-running shows routing regressions immediately.
-//
-// Run:  node evals/routing/run.mjs [--dry-run] [--only <substring>]
-// Env:  EVAL_ROUTING_MODEL (default claude-haiku-4-5-20251001), EVAL_CONCURRENCY (default 4)
+// Tier 1b — routing evals for maximum-effort. The live `## When not to run` and
+// `## Triage` sections decide whether Forge owns the task, its size, the primary leaf
+// lane, and whether a frontier review earns its cost.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { execFile } from 'node:child_process';
@@ -23,70 +16,79 @@ const dryRun = process.argv.includes('--dry-run');
 const onlyIdx = process.argv.indexOf('--only');
 const only = onlyIdx !== -1 ? process.argv[onlyIdx + 1] : null;
 
-// Promotion-proof: the skill is read from wherever it lives today.
 const skillPath = ['skills/maximum-effort/SKILL.md', 'skills/.experimental/maximum-effort/SKILL.md']
-  .map((p) => join(ROOT, p))
-  .find((p) => existsSync(p));
+  .map((path) => join(ROOT, path))
+  .find((path) => existsSync(path));
 if (!skillPath) {
   console.error('maximum-effort SKILL.md not found');
   process.exit(1);
 }
 const skill = readFileSync(skillPath, 'utf8');
-const triage = skill.match(/^## Triage\n([\s\S]*?)(?=^## )/m)?.[1]?.trim();
-if (!triage) {
-  console.error(`no "## Triage" section in ${skillPath}`);
-  process.exit(1);
-}
 const standDown = skill.match(/^## When not to run\n([\s\S]*?)(?=^## )/m)?.[1]?.trim();
-if (!standDown) {
-  console.error(`no "## When not to run" section in ${skillPath}`);
+const triage = skill.match(/^## Triage\n([\s\S]*?)(?=^## )/m)?.[1]?.trim();
+if (!standDown || !triage) {
+  console.error(`missing "## When not to run" or "## Triage" in ${skillPath}`);
   process.exit(1);
 }
 
 function buildPrompt(task) {
   return [
-    'You are applying a triage rule to one task. First, the rule for when NOT to run at all, verbatim:',
+    'Apply these routing rules to one task.',
     '',
+    'When not to run:',
     standDown,
     '',
-    'Then the size/floor triage rule, verbatim (only applies if the above does not say to stand down):',
-    '',
+    'Triage:',
     triage,
     '',
     `Task: "${task}"`,
     '',
-    'If the "When not to run" rule says forge owns this and you should stand down, reply with exactly',
-    'one word and nothing else: forge.',
-    'Otherwise, reply with exactly two words and nothing else: the size (S, M or L) and the worker floor (sonnet, opus or fable).',
-    'The floor is fable when the task is a design step — it decides how something looks or feels (layout, colour, typography,',
-    'spacing, motion, the shape of a UI surface) — whatever the size, even if it is also risky.',
-    'Otherwise the floor is opus when at least one step is risky as the rule defines it; otherwise sonnet.',
+    'If Forge owns it, reply with exactly one word: forge.',
+    'Otherwise reply with exactly three words: size (S, M or L), lane (owner, scout or mechanic), and review (self or frontier).',
+    'Lane means the best primary leaf route after the frontier owner triages the task.',
+    'Classify risk first. Auth, security controls, money, data, secrets, migrations, outbound side effects, ambiguity, root cause, original design, and decisions always use owner, never mechanic.',
+    'For read-only work, size one bounded query as S and a repo-wide inventory as M.',
+    'Use frontier review for risky M, original design, and every L task.',
   ].join('\n');
 }
 
 let { cases } = JSON.parse(readFileSync(join(ROOT, 'evals/routing/cases.json'), 'utf8'));
-if (only) cases = cases.filter((c) => c.task.toLowerCase().includes(only.toLowerCase()));
+if (only) cases = cases.filter((item) => item.task.toLowerCase().includes(only.toLowerCase()));
 
 if (dryRun) {
   console.log(buildPrompt(cases[0].task));
-  console.log(`\n--dry-run: ${cases.length} cases, model ${MODEL}, skill ${skillPath.replace(ROOT + '/', '')}`);
+  console.log(`\n--dry-run: ${cases.length} cases, model ${MODEL}, skill ${skillPath.replace(`${ROOT}/`, '')}`);
   process.exit(0);
 }
 
-async function judgeCase(c) {
+async function judgeCase(testCase) {
   try {
-    const { stdout } = await execFileP('claude', ['-p', buildPrompt(c.task), '--model', MODEL], { timeout: 120_000, env: process.env });
-    const answer = stdout.trim().split('\n').pop().replace(/[`"'.,]/g, '').trim();
+    const { stdout } = await execFileP('claude', [
+      '-p', buildPrompt(testCase.task),
+      '--model', MODEL,
+      '--strict-mcp-config',
+      '--mcp-config', '{"mcpServers":{}}',
+    ], {
+      timeout: 120_000,
+      env: process.env,
+    });
+    const answer = stdout.trim().split('\n').pop().trim();
     if (/^forge$/i.test(answer)) {
-      const pass = c.expectForge === true;
-      return { ...c, answer: 'forge', size_got: 'forge', floor_got: 'forge', pass };
+      return { ...testCase, answer: 'forge', laneGot: 'forge', reviewGot: 'forge', pass: testCase.expectForge === true };
     }
-    const size = answer.match(/\b([SML])\b/)?.[1] ?? '?';
-    const floor = answer.match(/\b(sonnet|opus|fable)\b/i)?.[1]?.toLowerCase() ?? '?';
-    const pass = !c.expectForge && c.size.includes(size) && c.floor === floor;
-    return { ...c, answer: `${size} ${floor}`, size_got: size, floor_got: floor, pass };
-  } catch (e) {
-    return { ...c, answer: `<error: ${e.code || e.message?.slice(0, 60)}>`, size_got: '?', floor_got: '?', pass: false };
+    const parsed = answer.match(/^([SML])\s+(owner|scout|mechanic)\s+(self|frontier)$/i);
+    const size = parsed?.[1]?.toUpperCase() ?? '?';
+    const lane = parsed?.[2]?.toLowerCase() ?? '?';
+    const review = parsed?.[3]?.toLowerCase() ?? '?';
+    const expectedLanes = Array.isArray(testCase.lane) ? testCase.lane : [testCase.lane];
+    const expectedReviews = Array.isArray(testCase.review) ? testCase.review : [testCase.review];
+    const pass = !testCase.expectForge
+      && testCase.size.includes(size)
+      && expectedLanes.includes(lane)
+      && expectedReviews.includes(review);
+    return { ...testCase, answer: `${size} ${lane} ${review}`, rawAnswer: answer, sizeGot: size, laneGot: lane, reviewGot: review, pass };
+  } catch (error) {
+    return { ...testCase, answer: `<error: ${error.code || error.message?.slice(0, 60)}>`, laneGot: '?', reviewGot: '?', pass: false };
   }
 }
 
@@ -94,23 +96,36 @@ const results = [];
 let cursor = 0;
 async function worker() {
   while (cursor < cases.length) {
-    const c = cases[cursor++];
-    const r = await judgeCase(c);
-    results.push(r);
-    const expected = r.expectForge ? 'forge' : `${(r.size || []).join('|')} ${r.floor}`;
-    console.log(`  ${r.pass ? 'PASS' : 'FAIL'}  [${r.tag}] "${r.task}" → ${r.answer}${r.pass ? '' : ` (expected ${expected})`}`);
+    const current = cases[cursor++];
+    const result = await judgeCase(current);
+    results.push(result);
+    const expectedLane = Array.isArray(result.lane) ? result.lane.join('|') : result.lane;
+    const expectedReview = Array.isArray(result.review) ? result.review.join('|') : result.review;
+    const expected = result.expectForge ? 'forge' : `${result.size.join('|')} ${expectedLane} ${expectedReview}`;
+    const raw = !result.pass && result.rawAnswer && result.rawAnswer !== result.answer ? ` · raw: ${result.rawAnswer}` : '';
+    console.log(`  ${result.pass ? 'PASS' : 'FAIL'}  [${result.tag}] "${result.task}" → ${result.answer}${result.pass ? '' : ` (expected ${expected})${raw}`}`);
   }
 }
+
 console.log(`Routing evals: ${cases.length} cases · model ${MODEL} · concurrency ${CONCURRENCY}\n`);
 await Promise.all(Array.from({ length: Math.min(CONCURRENCY, cases.length) }, worker));
 
-const passed = results.filter((r) => r.pass).length;
-const routineHot = results.filter((r) => r.tag === 'routine' && r.floor_got === 'opus');
-const hardCold = results.filter((r) => r.tag === 'hard' && r.floor_got !== 'opus');
-const designCold = results.filter((r) => r.tag === 'design' && r.floor_got !== 'fable');
+const passed = results.filter((result) => result.pass).length;
+const routineReviewed = results.filter((result) => result.tag === 'routine' && result.reviewGot === 'frontier');
+const hardUnreviewed = results.filter((result) => result.tag === 'hard' && result.reviewGot !== 'frontier');
+const menialKeptByOwner = results.filter((result) => result.tag === 'menial' && result.laneGot === 'owner');
+const hardDelegated = results.filter((result) => result.tag === 'hard' && result.laneGot !== 'owner');
+const designDelegated = results.filter((result) => result.tag === 'design' && result.laneGot !== 'owner');
+const forgeMisses = results.filter((result) => result.tag === 'forge' && !result.pass);
 const need = Math.max(1, results.length - 1);
 console.log(`\nPass rate: ${passed}/${results.length} · need ≥ ${need}/${results.length}`);
-console.log(`Hard constraints: routine→opus ${routineHot.length} (need 0) · hard→not-opus ${hardCold.length} (need 0) · design→not-fable ${designCold.length} (need 0)`);
-const ok = passed >= need && routineHot.length === 0 && hardCold.length === 0 && designCold.length === 0;
+console.log(`Hard constraints: routine→frontier ${routineReviewed.length} · hard→self ${hardUnreviewed.length} · menial→owner ${menialKeptByOwner.length} · hard→delegate ${hardDelegated.length} · design→delegate ${designDelegated.length} · forge misses ${forgeMisses.length} (all need 0)`);
+const ok = passed >= need
+  && routineReviewed.length === 0
+  && hardUnreviewed.length === 0
+  && menialKeptByOwner.length === 0
+  && hardDelegated.length === 0
+  && designDelegated.length === 0
+  && forgeMisses.length === 0;
 console.log(ok ? 'Routing evals: PASS' : 'Routing evals: FAIL');
 process.exit(ok ? 0 : 1);

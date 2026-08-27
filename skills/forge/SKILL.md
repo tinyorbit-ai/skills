@@ -127,9 +127,10 @@ would re-present the gate. The build loop is now unlocked.
    idempotently, ship checks branch position), so re-entry is always safe.
 2. **Announce it.** Phase number, title, its branch, its verifiable gate. One line.
 3. **Build.** Invoke `forge-build` for this phase (staff-engineer build of the best
-   version of the phase, on its `phase/<n>-<slug>` branch) — in a maximum-effort
-   worker lane when installed, changing only where it runs, never this loop's
-   stop-and-report contract (`references/phase-lanes.md`).
+   version of the phase, on its `phase/<n>-<slug>` branch) — under Maximum Effort's
+   frontier-led allocation when installed. One frontier phase owner keeps judgment and
+   integration while bounded factual or mechanical leaves may use smaller models. This
+   changes only model allocation, never the loop's lifecycle (`references/phase-lanes.md`).
 4. **Review.** Invoke `forge-review` on the phase's diff (security, tests, strict
    types, optional Codex, auto-fix objective findings, learnings → `wiki/learnings.md`,
    runtime verification of gate + goal). Review auto-invokes `forge-polish` (if the
@@ -184,4 +185,4 @@ forge · crack-on — complete | stopped at phase <n>
 - `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
 - `forge-principles`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
-- `references/phase-lanes.md` — how a phase runs in a maximum-effort worker lane instead of on the main thread
+- `references/phase-lanes.md` — frontier-led model allocation inside a Forge phase
