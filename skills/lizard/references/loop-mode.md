@@ -144,6 +144,25 @@ actually corrects something the stamped PR broke. If yes, append a miss record:
 blind-spots.md** and checks its lessons against the current diff — the stamp gets
 measurably better, or you find out it isn't.
 
+**Review-disagreement detection** — also check recent `verdict=go` records for a
+later human review on the same head. Formal `CHANGES_REQUESTED` is a signal, but not
+the only one: inspect COMMENTED reviews and inline threads for concrete correctness,
+scope, safety, performance, or missing-test claims. Ignore approval-only notes and
+nits. For each substantive disagreement:
+
+1. Re-run the normal evidence and causal-scope checks on the stamped head.
+2. Grade it `valid miss`, `wrong mechanism`, `pre-existing`, `optional`, or `false
+   positive`; do not treat the human verdict as truth by authority.
+3. A valid miss gets a `late-finding` ledger line naming the stamped head,
+   first-reachable commit, and missed cell, plus a deduped blind-spot entry. If the
+   author pushed a fix, use that delta as evidence, not as automatic proof the review
+   was right.
+4. When the miss exposes a failure shape not represented by the current criteria or
+   evals, record the coverage gap for the maintainer; the active review stays
+   read-only. Before a maintainer ships the next behavior change for that shape, they
+   add a fixture or cite existing coverage. Reviewer disagreements that never affect
+   the criteria or evals are not a learning loop.
+
 ## Blind-spot entries
 
 Writing one is **mandatory** on any detected miss, any retro grading below
@@ -157,6 +176,12 @@ deferred. Format for `~/.lizard/blind-spots.md`, one entry per lesson, deduped:
   **required proof** — the evidence that clears it (index, explain plan, limit check…)
   **example** — repo + path pattern from the miss
 ```
+
+`blind-spots.md` contains only local lessons not yet published into the skill. When a
+lesson ships in `references/field-lessons.md`, move its full incident record to
+`~/.lizard/archive/blind-spots-<date>.md`; archives preserve provenance but are not
+loaded by reviews. This keeps the portable rule and the unpromoted learning queue from
+diverging or being scanned twice.
 
 ## Retro mode
 

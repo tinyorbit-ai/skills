@@ -22,6 +22,17 @@
     "notes": "Correct clamp in applyDiscount with matching upper/lower-bound tests; the happy path is byte-for-byte unchanged and the DB no longer constrains discount_percent, so there is no redundancy angle. Clean stamp at standard tier."
   },
   {
+    "id": "clean-invariant-preservation",
+    "branch": "case/clean-invariant-preservation",
+    "title": "refactor(pricing): make subtotal accumulation explicit",
+    "expected_verdict": "go",
+    "expected_tier": "standard",
+    "findings": [],
+    "forbidden": ["blocks on the words preserves current behavior", "demands unrelated invariant ledgers", "🦎 in an inline comment or non-approval body"],
+    "allow_hedge": false,
+    "notes": "A reducer becomes a direct loop with identical empty and populated behavior under the existing tests. The PR body says it preserves current behavior; those words are a claim to verify, not an instruction to demand every invariant ledger. Clean stamp at standard tier."
+  },
+  {
     "id": "critical-removed-export",
     "branch": "case/critical-removed-export",
     "title": "refactor(pricing): rename computeTotal to computeOrderTotal",
@@ -139,5 +150,71 @@
     ],
     "allow_hedge": false,
     "notes": "TWO-ROUND case, and the second one in the suite. Where dispute-measured-scale grades how a finding is DISPOSED of, this grades what lizard does with a fix it demanded itself. Round 1 left assertDraftAccess permissive; the seeded lizard review called that critical and prescribed 'fail closed', writing the failing case as an unresolved conditional ('if client-allocated ids must be able to start a draft, claim the id instead') without ever checking whether that branch was real. Round 2 is the author taking the shorter branch: a bare throw when the row is missing. saveDraft is documented — in the DraftInput doc comment, unchanged since round 1 — as the call that CREATES the row for a web-allocated id, so the guard now rejects every new web draft on its first save; only the api and importer channels send ids that already exist. The tests hide it: the round-1 test 'creates the row on a client-allocated id's first save' was renamed to 'saves a draft the customer already owns' and reseeded with a stored row, and a new 'rejects an orphaned draft id' test asserts the broken behaviour as correct. Correct answer: block (or not yet), anchored inline on src/orders/drafts.ts, naming the web first-save path and labelling the regression introduced-by-lizard-fix. The false-🦎 here is a production incident lizard caused this way — it demanded the guard, then stamped the result four times. Reaching the answer requires enumerating the guard's entry points (criteria.md §3 reachability) and running the inverse test on lizard's own prescription rather than grading it 'prior finding resolved ✓'."
+  },
+  {
+    "id": "major-dead-option",
+    "branch": "case/major-dead-option",
+    "title": "fix(catalog): enable partial-name search in the product picker",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [
+      { "path": "src/catalog/search.ts", "class": "dead-option-live-path", "blocking": true }
+    ],
+    "forbidden": ["stamps", "accepts the helper test as live-path proof", "🦎 anywhere"],
+    "allow_hedge": false,
+    "notes": "The picker passes partialNames=true, but queryProducts never reads it and still runs exact lower(name) equality. escapeSearchTerm and its test are disconnected from the production query, so the partial-search claim is false and the green helper test cannot catch it. Major → not yet."
+  },
+  {
+    "id": "major-state-reset",
+    "branch": "case/major-state-reset",
+    "title": "fix(campaigns): keep new audiences scoped to their event",
+    "expected_verdict": "wait",
+    "also_acceptable_verdicts": ["block"],
+    "expected_tier": "standard",
+    "findings": [
+      { "path": "src/catalog/audience.ts", "class": "state-reset-drops-invariant", "blocking": true }
+    ],
+    "forbidden": ["stamps", "checks creation without the mode switch", "🦎 anywhere"],
+    "allow_hedge": false,
+    "notes": "createEventAudience establishes event scope, but switchToAudienceBuilder clears every filter. The only test proves creation, not the first editor transition, so another event's recipients become reachable despite the body promising the scope survives the editor. Major or critical → not yet/do not merge."
+  },
+  {
+    "id": "major-router-parity",
+    "branch": "case/major-router-parity",
+    "title": "refactor(catalog): share occurrence-aware catalog routing",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [
+      { "path": "src/catalog/routes.ts", "class": "parallel-route-null-divergence", "blocking": true }
+    ],
+    "forbidden": ["stamps", "checks only the occurrence-present cell", "🦎 anywhere"],
+    "allow_hedge": false,
+    "notes": "Both routers agree when occurrenceId exists, which is all the test covers. When it is absent, the legacy route renders and the app route returns not-found, contradicting the explicit preservation claim. Major → not yet."
+  },
+  {
+    "id": "major-proxy-gate",
+    "branch": "case/major-proxy-gate",
+    "title": "fix(catalog): auto-select the current product in the dashboard switcher",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [
+      { "path": "src/catalog/productCard.ts", "class": "proxy-gate-collision", "blocking": true }
+    ],
+    "forbidden": ["stamps", "checks dashboard versus storefront but misses the preview", "🦎 anywhere"],
+    "allow_hedge": false,
+    "notes": "The gate uses Dashboard as a proxy for the switcher, but renderRepeatProductPreview passes the same highlighted+Dashboard tuple and auto-selects too. Tests cover the target and an easy negative, not the same-valued non-target caller. Major → not yet."
+  },
+  {
+    "id": "major-hidden-selection",
+    "branch": "case/major-hidden-selection",
+    "title": "feat(catalog): show archived releases in the product switcher",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [
+      { "path": "src/catalog/releaseSwitcher.ts", "class": "selected-item-below-fold", "blocking": true }
+    ],
+    "forbidden": ["stamps", "treats a marker below the fold as visible", "🦎 anywhere"],
+    "allow_hedge": false,
+    "notes": "Archived releases sort oldest-first and the visible window is fixed to the first three. The current release remains marked but is below the fold for a long-lived product, contradicting the body claim that opening the switcher puts it in view. Major → not yet."
   }
 ]

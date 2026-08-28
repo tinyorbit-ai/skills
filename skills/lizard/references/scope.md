@@ -100,9 +100,13 @@ The sweep is an **enumeration, not a re-read**. For every unit the PR changes, w
 reachability grid (`criteria.md` §3) and the whole behaviour family around the change:
 if the PR makes a panel open, the family is every way it opens and closes — first
 paint, dismissal, reload, navigation, focus. If the PR adds a guard, the family is
-every producer of the guarded state. Report the family's failures together, in one
-round. One bug found per family per round is the pattern that turns a single review
-into four, and each extra round costs the author more than the finding was worth.
+every producer of the guarded state and every non-target caller sharing its proxy
+value. If the PR stores a new invariant, the family is every writer, reset, hydration,
+copy, and mode switch. If parallel routes claim parity, the family is the same null,
+empty, error, permission, query, and fragment cells on both sides. Report the family's
+failures together, in one round. One bug found per family per round is the pattern
+that turns a single review into four, and each extra round costs the author more than
+the finding was worth.
 
 ## Late findings are the reviewer's, not the author's
 

@@ -62,4 +62,10 @@ codex adversary was still reading files. Neither was a verdict, both passed on t
 second attempt, and both are now retried automatically with the failure kind named
 in the error line. The T3 adversary case takes ~14 minutes on its own, which is
 what sets the suite's floor.
+| 2026-08-28 | field-lessons-final-20260828 | default | 14/15 | 0 | 0 | 100% |
 
+The field-lessons run extends the previous 9-case suite with five field-derived
+defects and one clean preservation control. It caught every planted finding and
+stamped the clean control. The single failed row is the existing runtime-boundary
+case using the safer but stronger `block` verdict where the golden answer expects
+`wait`; false approvals, false blocks, harness errors, and format failures remain zero.

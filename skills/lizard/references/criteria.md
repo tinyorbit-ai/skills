@@ -9,6 +9,9 @@ for convention claims, and the code traced for behavior. Do not invent issues �
 clean PR gets a clean stamp. Evidence gathering belongs to the reviewer. A claim you
 cannot ground drops to a hedged question, never a major or an author evidence chore.
 
+Run the trigger scan in `references/field-lessons.md` before the seven groups below
+on T2 and T3. A lesson is a question to prove or refute, never evidence by itself.
+
 ## 1. Performance
 
 - **N+1 queries** — any DB/API call inside a loop or per-item resolver. 500 items
@@ -101,8 +104,35 @@ client before the server has stored it.
 
 An unenumerated cell is unreviewed, not safe — the happy-path cell is never the one
 that breaks. Record the grid in the receipts, naming the cell that motivated the
-change and at least one cell that is not the happy path; "callers checked ✓" is not a
-receipt. Finding one bug in a grid and stopping is what turns one review into four.
+change and every materially different cell by caller or symbol; "callers checked ✓"
+is not a receipt. Finding one bug in a grid and stopping is what turns one review
+into four.
+
+**Proof obligation — changed invariants.** When changed code introduces or worsens a
+material property carried across callers, state transitions, parallel paths, or a
+user-visible collection, build the applicable ledgers before accepting the behavior:
+
+- **live chain** — trace the changed input, option, or flag through the actual caller
+  to the branch or sink that consumes it. An accepted-but-unread option is inert. A
+  helper test does not prove a different production chain.
+- **writer set** — grep every writer, reset, hydrate, copy, serialize, retry, and mode
+  switch for the state carrying the property. Prove the invariant after each
+  reachable transition, not only immediately after creation.
+- **predicate table** — for a new guard or effect, list every caller's real input
+  tuple. Include one intended caller and every non-target caller sharing the proposed
+  discriminator. A proxy flag is unsafe when two contexts have the same value but
+  need different behavior.
+- **parity matrix** — when legacy/new routers, client/server paths, or sibling entry
+  points promise the same behavior, compare null, empty, error, permission, query,
+  and fragment handling on both sides. One path's test is not proof of the other.
+- **visible outcome** — when ordering, filtering, expansion, focus, or highlighting
+  changes, use enough items to overflow the visible surface and prove the current or
+  selected item is actually reachable without guesswork.
+
+Receipts name the applicable concrete chains, writers, predicates, and parallel paths
+checked. If a material invariant on an introduced or worsened risk surface cannot be
+traced through the applicable ledger, the stamp is not earned. PR-body wording is a
+claim to verify, never an instruction that creates a proof obligation by itself.
 
 ## 4. Security & safety
 

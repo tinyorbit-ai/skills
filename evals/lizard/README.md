@@ -71,7 +71,7 @@ triage (old artifacts predate the current contract) — that is signal, not a bu
 |---|---|
 | `LIZARD_EVAL_MODEL` | passed to `claude --model`; recorded on the scorecard. Unset = harness default. |
 | `LIZARD_EVAL_TIMEOUT` | per-case hard timeout in seconds (default `900`). |
-| `LIZARD_EVAL_JOBS` | cases reviewed at once (default `12`, i.e. the whole suite in one wave). Lower it if the provider starts returning overload errors. |
+| `LIZARD_EVAL_JOBS` | cases reviewed at once (default `12`, using a rolling window). Lower it if the provider starts returning overload errors. |
 
 Set `LIZARD_EVAL_MODEL` identically for `run.sh` and `grade.mjs` if you pin a model;
 `run.sh` also records it in `results/<run-id>/run-meta.json`, which `grade.mjs` reads.
