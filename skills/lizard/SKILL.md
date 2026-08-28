@@ -184,12 +184,12 @@ never a bare `github`) — so records never scatter across host spellings or ali
 ~/.lizard/cache/<host>/<owner>/<repo>/       # freshness-stamped context cache
 ~/.lizard/repos/<host>/<owner>/<repo>/       # shared git object store (loop mode)
 ~/.lizard/runs/                              # per-run worktrees, reaped after 24h
-~/.lizard/blind-spots.md                     # global lessons from misses — load every review
+~/.lizard/blind-spots.md                     # unpromoted — load every review; promoted go under archive/
 ```
 
 ## References
 
-- `references/criteria.md` — the seven criteria groups behind every verdict.
+- `references/criteria.md` + `references/field-lessons.md` — criteria and portable failure proofs.
 - `references/context.md` — context discovery, claim cross-check, receipts template.
 - `references/scope.md` — causal scope, economy, evidence, and rollout gates.
 - `references/dedup.md` — fingerprints, hidden metadata, delta re-review.

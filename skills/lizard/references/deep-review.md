@@ -25,6 +25,13 @@ structured findings:
 Reviewers cite file:line and do not invent issues — an empty findings array with a
 one-line summary is a valid, good result.
 
+File slices are not enough for a claimed invariant. If the PR adds or changes a
+flag/option, durable state field, guard/effect, parallel router, client/server pair,
+or highlighted/selected list behavior, assign one reviewer to that invariant across
+all slices. It returns the live chain, writer set, predicate table, parity matrix, or
+overflow interaction required by `criteria.md` §3, with symbols named. A system
+reviewer saying "callers checked" does not substitute for this pass.
+
 ## Stage 2 — cross-model adversary
 
 A different brain than the host, fed the diff plus this fixed instruction — **never
@@ -74,7 +81,8 @@ pass, no verdict. Degrade, never silently.
    scope brake fires, reconsider the earlier remedy instead of designing more parts.
 3. Run the first-pass closure sweep in `scope.md`: full changed-file inventory,
    criteria, focus packs, call sites, and existing review threads. Independently
-   verify every remaining candidate.
+   verify every remaining candidate. Reject any clean receipt that claims parity,
+   preservation, or all-caller coverage without the concrete invariant ledger.
 4. Apply the bar — any **critical** → `do not merge.` (REQUEST_CHANGES); any
    **major** → `not yet.` (COMMENT); otherwise run the pre-stamp refutation and
    stamp.

@@ -1,4 +1,28 @@
 {
+  "clean-invariant-preservation": {
+    "number": 23,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/23"
+  },
+  "major-state-reset": {
+    "number": 22,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/22"
+  },
+  "major-router-parity": {
+    "number": 21,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/21"
+  },
+  "major-proxy-gate": {
+    "number": 20,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/20"
+  },
+  "major-hidden-selection": {
+    "number": 19,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/19"
+  },
+  "major-dead-option": {
+    "number": 18,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/18"
+  },
   "lizard-fix-breaks-caller": {
     "number": 17,
     "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/17"
