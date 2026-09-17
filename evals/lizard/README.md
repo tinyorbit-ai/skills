@@ -61,9 +61,10 @@ evals/lizard/bin/lint.sh field /some/dir  # or an explicit LIZARD_HOME
 ```
 
 It re-checks the posted bodies/payloads under `runs/*`, validates every ledger record
-grammar, checks that each `blind-spots.md` entry carries all five fields, and flags a
-repo split across two host keys. Findings over real history are expected to need
-triage (old artifacts predate the current contract) — that is signal, not a bug.
+grammar, checks that each `blind-spots.md` entry carries all five fields, warns when
+that queue exceeds the 10-entry promotion ceiling, and flags a repo split across two
+host keys. Findings over real history are expected to need triage (old artifacts
+predate the current contract) — that is signal, not a bug.
 
 ### Environment
 

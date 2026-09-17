@@ -20,8 +20,9 @@ only, never on GitHub.
 ## Verdicts
 
 **One emoji in the whole system.** 🦎 appears on approval and nowhere else — never on
-a non-approving review, comment, or inline finding. Machine self-identification lives
-in the hidden metadata line (`references/dedup.md`), never in emoji.
+a non-approving review, comment, or inline finding, and never reproduced when quoting
+PR content that contains it: name it in words. Machine self-identification lives in the
+hidden metadata line (`references/dedup.md`), never in emoji.
 
 - **APPROVE** — the review body is exactly `🦎`, then the collapsed receipts block,
   then the hidden metadata line. Nothing else — no "go", no summary prose. Nits ride

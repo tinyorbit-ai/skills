@@ -183,6 +183,12 @@ lesson ships in `references/field-lessons.md`, move its full incident record to
 loaded by reviews. This keeps the portable rule and the unpromoted learning queue from
 diverging or being scanned twice.
 
+**The queue has a ceiling.** Every review pays for `blind-spots.md` in full, so it is a
+staging area, not a store. Once it holds more than **10 entries**, promotion is due:
+say so in the sweep's wrap-up and repeat it every sweep until the queue is drained.
+Promotion edits the published skill, so it is a maintainer action — the review itself
+stays read-only.
+
 ## Retro mode
 
 `lizard retro <n> <n> ...` reviews already-merged PRs for calibration, not
