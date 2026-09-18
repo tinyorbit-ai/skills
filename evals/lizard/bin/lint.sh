@@ -375,6 +375,9 @@ detect_split_ledgers() {
   fi
 }
 
+# Queue ceiling from references/loop-mode.md: past this, promotion is due.
+BLINDSPOT_CEILING=10
+
 lint_blindspots() {
   local root="$1"
   local f="$root/blind-spots.md"
@@ -404,12 +407,15 @@ lint_blindspots() {
       emit FAIL "blind-spot" "entry $total missing field(s):$miss"
     fi
   done
-  if [ "$total" -eq 0 ]; then
-    emit warn "blind-spots" "blind-spots.md has no entries"
-  elif [ "$bad" -eq 0 ]; then
-    emit ok "blind-spots" "$total entrie(s), all carry the 5 required fields"
-  else
+  if [ "$bad" -gt 0 ]; then
     emit FAIL "blind-spots" "$bad of $total entrie(s) missing required fields"
+  elif [ "$total" -eq 0 ]; then
+    emit ok "blind-spots" "queue drained — every lesson promoted"
+  elif [ "$total" -gt "$BLINDSPOT_CEILING" ]; then
+    emit warn "blind-spots" \
+      "$total entrie(s) exceeds the $BLINDSPOT_CEILING-entry ceiling — promotion is due"
+  else
+    emit ok "blind-spots" "$total entrie(s), all carry the 5 required fields"
   fi
 }
 
