@@ -1,6 +1,6 @@
 ---
 name: maximum-effort
-description: Frontier-led task runner — a Sol or Opus owner keeps judgment and final review and hands bounded lookups to Luna or Haiku and exact edits to Terra or Sonnet. Invoked by name only. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume .maximum-effort/plan.md.
+description: Frontier-led task runner — an Opus 5.5 or gpt-6-sol owner keeps judgment and final review and hands bounded lookups and exact edits to Sonnet 5 or gpt-6-luna. Invoked by name only. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume .maximum-effort/plan.md.
 model: opus
 effort: medium
 ---
@@ -22,8 +22,8 @@ only, never in a file or on GitHub.
 
 ## Charter
 
-The owner is Opus or Fable on Claude and Sol on Codex, unless the user explicitly chose
-another model or effort. It owns every judgment call and the accepted result. Delegation
+The owner is Opus 5.5 on Claude and gpt-6-sol on Codex, at medium effort by default and
+xhigh for L or risky work, unless the user explicitly chose another model or effort. It owns every judgment call and the accepted result. Delegation
 removes menial tokens from its context; it never lowers the quality bar or turns the
 owner into a passive planner.
 
@@ -77,8 +77,8 @@ Use this first-match order:
 | Lane | Use when | Never use for |
 |---|---|---|
 | Owner — frontier | ambiguity, root cause, architecture, behavior, integration, final diff | work a lower lane can prove more cheaply |
-| Scout — Haiku/Luna | one bounded factual lookup: callers, files, tests, existing pattern | conclusions, plans, edits, broad summaries |
-| Mechanic — Sonnet/Terra | exact reversible change, known files, locked behavior, deterministic check | auth/security/money/data/secrets, migrations, public-API decisions, design choices, unclear failures, tests that decide behavior |
+| Scout — Sonnet 5 / gpt-6-luna | one bounded factual lookup: callers, files, tests, existing pattern | conclusions, plans, edits, broad summaries |
+| Mechanic — Sonnet 5 / gpt-6-luna | exact reversible change, known files, locked behavior, deterministic check | auth/security/money/data/secrets, migrations, public-API decisions, design choices, unclear failures, tests that decide behavior |
 
 Applying a decision already made can be mechanical even when making that decision was
 not. Examples: propagate an exact rename, apply an existing pattern to several known
@@ -143,8 +143,8 @@ Append one task-level JSON line to `~/.maximum-effort/ledger.jsonl`:
 `{"ts","tool","cwd","task","size","owner_model","owner_effort","pool","scouts","mechanics","takeovers","review","pr_review","next_pool","outcome","rework_rounds"}`
 
 Use ISO-8601 UTC for `ts`; use `done`, `blocked`, or `rework` for `outcome`. Store
-`scouts` and `mechanics` as model-to-count objects such as `{"luna":1}` and
-`{"terra":2}`. Never store prompts, code, secrets, or raw user text.
+`scouts` and `mechanics` as model-to-count objects such as `{"gpt-6-luna":1}` and
+`{"sonnet-5":2}`. Never store prompts, code, secrets, or raw user text.
 
 ## Guardrails
 
