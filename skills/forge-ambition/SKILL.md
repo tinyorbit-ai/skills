@@ -8,16 +8,12 @@ description: Brief-time ambition check — pressure-tests whether you are buildi
 Pressure-tests one question: *are you building the boldest version of the thing
 you chose?*
 
-## Charter (hard boundary)
-
-This skill **only** pushes ambition within the intent the user already chose — the
-boldness it argues for is about craft and intent, never about market upside
-(`forge-principles`'s `references/charter.md`).
+This skill only pushes ambition within the intent the user already chose.
 
 ## What it does
 
 Run after a brief is drafted (or on demand against brief/plan). Read
-`forge-principles`'s `references/charter.md`, `wiki/brief.md`, and `wiki/plan.md` if
+`wiki/brief.md`, and `wiki/plan.md` if
 it exists.
 
 1. **Find the timid premises.** Where has the user unconsciously shrunk the idea?

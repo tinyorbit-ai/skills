@@ -8,12 +8,6 @@ description: Forge build retrospective — reads wiki/build-log.md, learnings an
 Looks back across landed phases and turns scattered build-log/learnings into a
 synthesis you can act on. The only forge skill that reasons across the whole arc.
 
-## Charter
-
-Retro is about **craft and process**, never speed, output volume, "shipping faster",
-or business value — "we slowed down to get the hard part right" is a *positive*
-finding here (`forge-principles`'s `references/charter.md`).
-
 ## When it runs
 
 - **Auto:** `forge` invokes this at **Done** — every plan phase has a build-log

@@ -9,12 +9,6 @@ The divergent design step — multiple shapes for the *same* UI intent so the
 user picks before code commits to one. Sister to `forge-harden-design`
 (convergent — finds issues in a chosen shape) and `forge-polish` (runtime QA).
 
-## Charter
-
-Exploration is for craft, not market — never frame variants in conversion /
-engagement / "users prefer" terms; the bar is which of these the *user* wants to
-build, given what the brief said it should feel like.
-
 ## When to run
 
 - **Standalone.** Most common. Invoke when staring at a phase that says

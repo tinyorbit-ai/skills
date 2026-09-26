@@ -99,4 +99,4 @@ quadratic complexity.
 
 Default to a disposable HTML file (a feedback board, a diff view, a specimen) over
 prose or static images — cheap to make, easy to throw away, judged with the eyes.
-See `references/design-feedback-board.md`.
+See `../../forge/references/design-feedback-board.md`.

@@ -11,11 +11,6 @@ finds** and remembers the lesson. The third-party pass is configurable — Codex
 Gemini, or Claude — via the shared reviewer abstraction
 (`forge/references/reviewer-agents.md`).
 
-## Charter
-
-Review hardens the *code* — the bar is correctness, safety, and durability, never
-market or speed.
-
 ## Scope
 
 Review the **current phase's diff** against the base branch (`git diff <base>...HEAD`

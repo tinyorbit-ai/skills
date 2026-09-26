@@ -9,12 +9,6 @@ The DX lead's review of the **plan**, not the running thing. Asks: does
 this plan obligate a respectful, learnable developer surface, or does it
 leave DX to chance? Runs *before* implementation.
 
-## Charter
-
-DX is part of the craft — critique the plan, and never frame in adoption-metrics
-or market-share terms; the bar is "respect the developer's time and attention",
-not "win a market" (`forge-principles`'s `references/charter.md`).
-
 ## When it runs
 
 - **Auto:** `forge-harden` invokes this when the plan ships a library /
@@ -170,5 +164,5 @@ the section yourself and present the taste batch.
 
 - forge suite's `references/question-style.md` — Decision Brief format
 - forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- `forge-principles`'s `references/craft-patterns.md` — respect the developer's time
+- `forge-harden`'s `references/craft-patterns.md` — respect the developer's time
 - `forge-dx` — runtime counterpart; reads the persona card + first-run bar set here

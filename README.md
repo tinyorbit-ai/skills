@@ -82,10 +82,10 @@ Every skill also runs standalone: `/forge-plan`, `/forge-review`,
 | Wiki | `forge-wiki` · `forge-wiki-maintain` |
 | Orchestrate | `forge` (resumable; `/forge help` for the map) |
 
-Full descriptions in [`CLAUDE.md`](./CLAUDE.md). Worldview in
-[`skills/forge/references/charter.md`](./skills/forge/references/charter.md);
-the quality bar in
-[`skills/forge/references/simplicity.md`](./skills/forge/references/simplicity.md).
+Per-skill notes in [`skills/INDEX.md`](./skills/INDEX.md). The quality bar is
+[`skills/forge-principles/SKILL.md`](./skills/forge-principles/SKILL.md), with economy of
+means in
+[`skills/forge-principles/references/simplicity.md`](./skills/forge-principles/references/simplicity.md).
 
 ## License
 

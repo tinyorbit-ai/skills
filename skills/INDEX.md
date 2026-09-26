@@ -12,7 +12,7 @@ row, and on a row with no folder.
 | Skill | Status | Description |
 |---|---|---|
 | `forge` | stable | **Resumable** orchestrator: reports where you left off, then routes init→discovery→plan→design (gated, if UI)→harden→(build→review→ship loop, one phase/run). A UI phase can't build until its `Design:` marker is locked. **Crack-on mode** trades one-phase-per-run for the whole rest of the plan: once the plan is locked it runs build→review→ship back-to-back for every remaining phase, skipping gates it can't execute itself and collecting them into an end-of-run summary; a genuinely red gate stops once forge-debug fails to fix it. `/forge help` prints a status-aware usage map. When `maximum-effort` is installed, one frontier owner keeps each phase's judgment, integration, review, and ship context while delegating only bounded factual lookup or exact reversible edits to smaller models. Forge still owns `wiki/plan.md`, the phase branch, gate, build log, and stop rules; phases remain strictly sequential. No `maximum-effort` installed means inline execution as before. |
-| `forge-principles` | stable | The suite's shared source of truth — every other forge skill is a *procedure*, this is the *worldview* they enforce. Carries the charter (all context, business included, is welcome as input — more is better than less; forge optimizes for craft and durability, never speed-to-value) plus the 11 quality principles the whole suite applies — economy of means, correctness/robustness, security as structure, strict by construction, tests-as-means, maintainability, evidence over claims, root cause over symptom, priced-and-recorded decisions, craft in the interface, anti-sycophantic voice — and the tie-breaks between them (ambition governs *outcome*, economy governs *means*, and economy never trades away a trust-boundary control). Owns the four worldview references `charter.md` / `simplicity.md` / `craft-patterns.md` / `voice.md` (moved out of `forge/references/`). The non-obvious part: each skill's own `## Charter` block is a one-line bar tailored to that skill plus a pointer here, so the full text exists in exactly one place instead of being restated 20+ times. Other skills cite it by principle name; it also runs standalone — nothing in it needs a `wiki/`, so it answers "what's the bar" or grades code that never went through the pipeline. |
+| `forge-principles` | stable | The quality bar in one ~1,100-word file: posture plus 12 rules, each with a bold one-line lead. `scripts/card.mjs` turns those leads into `references/worker-card.md` (~180 words), which factories such as Arnold inject as the stable first block of every worker run; `node scripts/card.mjs --check` (run by the validator) fails when the card is stale. Rule 10 holds the headless contract: with no one to ask, take the recommended option, record it, block only on irreversible or costly calls. Keeps `simplicity.md` (the eval rubric source) and `voice.md`; `craft-patterns.md` moved to `forge-harden`. |
 | `forge-init` | stable | Scaffolds the two-layer Obsidian `wiki/` (project record + `knowledge/` base + `.forge/` config & taste profile); injects wiki/ADR/phase/design rules into CLAUDE.md + AGENTS.md. Offers to chain into discovery (no one-liner ask — discovery owns the brief). |
 | `forge-discovery` | stable | Idea (one-liner or ingested one-pager) → `wiki/brief.md`. Base seven + sharpening six with push-until gates; unknown real use becomes a named human-evidence marker for planning. Files source docs into `knowledge/`. Anchors on the idea you actually gave it — never guesses the project from folder names. |
 | `forge-plan` | stable | Brief → risk-first `wiki/plan.md` with full material-bet contracts, ordered goal gates, conditional human-evidence stop, and a final release-closure phase; plus seed ADRs and substantive `architecture.md`. Behaviors trace to brief/ADR. Licensed to flag "too large to build well". |
@@ -45,7 +45,7 @@ row, and on a row with no folder.
 > per run: build → review (+polish/+dx) → ship (+docs, architecture reconcile,
 > wiki-maintain) — or every remaining phase in one run under crack-on; at Done: retro.
 > `forge-principles` is the 24th and is **not** a stage — it's the worldview the
-> stages enforce (charter + the 11 quality principles), cited by name from the
+> stages enforce (the posture + 12 rules), cited by name from the
 > others and runnable on its own.
 > `forge-harden` orchestrates five plan-time persona skills (-eng / -security always;
 > -design if UI; -dx if dev-facing; -scope on request) as isolated subagents, runs an
@@ -55,16 +55,13 @@ row, and on a row with no folder.
 > persona is also runnable standalone, runs the shared 0–10 rate→fix-to-10→re-rate
 > loop (`forge/references/scoring.md` — honest "no change" is first-class; deltas
 > cite their edit hunks), and cites the shared voice + craft-pattern references
-> (`forge-principles/references/voice.md`, `craft-patterns.md`). The four runtime persona skills
+> (`forge-principles/references/voice.md`, `forge-harden/references/craft-patterns.md`). The four runtime persona skills
 > (forge-polish, forge-dx, forge-docs, forge-ambition) auto-invoke in their phase and
 > also run standalone. The `wiki/` is two layers — a project record (brief, plan,
 > ADRs, build-log, learnings) and a `knowledge/` base of ingested context as
 > Timeline-based living articles (`forge-wiki` ingests/asks, `forge-wiki-maintain`
-> keeps indexes + links healthy). Charter: all context, business included, is
-> welcome as input — more is better than less — and forge optimizes for craft and
-> durability rather than speed-to-value — full text in
-> `forge-principles/references/charter.md`, which every skill's one-line `## Charter`
-> block points at rather than restating. **Economy of means** is a
+> keeps indexes + links healthy). The posture (all context is welcome; craft and
+> durability over speed) lives once, in `forge-principles`. **Economy of means** is a
 > first-class principle across the suite (`forge-principles/references/simplicity.md`): two
 > axes both maximized — ambition of *outcome*, economy of *means* — with
 > subtraction as the default fix. It runs at **every** stage, not just planning:

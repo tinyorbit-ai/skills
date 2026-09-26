@@ -15,7 +15,7 @@ The wiki has **two layers**, reachable from one top-level `index.md`:
    `forge-wiki`; maintained by `forge-wiki-maintain`. This is the Karpathy-style
    second brain that lives alongside the repo.
 
-Per the charter, **context is welcome — more is better than less.** Ingest freely;
+**Context is welcome — more is better than less.** Ingest freely;
 business rationale, research, and stakeholder material all sharpen *what* and *how*
 the project gets built.
 

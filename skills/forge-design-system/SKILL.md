@@ -13,12 +13,6 @@ Output: `DESIGN.md` at the repo root, the design source of truth that
 `forge-harden-design` (Pass 5), `forge-design-explore`, `forge-build`, and
 `forge-polish` all align against.
 
-## Charter
-
-A design system here is craft infrastructure, never branding-for-market — the bar is
-"every surface feels like one intentional thing", calibrated to the brief's "How it
-should feel", and the user's taste is the client.
-
 ## When it runs
 
 - **Suggested:** by `forge-plan` / `forge-harden-design` when the plan

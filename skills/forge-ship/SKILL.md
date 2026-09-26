@@ -9,11 +9,6 @@ Lands one phase. Enforces the contract: rebase onto the latest base → green ga
 the rebased tree → exactly one squashed commit on the base branch → one build-log
 entry. Never lands ungated, on a stale base, or with messy history.
 
-## Charter
-
-Shipping here means **landing a verified phase cleanly**, not "get it out fast" —
-the only bar is whether the phase's declared gate passed.
-
 ## The contract (enforced here)
 
 - A phase is executed on its own branch `phase/<n>-<slug>` off the base branch.
