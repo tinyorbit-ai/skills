@@ -25,7 +25,7 @@ intent. Output one verdict with citations:
 can be verified, then verdict it:
 
 - **DIFF-VERIFIABLE** — visible in the diff. Verify by reading the change.
-- **RUNTIME** — needs the thing executed (covered again in pass 5, but the
+- **RUNTIME** — needs the thing executed (covered again in pass 6, but the
   verdict lands here).
 - **EXTERNAL-STATE** — lives outside the repo (a deployed config, a third-party
   dashboard, an OAuth app). Verify what you can from the machine; anything you
@@ -63,14 +63,15 @@ specific behavior described must be present.
   per row. A single test exercising a real error path beats one per enumerated
   input class.
 - No skipped/`.only`/commented-out/flaky tests sneaking through. Skipped == failing.
-- The **full** suite runs and passes — show the command and the summary line. A
+- The suite runs and passes — show the command and the summary line. Scoped to the
+  diff by default; the full suite when it is fast or the diff touched shared code. A
   phase whose suite is red or whose new code is untested does not pass review.
 - Tests assert behavior/outcomes, not implementation detail mirrors. Coverage
   numbers are not the goal; meaningful failure on regression is.
 
 **Cost is part of the bar.** Tests are parts the project pays for on every future
 change, so economy of means applies to them
-(`forge-principles/references/simplicity.md`):
+(`../forge-principles/references/simplicity.md`):
 
 - **Count** — "covered" is the requirement, not one test per behavior. Two tests
   that fail together on the same regression are one test and a duplicate; delete
@@ -88,7 +89,8 @@ change, so economy of means applies to them
   by removed code are the same debt as the code itself.
 - **Feedback speed** — in the build/fix loop, run only the tests the change affects
   so each iteration is fast. Inner loop only: the hand-off still requires the
-  **full** suite run green with its output pasted.
+  terminal block's suite (scoped, or full when fast or shared code changed) green
+  with its output pasted.
 
 These are objective and auto-fixable, and the fix is usually **deletion** — see
 pass 5, which covers the test diff as well as the source.
@@ -109,7 +111,12 @@ there. Prefer fixing the type over suppressing the error — always.
   user/caller sees a truthful, actionable signal (no silent empty success).
 - State: transactions atomic; no write-then-fail leaving partial state.
 
-## 5. Runtime verification
+## 5. Economy & performance
+
+The checklist is in `SKILL.md` pass 5; the standard is
+`../../forge-principles/references/simplicity.md`.
+
+## 6. Runtime verification
 
 Static review is not enough — run the thing.
 
@@ -124,10 +131,13 @@ Static review is not enough — run the thing.
 - A gate that is green while the goal is unmet ⇒ the gate is too weak: fix the gate
   in `wiki/plan.md` (and note why) — that is a high-severity finding, not a pass.
 
-## 6. Codex third-party pass
+## 7. Third-party adversarial pass
 
-Optional, never blocking. Use it as an adversary, not a rubber stamp. Where Codex
-and this review disagree, surface the disagreement explicitly in the taste batch
+Required at the deep tier, per `wiki/.forge/config.yaml` otherwise; the reviewer is
+picked per `../../forge/references/reviewer-agents.md` (any family other than the
+driver's, not only Codex). A missing reviewer never blocks the review, but at deep
+tier the skip is disclosed in the receipts. Use it as an adversary, not a rubber
+stamp. Where the reviewer and this review disagree, surface the disagreement explicitly in the taste batch
 with both positions and a recommendation — never silently average them away.
 
 ## Severity → action

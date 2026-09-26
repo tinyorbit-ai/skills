@@ -1,6 +1,6 @@
 ---
 name: forge-docs
-description: Post-ship docs drift check (Diataxis) — compares the just-landed forge phase diff with the docs, fixes concrete drift and flags missing coverage. Run by forge-ship when a documented surface changed. Use when asked "what docs need updating", for "doc drift" or for "post-ship docs".
+description: Docs drift check (Diataxis) for a forge phase — compares the phase diff with the docs, fixes concrete drift and flags missing coverage, on the phase branch before it lands. Run by forge-ship when a documented surface changed. Use when asked "what docs need updating" or for "doc drift".
 ---
 
 # forge-docs
@@ -42,8 +42,8 @@ each piece by Diataxis quadrant. Note what's missing entirely.
 
 ### 2. Cross-reference the diff
 
-`git diff <prev-shipped>...HEAD` — typically the just-landed phase's
-squashed commit on the base branch (or the user-named range).
+`git diff <base>...HEAD` on the phase branch, before `forge-ship` squashes it (or the
+user-named range when run standalone).
 
 For each changed surface, decide:
 
@@ -61,7 +61,7 @@ For each changed surface, decide:
   permission to fix something objectively wrong.
 - **Structural gap → surface as taste decision.** Which quadrant should
   the new feature land in? Often more than one (tutorial + reference).
-  Decision Brief shape (forge suite's `references/question-style.md`).
+  Decision Brief shape (`../forge/references/question-style.md`).
   The user picks; you write the stub in the chosen location.
 - **Doc that no longer makes sense (covered feature deleted)** → fix
   automatically (remove or mark deprecated).
@@ -86,17 +86,23 @@ forge-docs
 
 Tell the user every file changed, in the same turn.
 
+## Result
+
+End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
+
 ## Rules
 
 - Auto-fix concrete drift; surface only structural taste calls.
 - Diataxis quadrant is mandatory for any new doc stub — never write a
   doc page without naming its quadrant.
 - Never invent content for a feature you don't fully understand from the
-  diff. If the diff is unclear, ask (Decision Brief) — don't hallucinate.
+  diff. If the diff is unclear, ask (Decision Brief); with no one to ask, flag the gap
+  instead of writing it. Don't hallucinate.
 - Docs serve the developer, not SEO or marketing.
-- Stay on the current branch (typically the base, post-ship); never push.
+- Stay on the current branch (the phase branch when forge-ship calls it); never commit
+  on base and never push.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format
+- `../forge/references/question-style.md` — Decision Brief format
 - Diataxis framework: https://diataxis.fr — for the quadrant lens

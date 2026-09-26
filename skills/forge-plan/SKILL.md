@@ -35,7 +35,7 @@ the brief's outcome** — the fewest moving parts, not the fewest features. An
 approach with more parts earns each one against the brief; the burden is on
 adding, not on cutting. The brief's ambition (locked at discovery) is the
 tiebreaker on *outcome* — how excellent the result is — never a licence for
-heavier means (`forge-principles`'s `references/simplicity.md`). Present as one
+heavier means (`../forge-principles/references/simplicity.md`). Present as one
 Decision Brief and lock the choice as ADR 0001.
 
 ### 2b. Draft the architecture
@@ -64,8 +64,7 @@ API/interface shape, persistence, project structure, build order, testing approa
 For each *non-trivial* one:
 
 - Present the realistic options with a recommendation and a reason.
-- Lock it with AskUserQuestion in the **Decision Brief** shape (forge suite's
-  `references/question-style.md`): framing names the concrete tradeoff;
+- Lock it with AskUserQuestion in the **Decision Brief** shape (`../forge/references/question-style.md`): framing names the concrete tradeoff;
   recommended option carries the *why* and the evidence that would flip it.
 - Write an ADR: `wiki/decisions/NNNN-slug.md` with these section headings
   verbatim — Context · Decision · Why · **Alternatives considered** ·
@@ -109,12 +108,16 @@ ships and set each phase's **Design:** marker before handing off:
 - Shape already fixed → `Design: follow DESIGN.md`. No UI → `Design: none`.
 
 Both design skills present their work as a **served** interactive feedback board
-(forge suite's `references/design-feedback-board.md`) — the user picks with their
+(`../forge/references/design-feedback-board.md`) — the user picks with their
 eyes before any code exists.
 
 Then state the phase count, phase 1's branch + gate, which phases carry
 `Design: explore`, and hand back to `forge` (design cycle if unresolved,
 `forge-harden` otherwise).
+
+## Result
+
+End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 
@@ -123,8 +126,7 @@ Then state the phase count, phase 1's branch + gate, which phases carry
   are both always on the table, at equal weight (§2).
 - Don't write feature code. Architecture, decisions, phases only.
 - Every locked decision gets an ADR with a non-empty "Alternatives considered".
-- Every AskUserQuestion call follows the Decision Brief shape (forge suite's
-  `references/question-style.md`).
+- Every AskUserQuestion call follows the Decision Brief shape (`../forge/references/question-style.md`).
 - Cut scope for engineering soundness, never on value judgments. Flagging a plan
   as **too large to build well** is engineering judgment, and it's required: when
   the phases exceed what can be built soundly, say so, propose the buildable
@@ -132,8 +134,7 @@ Then state the phase count, phase 1's branch + gate, which phases carry
   Reorder and slice for soundness; keep the ambition the brief set.
 - And don't add parts the brief doesn't demand. Economy of means keeps the ambition
   while removing machinery; it applies to the software, not to the plan — which
-  should be as thorough as the build needs (`forge-principles`'s
-  `references/simplicity.md`).
+  should be as thorough as the build needs (`../forge-principles/references/simplicity.md`).
 - Nor behaviors: anything a Goal, gate, or Work bullet *does* that neither the
   brief nor an ADR asked for is invented scope (`references/phase-contract.md`).
 

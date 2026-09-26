@@ -190,7 +190,7 @@ reviewer: auto    # auto | codex | gemini | claude | none
 
 Append-only design-taste record — approved and rejected directions, read by
 `forge-design-system` and `forge-design-explore` before generating anything.
-Entry format per the forge suite's `references/wiki.md`.
+Entry format per the `../forge/references/wiki.md`.
 ```
 
 ---
@@ -203,7 +203,7 @@ Entry format per the forge suite's `references/wiki.md`.
 Part of [[index]]. Ingested context the build rests on — business rationale,
 research, email, conversations. Living articles with Timelines (Compiled →
 Reinforced → Refined → Contradicted). Ingest with `forge-wiki`; keep this index
-current with `forge-wiki-maintain`.
+current with `forge-wiki` MAINTAIN.
 
 ## Topic Directory
 
@@ -298,7 +298,7 @@ This repo has an Obsidian-style wiki at `wiki/`. It is the source of truth for t
 - **External context that informs the build** (business rationale, research,
   email, a decision-driving conversation, competitive or user notes) → ingest it
   into the knowledge base at `wiki/knowledge/` as a living article with a Timeline.
-  Use `forge-wiki` to do this (it's plan-first); `forge-wiki-maintain` keeps the
+  Use `forge-wiki` to do this (it's plan-first); `forge-wiki` MAINTAIN keeps the
   indexes and links healthy. **More context is better than less** — capture it.
 - When you make such a change, **say so in your reply** — note which wiki file you
   updated. Under-capturing the *why* is the failure mode to avoid; when in doubt,
@@ -323,7 +323,7 @@ it in one line. This is what keeps the wiki a living record instead of a stale o
 - **Only pause to confirm** when a capture would **rewrite or contradict** an existing
   article's Core Concept (a `Refined`/`Contradicted` change) — show the diff first.
 - Use `forge-wiki`'s article format + Timeline and keep every new file reachable from
-  the index. Run `forge-wiki-maintain` now and then to regenerate indexes and check
+  the index. Run `forge-wiki` MAINTAIN now and then to regenerate indexes and check
   links. Explicit `forge-wiki` ingests (a pasted doc, a file) stay **plan-first**.
 - **Control:** if the user says "pause/mute wiki capture", stop ambient capture for the
   rest of the session (explicit `forge-wiki` still works); "resume capture" re-enables it.

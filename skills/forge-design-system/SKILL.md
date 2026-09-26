@@ -10,12 +10,12 @@ The convergent system step that runs *before* surfaces get designed.
 **materials every surface is built from** — type, color, space, radius,
 motion — so phases draw from one system instead of each inventing its own.
 Output: `DESIGN.md` at the repo root, the design source of truth that
-`forge-harden-design` (Pass 5), `forge-design-explore`, `forge-build`, and
+`forge-harden`'s design pass (Pass 5), `forge-design-explore`, `forge-build`, and
 `forge-polish` all align against.
 
 ## When it runs
 
-- **Suggested:** by `forge-plan` / `forge-harden-design` when the plan
+- **Suggested:** by `forge-plan` / `forge-harden`'s design pass when the plan
   implies 2+ UI surfaces and no `DESIGN.md` exists.
 - **Standalone:** any time, including pre-plan.
 - If a `DESIGN.md` already exists: audit it against the brief and fill
@@ -38,7 +38,7 @@ plan chose — tokens must land in its vocabulary).
 Ask, verbatim enough: **"What's the one thing someone should remember
 after seeing this for the first time?"** One sentence. Push once if the
 answer is a vibe ("that it's clean") rather than a thing ("the graph
-animates as data arrives") — per `forge-principles`'s `references/voice.md`.
+animates as data arrives") — per `../forge-principles/references/voice.md`.
 The answer is the lodestar every later trade-off resolves against; it goes at
 the top of `DESIGN.md`.
 
@@ -79,10 +79,8 @@ vocabulary:
 
 ### 5. Specimen page — pick with eyes, give feedback per section
 
-Generate the specimen as an **HTML file with a feedback system** (forge suite's
-`references/design-feedback-board.md`) at `wiki/.forge/specimen.html` — real text,
-no lorem. Before presenting, check every section against forge suite's
-`references/anti-slop.md` and regenerate any that hits the blacklist — the user
+Generate the specimen as an **HTML file with a feedback system** (`../forge/references/design-feedback-board.md`) at `wiki/.forge/specimen.html` — real text,
+no lorem. Before presenting, check every section against `../forge/references/anti-slop.md` and regenerate any that hits the blacklist — the user
 never reacts to slop. It must render the locked system, take feedback per section, and copy it
 back out; the layout is up to you (a ready template exists). Give the user
 something to react to for each part — typography, color (swatches *and* in use:
@@ -100,8 +98,8 @@ the thing". Don't skip this — adjectives lie, specimens don't.
 - **ADR** (`wiki/decisions/NNNN-design-system.md`) — Context · Decision ·
   Why · Alternatives (the other directions, briefly) · Consequences.
 - **Taste profile** — append the approved direction/fonts/palette (and any
-  explicitly rejected finalists) to `wiki/.forge/taste.md` per the forge
-  suite's `references/wiki.md` so future explorations start from the
+  explicitly rejected finalists) to `wiki/.forge/taste.md` per
+  `../forge/references/wiki.md` so future explorations start from the
   user's record, not from zero.
 - Link both from `wiki/index.md`. Tell the user what was written.
 
@@ -111,6 +109,10 @@ Recommend `forge-design-explore` for the first open surface, or back to
 `forge-plan` / `forge` if this ran pre-plan. Downstream contract: any
 phase that introduces an off-system value (raw px, unnamed color, new
 font) now has an objective finding waiting in `forge-polish`.
+
+## Result
+
+With no one to pick a direction, write the specimen, recommend one, and end `blocked`: taste is the user's call. End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 
@@ -129,8 +131,8 @@ font) now has an objective finding waiting in `forge-polish`.
 ## References
 
 - `references/design-md.md` — DESIGN.md structure + a worked example
-- forge suite's `references/anti-slop.md` — the blacklist the specimen must clear before presentation
-- forge suite's `references/design-feedback-board.md` — the interactive specimen board + generate-and-open contract
-- forge suite's `references/question-style.md` — Decision Brief format
-- forge suite's `references/scoring.md` — used by harden-design when auditing against this
-- `forge-principles`'s `references/voice.md` — the push on vibe-answers
+- `../forge/references/anti-slop.md` — the blacklist the specimen must clear before presentation
+- `../forge/references/design-feedback-board.md` — the interactive specimen board + generate-and-open contract
+- `../forge/references/question-style.md` — Decision Brief format
+- `../forge/references/scoring.md` — used by harden-design when auditing against this
+- `../forge-principles/references/voice.md` — the push on vibe-answers

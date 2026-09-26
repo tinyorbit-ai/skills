@@ -24,15 +24,14 @@ If there's no UI in scope, say so and exit — nothing to do.
 
 2. **Baseline, then audit with a designer's eye.** Capture screenshots, then
    score **design coherence 0–10** and **slop 0–10** (10 = none detected) as the
-   baseline per forge suite's `references/scoring.md`, then look for:
+   baseline per `../forge/references/scoring.md`, then look for:
    - **Consistency:** spacing scale honored? aligned edges? consistent radii,
      shadows, weights, colors from one system (`DESIGN.md` tokens if present) —
      or ad-hoc values?
    - **Hierarchy:** does the eye land on the right thing first? Is emphasis earned?
    - **Rhythm & density:** vertical rhythm, balanced whitespace, no cramped or
      orphaned elements; optical alignment, not just pixel alignment.
-   - **AI-slop tells** — the shared 11-pattern blacklist in forge suite's
-     `references/anti-slop.md` (design-explore/design-system enforce it at
+   - **AI-slop tells** — the shared 11-pattern blacklist in `../forge/references/anti-slop.md` (design-explore/design-system enforce it at
      generation; polish enforces it on the built thing). Run its mechanical
      sub-check (grep source for the grep-able patterns) plus the visual read,
      and say which ran; each hit is a finding.
@@ -46,7 +45,7 @@ If there's no UI in scope, say so and exit — nothing to do.
    branch, re-verify visually. Number every finding (`finding-001`, …) and pair
    its evidence by number — `finding-001-before.png` / `finding-001-after.png`.
    Subjective taste calls → one AskUserQuestion batch in the **Decision Brief**
-   shape (forge suite's `references/question-style.md`): concrete framing, named
+   shape (`../forge/references/question-style.md`): concrete framing, named
    stakes, recommendation with the *why*.
 
 4. **Re-score and loop to the bar.** Re-rate both scores after fixes and report
@@ -60,6 +59,10 @@ If there's no UI in scope, say so and exit — nothing to do.
    `forge-build` prevents it next time. Tell the user. Show the numbered
    before/after evidence.
 
+## Result
+
+If this harness can't drive a browser, end `blocked` with `gate` `deferred` and the exact check the user should run. End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
+
 ## Rules
 
 - Evidence or it didn't happen — every fix has numbered before/after screenshots.
@@ -71,7 +74,7 @@ If there's no UI in scope, say so and exit — nothing to do.
 
 ## References
 
-- forge suite's `references/anti-slop.md` — the shared 11-pattern blacklist + mechanical sub-check
-- forge suite's `references/scoring.md` — baseline → final score deltas
-- forge suite's `references/question-style.md` — Decision Brief format
+- `../forge/references/anti-slop.md` — the shared 11-pattern blacklist + mechanical sub-check
+- `../forge/references/scoring.md` — baseline → final score deltas
+- `../forge/references/question-style.md` — Decision Brief format
 - `forge-design-system` — the DESIGN.md contract this enforces at runtime

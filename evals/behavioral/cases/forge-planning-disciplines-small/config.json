@@ -1,4 +1,8 @@
 {
-  "skills": ["forge-plan", "forge-harden-eng", "forge-harden-security", "forge"],
+  "skills": [
+    "forge-plan",
+    "forge-harden",
+    "forge"
+  ],
   "timeoutMinutes": 25
 }

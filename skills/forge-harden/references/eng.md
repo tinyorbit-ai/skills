@@ -1,9 +1,8 @@
----
-name: forge-harden-eng
-description: Forge plan-time engineering persona, run by forge-harden — checks wiki/plan.md for failure modes, edge cases, idempotency, test gaps and gates that do not prove their goal, and fixes structural gaps. Use when forge-harden runs it, or when asked to "eng review the plan" or "lock the plan".
----
+# eng persona
 
-# forge-harden-eng
+A forge-harden pass, run as an isolated subagent (or standalone as `forge-harden eng`).
+Paths below are relative to the forge-harden skill folder. Record taste calls for the
+orchestrator's batch; only the orchestrator asks the user.
 
 The staff engineer / EM persona doing a plan review *before* any code is
 written. Reads the plan and architecture, finds the structural gaps, fixes
@@ -32,12 +31,12 @@ first.
 
 ### 2. Rate, then walk every phase
 
-Run the **rate → fix-to-10 → re-rate loop** (forge suite's
-`references/scoring.md`) over these eight dimensions. Each gets a 0–10 with
+Run the **rate → fix-to-10 → re-rate loop** (
+`../forge/references/scoring.md`) over these eight dimensions. Each gets a 0–10 with
 the gap named, a "what a 10 looks like for *this* plan", fixes, and a
 re-rate; deltas go in the report. Thinking moves: **inversion** ("what makes
 this phase fail?"), **idempotency reflex**, **proxy skepticism** —
-`forge-harden`'s `references/craft-patterns.md`.
+`references/craft-patterns.md`.
 
 - **Failure modes & edges:** nil / empty / wrong type / overflow / timeout /
   partial failure / concurrent writes / stale cache. Name the specific edges
@@ -63,7 +62,7 @@ this phase fail?"), **idempotency reflex**, **proxy skepticism** —
   abstraction, one caller", "use the existing Bar module", "split the 200-line
   function", "replace the nested loop with a map". Default-deny on new
   dependencies and abstractions; run the "can a phase be deleted?" challenge
-  (`forge-principles`'s `references/simplicity.md`).
+  (`../forge-principles/references/simplicity.md`).
 
 ### 2b. Concrete triggers for the economy dimension
 
@@ -137,15 +136,14 @@ must hold across phases — flag any phase that quietly diverges.
   `wiki/plan.md` in place. Strengthen the phase, add a phase, harden the
   gate. No permission needed for objectively broken.
 - **Subjective / taste** (a tradeoff with no right answer) → return as taste
-  decision for the orchestrator's batch. Decision Brief shape (forge
-  suite's `references/question-style.md`).
+  decision for the orchestrator's batch. Decision Brief shape (`../forge/references/question-style.md`).
 
 ### 5. Report
 
 Return a structured summary:
 
 ```
-forge-harden-eng (mode: LOCK | TRIAGE)
+forge-harden eng (mode: LOCK | TRIAGE)
   Scores (before → after): edges <a>→<b> · idempotency <a>→<b> · integrity <a>→<b>
                            errors <a>→<b> · tests <a>→<b> · perf <a>→<b> · gates <a>→<b>
                            economy <a>→<b>
@@ -158,7 +156,7 @@ forge-harden-eng (mode: LOCK | TRIAGE)
 ```
 
 If a previous `## Review` block exists in the plan, lead with the trend
-line per `references/scoring.md` ("eng findings: 6 last harden → 2 now").
+line per `../forge/references/scoring.md` ("eng findings: 6 last harden → 2 now").
 
 The orchestrator (`forge-harden`) folds this into the `## Review` section in
 `wiki/plan.md`. When run standalone, also write that section yourself and
@@ -172,8 +170,8 @@ present the taste batch directly.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format for taste decisions
-- forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- `forge-harden`'s `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
-- `forge-principles`'s `references/simplicity.md` — economy of means & performance dimension
-- `forge-principles`'s `references/voice.md` — how to push; banned hedges
+- `../forge/references/question-style.md` — Decision Brief format for taste decisions
+- `../forge/references/scoring.md` — the rate → fix-to-10 → re-rate loop
+- `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
+- `../forge-principles/references/simplicity.md` — economy of means & performance dimension
+- `../forge-principles/references/voice.md` — how to push; banned hedges

@@ -86,7 +86,7 @@ once, in the filmable-moment form; likewise "hard part" folds into §2b's
 **Every question has a push gate.** Each (base seven and sharpening six) has a
 "push until you hear" bar and named red flags in `references/questions.md` — when
 an answer is vague, push once with the sharper frame, then once more if needed,
-never a third time (`forge-principles`'s `references/voice.md`). If two answers
+never a third time (`../forge-principles/references/voice.md`). If two answers
 contradict ("dead simple" + a large feature list), name the tension and resolve
 it with them now.
 
@@ -130,12 +130,12 @@ what it optimizes for, what it costs, what the first runnable version looks like
 Build approaches only.
 
 Lock the chosen shape with AskUserQuestion in the **Decision Brief** shape
-(forge suite's `references/question-style.md`): concrete framing, named stakes,
+(`../forge/references/question-style.md`): concrete framing, named stakes,
 recommendation with the *why* and the evidence that would flip it.
 
 ### 3b. Ambition check (auto)
 
-Before writing the brief, invoke **`forge-ambition`** on the draft — it
+Before writing the brief, invoke **`forge-scope`** (brief mode) on the draft — it
 pressure-tests whether this is the most ambitious version of *the thing the user
 already chose* ("smaller on purpose" is a valid answer it must accept). Fold its
 outcome into the brief. Skip only if the user declines.
@@ -151,6 +151,10 @@ section order, the unknown-real-use marker, ADR handling, and source filing.
   one-sentence summary from the brief; mark [[brief]] as filled.
 - Recommend `forge-plan` next (or return to `forge` for the full pipeline).
 
+## Result
+
+With no one to answer, write the brief from the seed with each gap marked `open question`, then end `blocked` with the most load-bearing question in `notes`. End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
+
 ## Rules
 
 - No code. No file scaffolding beyond the brief + any ADR.
@@ -163,5 +167,5 @@ section order, the unknown-real-use marker, ADR handling, and source filing.
 
 - `references/questions.md` — per-question push-until gates and red flags
 - `references/brief-contract.md` — required brief shape and human-evidence marker
-- `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
-- forge suite's `references/question-style.md` — Decision Brief format for the shape lock
+- `../forge-principles/references/voice.md` — banned hedges, push-twice rule, "just do it" escape hatch
+- `../forge/references/question-style.md` — Decision Brief format for the shape lock

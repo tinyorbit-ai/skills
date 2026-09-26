@@ -43,7 +43,7 @@ wiki/
 ├── .forge/           machine-ish state — config.yaml (reviewer, default auto)
 │                     + taste.md (design-taste record, starts empty)
 │   ── Knowledge base (ingested context) ──
-└── knowledge/        living articles ingested by forge-wiki; maintained by forge-wiki-maintain
+└── knowledge/        living articles ingested by forge-wiki; maintained by forge-wiki MAINTAIN
     ├── INDEX.md            topic directory (stub — fills as topics form)
     └── _compilation-log.md ingest audit trail (header row only at init)
 ```
@@ -82,7 +82,7 @@ Confirm the base branch (current branch, usually `main`). Record it in
 > branch; a finished phase merges back as exactly one squashed commit, only after
 > its verifiable gate is green, with one `wiki/build-log.md` entry.
 
-(Full contract: the forge suite's `branch-discipline` reference. `forge-ship`
+(Full contract: `../forge/references/branch-discipline.md`. `forge-ship`
 enforces it. `forge-init` only sets it up and records the base branch.)
 
 ### 5. Report and offer to chain into discovery
@@ -103,6 +103,10 @@ If the user invoked `forge-init` as part of a `forge` orchestration run, defer
 the offer to `forge` (it already handles "fresh project → setup → discovery →
 plan → harden" chaining via its own AskUserQuestion). Standalone runs of
 `forge-init` are the ones that need this offer.
+
+## Result
+
+End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 

@@ -6,7 +6,7 @@ description: Generates 3-4 rendered design variants for a named UI surface befor
 # forge-design-explore
 
 The divergent design step — multiple shapes for the *same* UI intent so the
-user picks before code commits to one. Sister to `forge-harden-design`
+user picks before code commits to one. Sister to `forge-harden`'s design pass
 (convergent — finds issues in a chosen shape) and `forge-polish` (runtime QA).
 
 ## When to run
@@ -14,7 +14,7 @@ user picks before code commits to one. Sister to `forge-harden-design`
 - **Standalone.** Most common. Invoke when staring at a phase that says
   "build the UI for X" and you don't yet know the shape.
 - **Suggested.** `forge-plan` recommends this at hand-off when a phase's UI shape
-  is genuinely open (and `forge-harden-design` may flag it during hardening) — the
+  is genuinely open (and `forge-harden`'s design pass may flag it during hardening) — the
   brief's "How it should feel" is firm but the layout isn't settled yet.
 
 If the brief / plan already fixes the shape (e.g. "follow DESIGN.md
@@ -41,7 +41,7 @@ Each variant is a *different shape for the same intent*. Vary one
 high-impact axis per variant — visual language, interaction model,
 density, hierarchy. Don't just restyle the same layout.
 
-Before presenting, run the checks in forge suite's `references/anti-slop.md`:
+Before presenting, run the checks in `../forge/references/anti-slop.md`:
 a variant that hits any blacklist pattern is **regenerated, not shown** — the
 user never picks from slop. Then the **differentiation check**: if two
 variants share the same layout skeleton, they are one variant — regenerate
@@ -52,7 +52,7 @@ For each variant, produce:
 - **Name** — one or two words that capture the shape (`compact-table`,
   `card-grid`, `terminal-first`, `chat-stream`).
 - **Mockup** — for any visual surface, **rendered HTML on the served feedback
-  board is mandatory** (forge suite's `references/design-feedback-board.md`): it
+  board is mandatory** (`../forge/references/design-feedback-board.md`): it
   renders the variants, takes per-variant feedback, copies it back. Structure/
   layout is up to you (a ready template exists). ASCII is legitimate **only when
   the surface itself is a terminal UI** — "no browser reachable" is never a
@@ -77,8 +77,7 @@ anti-sycophantic; take a position. The user reacts per variant and pastes their
 feedback back; fold objective fixes in and, if they want changes before choosing,
 iterate.
 
-**Terminal-UI path — `AskUserQuestion`** in the **Decision Brief** shape (forge
-suite's `references/question-style.md`), each variant an option with the ASCII
+**Terminal-UI path — `AskUserQuestion`** in the **Decision Brief** shape (`../forge/references/question-style.md`), each variant an option with the ASCII
 mockup in the `preview` field. Only for surfaces that are themselves terminal/CLI
 UIs — never a shortcut for a visual surface.
 
@@ -92,20 +91,26 @@ confirm it with one quick `AskUserQuestion`):
 - Write an ADR (`wiki/decisions/NNNN-design-<surface>.md`) — Context ·
   Decision · Why · Alternatives considered (the *other* variants, in
   brief) · Consequences. Link from `wiki/index.md`.
-- Update the relevant phase in `wiki/plan.md` to reference the chosen
-  variant by name.
+- In `wiki/plan.md`, set the phase's marker line to
+  `**Design:** locked via [[decisions/NNNN-design-<surface>]]` and name the chosen
+  variant in its Work bullets. `forge` and `scripts/status.mjs` parse this exact line;
+  while it still says `explore`, the build loop waits.
 - If the project has a `DESIGN.md`, append a one-line entry pointing at
   the new ADR.
-- Append to the taste profile (`wiki/.forge/taste.md`, format per forge
-  suite's `references/wiki.md`): the approved variant's axis values, and
+- Append to the taste profile (`wiki/.forge/taste.md`, format per `../forge/references/wiki.md`): the approved variant's axis values, and
   any variant the user *rejected with a reason* — rejections steer future
   explorations as much as approvals.
+
+With no one to pick (headless), don't lock: leave the marker as `explore`, keep the
+board, and end `blocked` with your recommended variant in `notes`. Taste is the
+user's call.
 
 ### 5. Hand off
 
 Recommend: continue with `forge-plan` if the exploration unblocked
 planning, `forge-build` if the plan is ready and this was the missing
-piece, or `forge` to resume the pipeline.
+piece, or `forge` to resume the pipeline. End with the result line from
+`../forge/references/headless.md` (`gate` is `n/a`).
 
 ## Rules
 
@@ -120,6 +125,6 @@ piece, or `forge` to resume the pipeline.
 
 ## References
 
-- forge suite's `references/design-feedback-board.md` — the interactive board (default presentation) + generate-and-open contract
-- forge suite's `references/anti-slop.md` — generation-time blacklist + differentiation check
-- forge suite's `references/question-style.md` — Decision Brief format (the terminal-UI path)
+- `../forge/references/design-feedback-board.md` — the interactive board (default presentation) + generate-and-open contract
+- `../forge/references/anti-slop.md` — generation-time blacklist + differentiation check
+- `../forge/references/question-style.md` — Decision Brief format (the terminal-UI path)

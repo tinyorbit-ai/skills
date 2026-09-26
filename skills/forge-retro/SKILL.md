@@ -28,8 +28,7 @@ synthesis you can act on. The only forge skill that reasons across the whole arc
    - **What shipped** — the phases, what each delivered, told as one coherent story
      of the build, not a changelog.
    - **The trend lines** — review finding counts and harden/polish score deltas
-     across phases (each review/harden report recorded them, per forge suite's
-     `references/scoring.md`). Falling counts = the learnings loop is working —
+     across phases (each review/harden report recorded them, per `../forge/references/scoring.md`). Falling counts = the learnings loop is working —
      say so; rising counts = a process finding to dig into. Also: which learnings
      were *applied* most ("Prior learning applied" mentions) and which never fired
      (retire candidates).
@@ -48,7 +47,7 @@ synthesis you can act on. The only forge skill that reasons across the whole arc
      tests that duplicate each other or outlived the behavior they covered, and
      anything kept "for compatibility" whose consumer you can no longer name. Name
      each with the phase that obsoleted it. This is the arc's accumulated cost, and
-     it only ever grows if nobody looks (`forge-principles/references/simplicity.md`).
+     it only ever grows if nobody looks (`../forge-principles/references/simplicity.md`).
    - **Open threads** — unresolved taste decisions, deferred items still pending.
 
 3. **File it back into the wiki:**
@@ -59,12 +58,16 @@ synthesis you can act on. The only forge skill that reasons across the whole arc
      `wiki/improvements.md`, each with the phase that obsoleted it and the caller
      check that found it dead — so a later phase can act on them as ordinary work.
      Retro names them; it doesn't delete code itself.
-   - Link from `wiki/index.md`. Then run `forge-wiki-maintain --fix` (indexes
+   - Link from `wiki/index.md`. Then run `forge-wiki` MAINTAIN with `--fix` (indexes
      regenerated, safe health fixes applied) — a retro leaves the whole wiki
      consistent, not just its own entry. Tell the user exactly what you filed.
 
 4. **Report.** Present the synthesis to the user directly — this is meant to be
    read, not just stored. Lead with the one pattern most worth acting on.
+
+## Result
+
+End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 

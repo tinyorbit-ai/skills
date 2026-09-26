@@ -1,6 +1,6 @@
-# forge-wiki-maintain — health reference
+# forge-wiki MAINTAIN — health reference
 
-The full check list. Scope is `wiki/` with a focus on `wiki/knowledge/`. Write results
+The full check list. `scripts/wiki-maintain.mjs` runs every check except 6, 13, 14 and 17, which need judgment. Scope is `wiki/` with a focus on `wiki/knowledge/`. Write results
 to `wiki/knowledge/_health-report.md`. Each check is report-only unless marked
 auto-fixable and `--fix` was passed.
 

@@ -1,6 +1,6 @@
 ---
 name: forge-harden
-description: Hardens a forge plan (wiki/plan.md) before build — runs the eng and security personas, plus design, DX or scope when relevant, then an independent reviewer from another model. Stage 3 of forge; --auto decides reversible calls. Use when asked to "harden the plan" or "stress test this plan".
+description: Hardens a forge plan (wiki/plan.md) before build with eng, security, design and DX passes, then a read-only reviewer from another model. Stage 3 of forge. Use when asked to "harden the plan", "stress test this plan", "threat model this plan", or to eng-, design- or DX-review a plan.
 ---
 
 # forge-harden
@@ -11,6 +11,8 @@ into the plan's `## Review` section and the lock gate.
 
 ## Modes
 
+- **One persona** — `forge-harden eng|security|design|dx` runs just that pass from
+  `references/<persona>.md` in this context, then writes its block and asks directly.
 - **Interactive** (default) — persona passes run; taste decisions reach the
   user as one batch at the end.
 - **`--auto`** — auto-decides objective findings and any taste decision the
@@ -41,11 +43,11 @@ When auto-deciding a taste call surfaced by a persona, apply these five in
 order. Skip a principle that doesn't bear on the question; never bend one.
 
 1. **Bolder outcome, most economical means.** The more excellent realization
-   of what the user chose, with the fewest parts (`forge-principles/references/simplicity.md`).
+   of what the user chose, with the fewest parts (`../forge-principles/references/simplicity.md`).
 2. **Bias to a falsifiable gate.** Pick whichever option would actually catch
    a regression.
 3. **Bias to security on tied craft cost.** Equal effort and clarity → the
-   more secure shape; severity tags from `forge-harden-security` carry.
+   more secure shape; severity tags from the security pass carry.
 4. **Bias to economy of means.** Fewer phases, dependencies, abstractions;
    established tech over novel; no new service the brief doesn't demand.
 5. **Always-surface allowlist — never auto-decided:** framework, language,
@@ -62,13 +64,12 @@ Prereq: `wiki/plan.md` with phases + gates — else run `forge-plan` first.
 
 From `wiki/brief.md` + `wiki/plan.md`:
 
-- Does the plan ship a UI? → run `forge-harden-design`.
-- Is the plan developer-facing (library / API / CLI / SDK)? → run
-  `forge-harden-dx`.
-- Scope rethink (`forge-harden-scope`) is opt-in: run when a `scope` arg was
+- Does the plan ship a UI? → run the design pass.
+- Is the plan developer-facing (library / API / CLI / SDK)? → run the dx pass.
+- Scope rethink (`forge-scope`, plan mode) is opt-in: run when a `scope` arg was
   passed; otherwise in interactive mode ask once (AskUserQuestion — *"rethink
-  scope, or take it as-is?"*, default as-is). `--auto` skips it unless
-  the arg was given. State plainly which personas run, and why, before invoking.
+  scope, or take it as-is?"*, default as-is). `--auto` and headless runs skip it
+  unless the arg was given. State plainly which personas run, and why, before invoking.
 
 ### 2. Run persona passes
 
@@ -76,30 +77,38 @@ Read the shared ground **once** (brief, plan, architecture, learnings, ADR
 list) and hand each persona a digest. Run each applicable persona as an
 **isolated subagent** that reads the digest + `wiki/plan.md`, applies its own
 auto-fixes to the plan, and returns only its report block + surfaced taste
-decisions. Never stack five persona SKILL.md files into one context — the
-late, user-facing passes would reason in the most degraded window.
+decisions. Personas never ask the user; they return taste decisions and this
+orchestrator is the only asker. Never stack five persona files into one context: the
+late passes would reason in the most degraded window.
+
+- Claude: `Agent(prompt: "Read <forge-harden>/references/eng.md and apply it to
+  wiki/plan.md. Digest: … Return only your report block and taste decisions.")`
+- Codex: `spawn_agent` with `fork_turns: "none"` and the same prompt.
+- No subagent tool: run the passes inline, one at a time, dropping each persona file
+  from focus before the next.
 
 | Order | Persona | Always? |
 |---|---|---|
-| 1 | `forge-harden-eng` | yes |
-| 2 | `forge-harden-security` | yes |
-| 3 | `forge-harden-design` | only if UI |
-| 4 | `forge-harden-dx` | only if dev-facing |
-| 5 | `forge-harden-scope` | only if requested |
-| 6 | **economy sweep** — re-run `forge-harden-eng`, economy dimension only | yes — always LAST |
+| 1 | eng (`references/eng.md`) | yes |
+| 2 | security (`references/security.md`) | yes |
+| 3 | design (`references/design.md`) | only if UI |
+| 4 | dx (`references/dx.md`) | only if dev-facing |
+| 5 | scope (`../forge-scope/SKILL.md`, plan mode, HOLD unless a lens was passed) | only if requested |
+| 6 | **economy sweep** — re-run eng, economy dimension only | yes — always LAST |
 
 Personas run sequentially (later passes see the earlier ones' plan fixes).
 The **economy sweep runs last on purpose**: passes 2–5 are additive by
 construction, so the one subtractive lens must see the fully-cumulative plan.
 It has authority to **cut any obligation added in passes 1–5 that doesn't
-earn its place against the brief** (`forge-principles/references/simplicity.md`);
+earn its place against the brief** (`../forge-principles/references/simplicity.md`);
 every cut is logged in the report with the persona it came from.
 
 ### 3. Independent reviewer pass
 
-Resolve the adversarial reviewer per `references/reviewer-agents.md` —
-explicit `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then auto-probe
-`codex` → `gemini` → `claude`. State which one was picked. If none is
+Resolve the adversarial reviewer per `../forge/references/reviewer-agents.md` —
+explicit `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then the first installed
+CLI from a different model family than the one driving this run. State which one was
+picked. If none is
 available or config says `reviewer: none`, state the pass is skipped.
 
 Send the standard prompt envelope from `reviewer-agents.md`, artifact passed
@@ -132,7 +141,7 @@ Append (or replace) the `## Review` section in `wiki/plan.md`:
 
 **Lock status:** pending
 **Mode:** interactive | --auto
-**Personas run:** forge-harden-eng, forge-harden-security[, -design][, -dx][, -scope]
+**Personas run:** eng, security[, design][, dx][, scope]
 **Adversarial reviewer:** <codex | gemini | claude | none — reason>
 
 ### Findings fixed
@@ -163,28 +172,28 @@ by the lock gate; `pending` is what makes hardening resumable.
 Invoked by `forge`: return so `forge` runs its lock gate (it flips the marker on
 the user's confirm). Standalone: present the open taste decisions, User
 Challenges, and disagreements as one `AskUserQuestion` batch in the Decision
-Brief shape (`references/question-style.md`); on confirm, set
-`**Lock status:** locked` and tell them the build loop is unlocked.
+Brief shape (`../forge/references/question-style.md`); on confirm, set
+`**Lock status:** locked` and tell them the build loop is unlocked. With no one to
+ask, leave it `pending`, list the open decisions, and end `blocked`.
+
+End with the result line from `../forge/references/headless.md`
+(`gate` is `n/a`; `notes` names the open decisions).
 
 ## Rules
 
-- The orchestrator itself never writes findings — that's each persona's
-  job. Keep the orchestrator thin.
-- A persona's auto-fix stands unless the economy sweep (pass 6) cuts it or
-  reconciliation routes it to the user. The orchestrator itself never rewrites
-  findings — it consolidates, sweeps, and reconciles.
+- The orchestrator never writes or rewrites findings; it consolidates, sweeps and
+  reconciles. A persona's auto-fix stands unless the economy sweep cuts it or
+  reconciliation routes it to the user.
 - Subtraction is the default fix. For every finding the first candidate is
   collapse / delete / reuse; adding a part must justify why it beat subtraction —
-  more rigor is not more machinery (`forge-principles/references/simplicity.md`).
-- Anti-sycophantic throughout: take positions, state what evidence would
-  flip them, don't hedge.
+  more rigor is not more machinery (`../forge-principles/references/simplicity.md`).
 
 ## References
 
-- forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
-- forge suite's `references/question-style.md` — Decision Brief format for the taste batch
-- forge suite's `references/scoring.md` — the personas' rating loop + trend lines
+- `../forge/references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
+- `../forge/references/question-style.md` — Decision Brief format for the taste batch
+- `../forge/references/scoring.md` — the personas' rating loop + trend lines
 - `references/craft-patterns.md` — the thinking moves the personas cite
-- `forge-principles`'s `references/simplicity.md` — economy of means (subtraction-first fix policy)
-- `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
-  `forge-harden-dx`, `forge-harden-scope` — the five persona skills
+- `../forge-principles/references/simplicity.md` — economy of means (subtraction-first fix policy)
+- `references/eng.md`, `security.md`, `design.md`, `dx.md` — the persona passes;
+  `forge-scope` — the scope pass

@@ -67,7 +67,7 @@ load-bearing — without it, anything can be justified as "needed for quality".
 
 ## The seam with ambition
 
-This governs *means*. `forge-ambition` and `forge-harden-scope` EXPAND govern
+This governs *means*. `forge-scope` (brief mode and plan EXPAND) governs
 *outcome* — they push the result to be more excellent, never heavier. The boldest
 version is the one that does the most with the fewest parts; a "bolder" idea that
 needs a heavier system is usually a weaker idea wearing ambition.

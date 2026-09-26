@@ -88,11 +88,11 @@ real content or it should have been Timeline-only.
   where action ∈ `ingested-new` | `ingested-timeline` | `skipped`.
 - Add NEW articles to their topic `_index.md`; ensure reachable from
   `wiki/index.md → [[knowledge/INDEX]]`. Either update indexes inline or note that
-  `forge-wiki-maintain` should run to regenerate them.
+  `forge-wiki` MAINTAIN should run to regenerate them.
 
 ## Batch ingests
 
 When several sources arrive at once (a folder, a thread dump), run Steps 1–4 for all
 of them and present **one consolidated plan** (a table of disposition + NEW/MERGE +
 target per source) before writing anything. After writing, recommend
-`forge-wiki-maintain` to regenerate indexes and check links in one pass.
+`forge-wiki` MAINTAIN to regenerate indexes and check links in one pass.

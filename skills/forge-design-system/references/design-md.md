@@ -1,7 +1,7 @@
 # DESIGN.md — structure and worked example
 
 `DESIGN.md` lives at the **repo root** (next to the code that must obey it, not
-inside `wiki/`) and is the design source of truth. `forge-harden-design` audits
+inside `wiki/`) and is the design source of truth. `forge-harden`'s design pass audits
 plans against it, `forge-design-explore` generates variants inside it,
 `forge-build` implements with its tokens, `forge-polish` treats violations as
 objective findings.

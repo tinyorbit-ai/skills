@@ -4,6 +4,10 @@ Every `AskUserQuestion` call in any forge skill should follow this shape. It
 carries enough structure to surface a real choice, not so much that it turns
 every prompt into ceremony.
 
+Which tool to call on Claude or Codex, and what to do when no one can answer:
+`headless.md` in this folder. With no one to answer, the recommended option is the
+answer; record it and continue.
+
 ## When to use it
 
 Use the Decision Brief shape any time the question represents a **real
@@ -12,7 +16,7 @@ decision** the wiki should remember:
 - Shape/architecture/library choices in `forge-plan`
 - Unreconciled reviewer disagreements at the lock gate
 - Taste batches at the end of `forge-harden`, `forge-review`, `forge-polish`, `forge-dx`
-- Scope/ambition choices in `forge-ambition`
+- Scope/ambition choices in `forge-scope`
 - Confirmation before irreversible-ish actions (`forge-ship` squash-merge)
 
 Skip it (use a plain `AskUserQuestion`) for *micro* choices that won't ever be

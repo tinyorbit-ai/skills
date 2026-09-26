@@ -1,23 +1,26 @@
 ---
 name: forge-wiki
-description: Answers questions from a forge project wiki/ with citations, and files new context (notes, research, email, decisions) into wiki/knowledge/, proposing writes before making them. Use in a repo with wiki/ when asked to "ask the wiki", "what do we know about X", "ingest this" or "add this to the wiki".
+description: Answers questions from a forge wiki/ with citations, files new context into wiki/knowledge/ (proposing writes first), and runs index and health upkeep with a script. Use when a repo has wiki/ and asked to "ask the wiki", "ingest this", "add this to the wiki" or to "regenerate the wiki index".
 ---
 
 # forge-wiki
 
-The wiki's read/write brain. Two jobs: **answer questions** from the wiki, and
-**ingest context** into it. The wiki layout, article format, and Timeline rules live
+The wiki's read/write brain. Three jobs: **answer questions** from the wiki, **ingest
+context** into it, and **maintain** its indexes and health. The wiki layout, article format, and Timeline rules live
 in the forge orchestrator's `references/wiki.md` — read it before writing anything.
 
 ## Routing
 
-Read the request and pick the mode. If `wiki/` doesn't exist, run `forge-init` first.
+Read the request and pick the mode. If `wiki/` doesn't exist, say so and stop; a wiki
+is created only by an explicit `forge-init`.
 
 - A **question** ("what do we know about…", "why did we…", "ask the wiki…") → **ASK**.
-- **Material to capture** (a pasted block, a file path, "ingest this", "remember
-  this", "add this context") → **INGEST** (plan-first).
+- **Material to capture** (a pasted block, a file path, "ingest this", "add this
+  context") → **INGEST** (plan-first).
 - **Durable context that surfaced in conversation** (the user mentioned a constraint,
   a stakeholder directive, a deadline) → **AMBIENT CAPTURE** (lighter; see below).
+- "regenerate the index", "wiki health", "check the wiki for broken links", or a call
+  from `forge-ship` / `forge-retro` → **MAINTAIN**.
 - Ambiguous → ask the user which they meant before acting.
 
 ---
@@ -97,8 +100,7 @@ On approval, write per `references/ingest.md` and the article format in
   `sources:`; bump `last_evidence` (leave `compiled`).
 - Append a row to `wiki/knowledge/_compilation-log.md`.
 - Add the article to its topic `_index.md` and ensure it's reachable from
-  `wiki/index.md` → `[[knowledge/INDEX]]` (or run `forge-wiki-maintain` to
-  regenerate). Use `[[wikilinks]]`.
+  `wiki/index.md` → `[[knowledge/INDEX]]` (or run MAINTAIN with `--fix`). Use `[[wikilinks]]`.
 
 ### 6. Report
 
@@ -124,8 +126,23 @@ full plan-first gate for low friction, but **only for additive writes**:
 - **Rewrites still confirm.** If the new context would `Refine`/`Contradict` an
   existing Core Concept, stop and show the diff first — same as INGEST.
 - Same format, taxonomy, logging, and indexing as INGEST (Steps 5–6 / `references/
-  ingest.md`). Suggest `forge-wiki-maintain` after a run of captures.
+  ingest.md`). Suggest MAINTAIN after a run of captures.
 - Honor "pause/mute wiki capture" — go silent until "resume capture".
+
+## MAINTAIN (script first)
+
+Run `node scripts/wiki-maintain.mjs --wiki wiki` from the repo root (path relative to
+this skill; add `--fix` to apply safe fixes, `--json` for counts). It regenerates every
+`_index.md`, `knowledge/INDEX.md` and the `wiki/index.md` links from disk, adds missing
+Timelines, runs the mechanical checks (orphans, stale index entries, missing summaries
+and frontmatter, broken `[[links]]`, stubs, stale evidence, Timeline health, nested
+folders, learnings hygiene) and writes `wiki/knowledge/_health-report.md`.
+
+Then do the parts that need judgment, listed in `references/health.md`: write each
+missing or generic Summary line (a specific one, never "Overview of X"), re-run with
+`--fix` so indexes pick them up, and report duplicates, split candidates, near-duplicate
+topics and contradicting learnings. Never delete, merge, move or split on your own;
+those are the user's calls.
 
 ## Rules
 
@@ -136,5 +153,4 @@ full plan-first gate for low friction, but **only for additive writes**:
   deliberate, quality-gated, and (for Contradicted) user-confirmed with a diff.
 - Obsidian `[[wikilinks]]` only; every new file reachable from an index in the same
   change.
-- After a batch of ingests/captures, suggest `forge-wiki-maintain` to regenerate
-  indexes and health-check links.
+- After a batch of ingests or captures, suggest MAINTAIN.

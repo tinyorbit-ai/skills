@@ -1,6 +1,6 @@
 ---
 name: forge
-description: Resumable build pipeline for a forge project — finds where you left off and continues through setup, discovery, plan and harden, then build, review and ship one phase at a time. Use when asked to "forge this", "forge help", "forge crack-on" (run every remaining phase), or "let's build X".
+description: Resumable build pipeline for a forge project (wiki/ with brief and plan) — picks up where it left off through setup, discovery, plan and harden, then build, review and ship one phase at a time. Use when asked to "forge this", "forge help", "forge status", "forge crack-on" or "let's build X".
 ---
 
 # forge
@@ -24,20 +24,18 @@ You are here ──────────────────────�
   ▶ Next: <the exact next command, e.g. `/forge` → build phase 3>
 
 Full map ─────────────────────────────────────
-  PLAN   init · discovery (+ambition) · plan · design (system+explore, if UI) · harden
+  PLAN   init · discovery (+scope) · plan · design (system+explore, if UI) · harden
   BUILD  build · review (+polish +dx) · ship  ·· 1 phase/run · all: /forge crack-on
   LOOK   debug (root-cause) · retro (synthesis, auto at Done)
-  WIKI   wiki (ask · ingest context) · wiki-maintain (index · health) ·· any time
+  WIKI   wiki (ask · ingest context · maintain index + health) ·· any time
 
 Every skill also runs standalone — invoke any directly:
-  /forge-init  /forge-discovery  /forge-ambition  /forge-plan
+  /forge-init  /forge-discovery  /forge-scope  /forge-plan
   /forge-design-system  /forge-design-explore  (DESIGN.md, then design variants)
-  /forge-harden                   (orchestrator; --auto for auto-decision)
-  /forge-harden-eng  /forge-harden-security  /forge-harden-design
-  /forge-harden-dx   /forge-harden-scope
+  /forge-harden [eng|security|design|dx]   (--auto for auto-decision)
   /forge-build  /forge-review  /forge-polish  /forge-dx
   /forge-ship  /forge-docs  /forge-debug  /forge-retro
-  /forge-wiki  /forge-wiki-maintain   (knowledge base — ask, ingest, upkeep)
+  /forge-wiki                     (knowledge base — ask, ingest, maintain)
 
 /forge with no args continues from ▶ Next.
 ```
@@ -46,9 +44,9 @@ Fill `<...>` from the live state. Keep the box; don't add a charter blurb.
 
 ## Step 1 — always: detect state and report "where you left off"
 
-Before acting, read (silently): `wiki/` existence, `wiki/brief.md`,
-`wiki/plan.md`, `wiki/build-log.md`, `wiki/learnings.md`, `git branch --show-current`,
-`git status`, `git log --oneline -5`. Then print a short status block:
+Run `node scripts/status.mjs` (in this skill's folder; `--json` for factories). It
+reads `wiki/`, the plan, the build log and git, and applies the ladder below. Read the
+files yourself only when you need more than it reports. Then print a short status block:
 
 ```
 forge status
@@ -77,11 +75,10 @@ Derive **next action** from this ladder (first unmet wins):
 
 ### Planning stages (init / discovery / plan / design / harden)
 
-Invoke the one skill for the unmet stage. Each writes its wiki artifact. After it
-completes, **stop and report** — do not silently chain into the next stage; tell the
-user what's done and that the next `/forge` continues. (Exception: a fresh project
-with nothing — offer, via AskUserQuestion, to run setup→discovery→plan→harden in
-sequence so first-time setup isn't four invocations.)
+Invoke the one skill for the unmet stage (Claude: the Skill tool or `/name`; Codex:
+`$name`). Each writes its wiki artifact. Then **stop and report**; the next `/forge`
+continues. Exception: on a fresh project, offer to run setup → discovery → plan →
+harden in one go.
 
 ### Design stage (plan ships UI, direction unresolved)
 
@@ -120,22 +117,15 @@ would re-present the gate. The build loop is now unlocked.
      **Build/Review** (forge-build continues in-progress work; it won't re-scaffold).
    - gate green and review evidence exists but no build-log entry → go straight to
      **Ship** (step 5).
-   Each sub-skill also guards its own entry (build continues, review re-runs
-   idempotently, ship checks branch position), so re-entry is always safe.
 2. **Announce it.** Phase number, title, its branch, its verifiable gate. One line.
-3. **Build.** Invoke `forge-build` for this phase (staff-engineer build of the best
-   version of the phase, on its `phase/<n>-<slug>` branch) — under Maximum Effort's
-   frontier-led allocation when installed. One frontier phase owner keeps judgment and
-   integration while bounded factual or mechanical leaves may use smaller models. This
-   changes only model allocation, never the loop's lifecycle (`references/phase-lanes.md`).
-4. **Review.** Invoke `forge-review` on the phase's diff (security, tests, strict
-   types, optional Codex, auto-fix objective findings, learnings → `wiki/learnings.md`,
-   runtime verification of gate + goal). Review auto-invokes `forge-polish` (if the
-   phase touched UI) and `forge-dx` (if the build is developer-facing); both are
-   also runnable standalone any time.
-5. **Ship.** Invoke `forge-ship` (verify gate green → one squashed commit on base,
-   plus an optional `docs:` commit if `forge-docs` changed docs → one
-   `wiki/build-log.md` entry).
+3. **Build.** Invoke `forge-build` on the phase branch. With `maximum-effort`
+   installed, one frontier owner keeps judgment while bounded leaves may use smaller
+   models; the lifecycle is unchanged (`references/phase-lanes.md`).
+4. **Review.** Invoke `forge-review` on the phase diff. It runs `forge-polish` when
+   the phase touched UI and `forge-dx` when the build is developer-facing.
+5. **Ship.** Invoke `forge-ship` (gate green on the rebased tree → build log, wiki and
+   docs written on the phase branch → one squashed commit on base, or a PR with
+   `--pr`).
 6. **Stop and report.** State: phase N landed, the commit, the gate that passed,
    what's next (phase N+1 + its branch + gate). **Do not** auto-continue to N+1 —
    the user runs `/forge` again to take the next phase. If any step fails (red gate,
@@ -153,14 +143,7 @@ stop below fires, then the summary. Skips and full rules: `references/crack-on.m
 - one-way door (`forge-harden`'s always-surface allowlist) → **stop and ask**
 - unlocked `Design:` marker on a UI phase → **stop**, `forge-design-explore` next
 
-```
-forge · crack-on — complete | stopped at phase <n>
-  Landed     phase <n> <title> — <commit>            (one line per phase)
-  Gates      ✓ <gate that passed>  ·  ⏸ <skipped> → you run `<exact check>`
-  Decisions  <taste decision deferred, its phase, the position taken>
-  Your eyes  <one-way door hit; gate-deferred phases; anything else needing you>
-  Left       <phases not attempted, and why the run stopped>
-```
+End with the crack-on summary block from `references/crack-on.md`.
 
 ## Rules
 
@@ -171,6 +154,8 @@ forge · crack-on — complete | stopped at phase <n>
 - Decisions in any stage → ADRs in `wiki/decisions/` (`references/wiki.md`).
 - Prototype-first: phase 1 is the thinnest end-to-end thing that runs.
 - forge itself writes no feature code — it routes; `forge-build` builds.
+- With no one to answer, follow `references/headless.md`, and end every run with its
+  `FORGE_RESULT` line.
 
 ## References
 
@@ -179,7 +164,9 @@ forge · crack-on — complete | stopped at phase <n>
 - `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
-- `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
+- `references/headless.md` — no-human rule, the Codex question tool, the `FORGE_RESULT` line
+- `scripts/status.mjs` — deterministic state + next action (`--json`)
+- `../forge-principles/references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
-- `forge-harden`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
+- `../forge-harden/references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
 - `references/phase-lanes.md` — frontier-led model allocation inside a Forge phase

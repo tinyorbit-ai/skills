@@ -12,9 +12,13 @@ Claude and review with Codex, drive from Codex and review with Gemini, etc.
 
 | Agent | CLI | Headless invocation | Notes |
 |---|---|---|---|
-| Codex (OpenAI) | `codex` | `codex exec --skip-git-repo-check "<prompt>"` | forge's original reviewer |
-| Gemini (Google) | `gemini` | `gemini -p "<prompt>"` | Google's CLI agent |
-| Claude (Anthropic) | `claude` | `claude -p "<prompt>"` | Same family as the typical driver — useful fallback |
+| Codex (OpenAI) | `codex` | `codex exec -s read-only --skip-git-repo-check "<prompt>"` | forge's original reviewer |
+| Gemini (Google) | `gemini` | `gemini --approval-mode plan -p "<prompt>"` | Google's CLI agent |
+| Claude (Anthropic) | `claude` | `claude -p --permission-mode plan "<prompt>"` | Different family when Codex or Gemini drives |
+
+The reviewer reads; it never writes. Every invocation carries its read-only flag
+(`-s read-only`, `--approval-mode plan`, `--permission-mode plan`). Never drop it to
+get past an error; a reviewer that can't run read-only is a skipped pass.
 
 **Antigravity** (Google's agent IDE) is supported as a *driver* but not as a
 headless reviewer — its CLI opens an interactive window, not a one-shot pass.
@@ -28,7 +32,9 @@ calls out to one of the headless agents above.
    independent pass entirely and state so in the report.
 2. **Environment override.** If `FORGE_REVIEWER` is set, use its value.
 3. **Auto-probe (default).** `command -v` in this order: `codex` → `gemini` →
-   `claude`. Pick the first installed.
+   `claude`. Pick the first installed CLI whose model family differs from the one
+   driving this run (Claude driving → codex or gemini; Codex driving → gemini or
+   claude). An adversary from the driver's own family shares its blind spots.
 4. **None found.** State "no reviewer available — pass skipped" and continue.
    Do not block.
 
@@ -73,11 +79,12 @@ the prompt string. Contract:
 ```
 ART=$(mktemp /tmp/forge-artifact-XXXXXX.md)
 git diff <base>...HEAD > "$ART"          # or cat the plan diff into it
-codex exec --skip-git-repo-check "<envelope text> — the artifact is the file
-$ART; read it before answering."
+codex exec -s read-only --skip-git-repo-check "<envelope text> — the artifact is
+the file $ART; read it before answering."
 ```
 
-(Same shape for `gemini -p` / `claude -p` — all three can read a file by path.)
+(Same shape for `gemini --approval-mode plan -p` / `claude -p --permission-mode plan`;
+all three can read a file by path.)
 After the call, **verify: exit code 0 AND non-empty output.** Anything else is a
 *skipped* pass — report it as skipped, never as clean.
 
