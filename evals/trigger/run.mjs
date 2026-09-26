@@ -64,7 +64,12 @@ if (dryRun) {
 
 async function judgeCase(c) {
   try {
-    const { stdout } = await execFileP('claude', ['-p', buildPrompt(c.utterance), '--model', MODEL], {
+    const { stdout } = await execFileP('claude', [
+      '-p', buildPrompt(c.utterance),
+      '--model', MODEL,
+      '--strict-mcp-config',
+      '--mcp-config', '{"mcpServers":{}}',
+    ], {
       timeout: 120_000,
       env: process.env,
     });
