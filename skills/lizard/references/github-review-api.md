@@ -1,109 +1,10 @@
 # GitHub Review Mechanics
 
-Exact `gh` commands for fetching PR data and submitting the review. All commands
+Loaded at step 8 only: exact `gh` commands for composing and submitting the review.
+Startup fetches are in SKILL.md; previous-review and reaction lookups in
+`references/dedup.md`. All commands
 accept `--repo <owner>/<repo>`. For GitHub Enterprise hosts export `GH_HOST=<host>`
 before running anything here.
-
-## Fetch startup metadata
-
-At startup fetch only what dedup and triage need — before any checkout, full diff
-read, or context discovery:
-
-```bash
-gh pr view <number> --repo <owner>/<repo> --json \
-  number,title,body,author,isDraft,state,url,\
-baseRefName,headRefName,headRefOid,additions,deletions,changedFiles,\
-files,reviews,comments,latestReviews,closingIssuesReferences
-```
-
-Useful fields: `headRefOid` (the SHA to dedup against and pin the review to),
-`author.login` (compare with `gh api user --jq .login` to detect a self-authored PR),
-`files`/`additions`/`deletions` (triage), `closingIssuesReferences` (context).
-
-CI, in a friendly shape (`gh pr checks` exits non-zero on failing/pending checks, so
-guard it):
-
-```bash
-gh pr checks <number> --repo <owner>/<repo> --json name,state,bucket,link || true
-```
-
-## Fetch the diff
-
-```bash
-gh pr diff <number> --repo <owner>/<repo>              # unified diff
-gh pr diff <number> --repo <owner>/<repo> --name-only  # changed paths (triage)
-gh pr diff <number> --repo <owner>/<repo> --patch      # patch (fingerprinting)
-```
-
-`gh pr diff` returns the PR's own merge-base delta — correct per-PR even in a
-stacked (e.g. Graphite) flow. For surrounding source, prefer the local checkout
-(session mode) or the shared object store (loop mode). Single-file fallback with no
-checkout:
-
-```bash
-gh api "repos/<owner>/<repo>/contents/<path>?ref=<headRefOid>" \
-  -H "Accept: application/vnd.github.raw+json"
-```
-
-## Find previous lizard reviews
-
-```bash
-gh api "repos/<owner>/<repo>/pulls/<number>/reviews" --paginate \
-  --jq '[.[] | select(.body | test("^🦎") or test("(lizard|pr-issue-review):v1"))
-         | {state, commit_id, submitted_at,
-            metadata: (try (.body
-              | capture("<!-- lizard:v1 verdict=(?<verdict>[^ ]+) tier=(?<tier>[^ ]+) adversary=(?<adversary>[^ ]+) head=(?<head>[^ ]+) diff=(?<diff>[^ ]+) context=(?<context>[^ ]+) -->"))
-              catch null)}]'
-```
-
-`commit_id` is the head SHA the review was submitted against — the exact-head skip
-key. Stamp-as-comments (self-authored PRs) live on the issue-comments endpoint;
-check it too when detecting previous reviews:
-
-```bash
-gh api "repos/<owner>/<repo>/issues/<number>/comments" --paginate \
-  --jq '[.[] | select(.body | test("lizard:v1")) | {body, created_at}]'
-```
-
-Inline threads (for the never-repost-open-threads rule):
-
-```bash
-gh api "repos/<owner>/<repo>/pulls/<number>/comments" --paginate
-```
-
-## In-progress reaction — the in-flight claim
-
-The 👀 reaction doubles as the parallel-run claim (`references/dedup.md`) — but only
-your own: anyone can react 👀 on a PR, so filter to the authenticated login (the
-same `gh api user --jq .login` already fetched for self-authored detection). Your
-`eyes` fresher than 30 minutes means another run is in flight — stop; older is a
-crashed run's leftover — remove it and proceed (the API only permits deleting your
-own reactions anyway):
-
-```bash
-login="$(gh api user --jq .login)"
-gh api "repos/<owner>/<repo>/issues/<number>/reactions" \
-  -H "Accept: application/vnd.github+json" \
-| jq --arg login "$login" \
-    '[.[] | select(.content == "eyes" and .user.login == $login) | {id, created_at}]'
-```
-
-Add yours after the exact-head check decides a review might happen; best effort, not
-a lock (GitHub dedups identical reactions from the same user — accept it):
-
-```bash
-reaction_id="$(gh api --method POST \
-  "repos/<owner>/<repo>/issues/<number>/reactions" \
-  -H "Accept: application/vnd.github+json" \
-  -f content=eyes --jq '.id' 2>/dev/null || true)"
-```
-
-Remove it after posting (or before exiting on a skip/failure); a 404 is fine:
-
-```bash
-[ -n "${reaction_id:-}" ] && gh api --method DELETE \
-  "repos/<owner>/<repo>/issues/<number>/reactions/$reaction_id" --silent || true
-```
 
 ## Submit one review with inline comments
 
@@ -152,11 +53,8 @@ Payload rules:
   line. `comments` may still carry nits.
 - `commit_id` = the `headRefOid` actually reviewed, so the review attaches to the
   right head even if the author pushes mid-review.
-- Before any POST, validate the top-level body has a collapsed receipts table:
-  `<details>`, `<summary>...lizard receipts...what was checked...</summary>`,
-  `|---|---|`, and `</details>` must all appear before the hidden metadata line.
-  Plain `Receipts:` bullet lists are invalid. This validation applies equally to
-  stamp-as-comment approvals for self-authored PRs.
+- Before any POST, validate the receipts structure (`references/context.md`, Receipts),
+  stamp-as-comment approvals included.
 - Also before any POST, re-run the previous-review lookups above: a lizard verdict
   at the current `headRefOid` that appeared mid-review means this run lost the race
   — do not post (`references/dedup.md`).
@@ -277,23 +175,9 @@ gh api --method PUT \
 
 ## Dry-run payload
 
-`--dry-run` (`SKILL.md`) reports the review in the session, posts nothing, and ends
-by printing the exact would-be submission as raw JSON between two marker lines:
-
-```text
-LIZARD_PAYLOAD_BEGIN
-{"event":"APPROVE|COMMENT|REQUEST_CHANGES","body":"<review body>","comments":[{"path":"...","line":N,"side":"RIGHT","body":"..."}]}
-LIZARD_PAYLOAD_END
-```
-
-The JSON mirrors the review POST assembled above — `event`, the full `body` (stamp
-or `Why:` block, then receipts and the metadata line), and every inline `comments`
-entry with its verified anchor. For a self-authored stamp-as-comment the `event` is
-`APPROVE` with an added `"comment": true` field, marking that it posts as an issue
-comment rather than a formal review. The two marker lines are the parse contract —
-print nothing between them but the single JSON object.
-
-The envelope never varies. It is not the raw endpoint POST: a stamp-as-comment
-still prints `"event": "APPROVE"` with `"comment": true`, not the bare
-`{"body": …}` an issue-comment create would take, and no other keys or structures
-(`would_post`, `submissions`, `endpoint`, …) are ever valid between the markers.
+`--dry-run` builds everything above but posts nothing, then prints the payload block
+defined in SKILL.md. Its JSON mirrors the review POST: `event`, the full `body`
+(stamp or `Why:` block, receipts, metadata line) and every inline `comments` entry
+with its verified anchor. A self-authored stamp prints `"event": "APPROVE"` with
+`"comment": true`, never the bare issue-comment shape, and no other keys
+(`would_post`, `submissions`, `endpoint`, …) are ever valid.

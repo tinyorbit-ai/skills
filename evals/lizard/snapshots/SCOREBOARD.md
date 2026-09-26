@@ -89,3 +89,15 @@ emoji. `SKILL.md` now says to name it in words rather than reproduce it.
 in the body, case passes. **Its 1/15 is the single-case artifact, not a score** —
 `grade.mjs` grades all of `cases.json`, so the 14 cases that never ran are counted as
 errors. Read the per-case row. Effective suite state is 14/15, equal to baseline.
+| 2026-09-26 | local-mode-1 | default | 14/15 | 0 | 1 | 100% |
+| 2026-09-26 | local-mode-2 | default | 5/15 | 0 | 0 | 33% |
+| 2026-09-26 | local-mode-3 | default | 13/15 | 0 | 0 | 93% |
+| 2026-09-26 | local-mode-4 | default | 14/15 | 0 | 0 | 93% |
+
+`local-mode-1` ran the installed copy by accident (the headless session picked the
+global `~/.claude/skills/lizard` over the scratch project's), so it measured the old
+skill. `local-mode-2..4` repointed the global symlink at the worktree. Run 2 caught
+a real regression: the inline `**Why:**`/`**Fix:**` shape and metadata line had moved
+to `github-review-api.md`, which the dry-run path then skipped. SKILL.md now states the
+exact inline shape and the receipts + metadata tail. `local-mode-4` is the effective
+result: 14/15, false-🦎 0; the one miss is a malformed metadata line (format flake).
