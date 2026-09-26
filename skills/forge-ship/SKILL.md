@@ -7,7 +7,8 @@ description: Lands a finished forge phase — rebases onto base, reruns the gate
 
 Lands one phase. Enforces the contract: rebase onto the latest base → green gate on
 the rebased tree → exactly one squashed commit on the base branch → one build-log
-entry. Never lands ungated, on a stale base, or with messy history.
+entry. Never lands ungated, on a stale base, or with messy history. `--pr` lands through
+a pull request instead of a local squash.
 
 ## The contract (enforced here)
 
@@ -28,7 +29,7 @@ entry. Never lands ungated, on a stale base, or with messy history.
   - If on the base branch with phase work uncommitted: create the phase branch now
     and move the work onto it. Do not proceed on base.
   - If the phase branch name doesn't match the plan, reconcile with the user
-    (AskUserQuestion) before continuing.
+    (AskUserQuestion); with no one to ask, use the branch you are on and note it.
 - `git status` clean or all phase work committed on the phase branch first (commit
   freely here — that's allowed and expected).
 
@@ -54,15 +55,48 @@ Then run, and show the output of:
    contract; the touched surface is. If the project's full suite *is* fast, run it.
 
 **If any of it is not unambiguously green, stop.** Do not merge. Report what
-failed; recommend `forge-debug`. A phase never lands on a red or hand-waved gate.
+failed; recommend `forge-debug`, and end with `FORGE_RESULT` status `blocked`, gate
+`red`. A phase never lands on a red or hand-waved gate.
 
 If the gate is a manual check, perform it and record the observed result verbatim —
 "looks fine" is not acceptable; state what was observed and why it satisfies the gate.
 
-### 3. Squash-merge to base (confirm first)
+### 3. Write the record on the phase branch, before landing
 
-Outward/irreversible-ish action — confirm with the user before doing it, unless they
-said proceed. Determine base branch from `wiki/plan.md` header.
+Everything the phase changes in the repo goes into the phase branch now, so the
+landing is one commit and base is never edited afterwards.
+
+1. **Build-log entry.** Prepend to `wiki/build-log.md` (newest on top):
+
+   ```markdown
+   ## Phase N — <title>
+   **Branch:** `phase/<n>-<slug>` → squashed to `<base>` | PR to `<base>`
+
+   - <what was built, briefly>
+   - <the *why* of any notable decision; link the ADR — [[decisions/NNNN-...]]>
+   - <any scope cut → also note in [[improvements]]>
+   - **Gate:** <exact gate> — green (<one line on how verified>) | deferred (<the check the user must run>).
+   ```
+
+   Write or update any ADR or `wiki/notes/` entry the phase needs and link it.
+2. **Architecture.** If the phase added or changed a component, boundary, data flow,
+   scale assumption or the central bet, update `wiki/architecture.md` (parts list
+   included) and add "architecture updated" to the entry. Otherwise say "architecture
+   unchanged" in the entry.
+3. **Wiki upkeep.** Run `../forge-wiki/scripts/wiki-maintain.mjs --fix` with node
+   (the path is relative to this skill's folder). It regenerates every index and applies the
+   safe fixes; read its `_health-report.md` and write any missing Summary lines.
+4. **Docs.** If the diff touched a documented surface (README, `docs/`, `--help`
+   text, exported API, OpenAPI, any `*.md` outside `wiki/`), run `forge-docs` on the
+   phase diff. It edits on this branch.
+5. Commit these on the phase branch. If the docs edits touch anything that builds
+   (generated help, doc tests, typed examples), re-run §2's scoped verification.
+
+### 4. Land
+
+**Local (default).** Squashing to a local base is reversible until pushed, so with no
+one to ask, proceed (`forge-principles` rule 10); in a live session confirm first.
+Determine the base branch from the `wiki/plan.md` header.
 
 ```
 git switch <base>
@@ -71,76 +105,29 @@ git merge --squash phase/<n>-<slug>
 git commit -m "phase <n>: <one-line summary> (gate: <gate>)"
 ```
 
-Because the phase branch was just rebased onto base (§2), this squash cannot
-conflict and the committed tree is byte-identical to the one the gate passed on —
-that identity is what makes §2's green mean "green on base". If git still reports
-a conflict, base moved after the rebase: abort the merge, return to §2, rebase
-again. Never resolve conflicts on base.
+The phase branch was just rebased (§2), so this cannot conflict and the tree is the
+one the gate passed on. If git still reports a conflict, base moved: abort, go back
+to §2. Never resolve conflicts on base. Don't push unless the user asked.
 
-One commit. The base branch history stays one gated commit per phase. Do **not**
-push unless the user asks (their standing rule); if they do ask, confirm, then push.
+**`--pr` (factories, protected bases).** Don't touch base. Push the phase branch and
+open a PR against `<base>` (`gh pr create --fill`, or hand the branch to `shepherd
+--once` when installed). The PR is squash-merged by whoever owns the merge; the
+build-log entry is already in it. Report the PR URL.
 
-### 4. Append the build-log entry
+### 5. Report
 
-Prepend to `wiki/build-log.md` (newest on top):
+State: phase landed (commit on base, or PR URL), the gate that passed, the build-log
+entry, whether `forge-docs` changed anything, and the next phase with its branch and
+gate. End with the result line from `../forge/references/headless.md`:
 
-```markdown
-## Phase N — <title>
-**Branch:** `phase/<n>-<slug>` → squashed to `<base>`
-
-- <what was built, briefly>
-- <the *why* of any notable decision; link the ADR — [[decisions/NNNN-...]]>
-- <any scope cut → also note in [[improvements]]>
-- **Gate:** <exact gate> — green (<one line on how verified>).
-```
-
-If decisions or incidents arose during the phase that aren't yet captured, write/
-update the ADR or `wiki/notes/` entry now and link it. Update `wiki/index.md` if new
-ADRs/notes were added.
-
-Then **reconcile `wiki/architecture.md`** — this skill owns keeping it honest. If
-the phase added or changed a component, a boundary, the data flow, a scale
-assumption, or the central bet: update the doc (including its parts list) now and
-add "architecture updated" to the build-log entry. If nothing changed shape, state
-that explicitly in the entry. A phase never lands with a stale architecture doc.
-
-### 4b. Wiki upkeep (automatic)
-
-Run **`forge-wiki-maintain --fix`**: every index regenerated, safe health fixes
-applied. Each landed phase leaves the wiki internally consistent — this runs every
-ship, not when someone remembers.
-
-### 5. Doc drift (auto if applicable)
-
-If the landed phase's diff touched a documented surface (README, `docs/`,
-`--help` text, exported API surface, OpenAPI spec, any `*.md` outside
-`wiki/`), invoke **`forge-docs`** scoped to the just-landed commit. It
-auto-fixes concrete drift (renamed commands, changed signatures, moved env
-vars) and surfaces structural gaps as taste decisions. If no doc surface
-was touched, skip cleanly and say so.
-
-`forge-docs`'s commits (if it actually edits anything) land on the base
-branch as one additional commit per phase, prefixed `docs:`. This is the
-only exception to "one commit per phase on base" — and only when docs
-actually changed. If the doc edits touch anything that participates in the
-build (generated help text, doc tests, typed examples), re-run §2's scoped
-verification before committing; prose-only docs land as-is.
-
-### 6. Report
-
-State: phase landed, the single commit hash on base, the gate that passed, the
-build-log entry written, whether `forge-docs` ran and what it changed, and
-what the next phase + its branch + its gate are (from the plan). Optionally
-offer to create the next phase branch.
+`FORGE_RESULT {"skill":"forge-ship","status":"done","phase":N,"gate":"green","notes":"<commit or PR URL>"}`
 
 ## Rules
 
-- No green gate **on the rebased tree**, no merge. No exceptions — escalate to the
-  user instead. Rebase-then-verify is what makes "green" mean green on base.
-- One squashed phase commit on the base branch — plus, **only when `forge-docs`
-  actually changed docs**, one optional follow-up `docs:` commit (§5). No other
-  commits on base. If a squash would lose important message detail, put it in the
-  build-log entry, not in extra base commits.
-- Never push or open a PR unless explicitly asked; never commit on base outside the
-  squash-merge commit.
-- Don't skip the build-log entry — an unlogged phase is an incomplete phase.
+- No green gate on the rebased tree, no landing. Escalate instead. The one exception
+  is a crack-on gate the agent cannot run (human, browser, device): it lands with
+  `gate: deferred` and the exact check in the build-log entry (`../forge/references/crack-on.md`).
+- Exactly one squashed commit per phase on base, holding the code, the build-log
+  entry, the wiki and the docs. No other commits on base.
+- Never commit on base outside the squash commit. Never push to base unless asked.
+- An unlogged phase is an incomplete phase.

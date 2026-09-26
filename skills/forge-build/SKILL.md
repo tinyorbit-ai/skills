@@ -51,28 +51,26 @@ Build the phase's work to a standard you'd defend in review:
   the work, not scope creep; leaving both paths alive is the phase's own mess, and
   the next builder inherits it as "legacy". If a removal is genuinely unsafe, name
   the consumer that needs it and record an ADR — never default to keeping it "for
-  compatibility" without one (`forge-principles`'s `references/simplicity.md`).
+  compatibility" without one (`../forge-principles/references/simplicity.md`).
 - **Match the codebase.** Read neighboring code first; follow its patterns, naming,
   and idioms. New code should read like the surrounding code.
 - **Default-deny before adding.** A new dependency, config surface, wrapper,
   abstraction, or service boundary needs the phase's work to demand it — otherwise
   prefer the existing path, and inline over abstract until a second caller exists.
   Keep functions small and performant: reach for the straightforward algorithm
-  before the clever one, and never an accidental quadratic (`forge-principles`'s
-  `references/simplicity.md`).
+  before the clever one, and never an accidental quadratic (`../forge-principles/references/simplicity.md`).
 - **Honor the ADRs.** Build along the recorded decisions. If a decision turns out
   wrong while building, stop, write/update the ADR with what you learned, and raise
   it — don't silently diverge.
 - **Strict by construction.** Write to the project's strictest setting from the
-  start (typed, no escape hatches, no `any`/equivalent — see `forge-review`'s
-  `references/strictness.md`). Don't leave it for review to fix.
+  start (typed, no escape hatches, no `any`/equivalent — see `../forge-review/references/strictness.md`). Don't leave it for review to fix.
 - **Tests as you go, sized to the risk.** Write the phase's tests with the code, not
   after. The target is *coverage* — every behavior the phase adds is caught by
   something that goes red if it regresses — not one test per behavior. Prefer the
   fewest tests that would actually catch it: one crossing the real seam over five
   mirroring the implementation, a real object over a mock, a fixture no bigger than
   its assertion. Tests are parts you pay for on every future change
-  (`forge-principles`'s `references/simplicity.md`), so match the depth to the risk
+  (`../forge-principles/references/simplicity.md`), so match the depth to the risk
   the phase carries. While building, run only the tests your change affects — fast
   feedback per iteration; the full suite still gates the hand-off in `forge-review`,
   so this scopes the inner loop only.
@@ -94,6 +92,10 @@ When the phase's work is complete and committed on its branch:
    optional-Codex / auto-fix pass. Do not run `forge-ship` from here — review gates
    shipping.
 3. Report: phase built, branch, commits, gate status, handing to review.
+
+## Result
+
+If an ADR or the plan turns out wrong mid-build, end `blocked` with `notes` naming the ADR and why, rather than building around it. End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 

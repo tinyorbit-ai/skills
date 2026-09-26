@@ -75,11 +75,11 @@ Every skill also runs standalone: `/forge-plan`, `/forge-review`,
 | Stage | Skills |
 |---|---|
 | Setup | `forge-init` |
-| Plan | `forge-discovery` · `forge-ambition` · `forge-plan` · `forge-harden` (+ `-eng` `-security` `-design` `-dx` `-scope`) |
+| Plan | `forge-discovery` · `forge-scope` · `forge-plan` · `forge-harden` |
 | Design | `forge-design-system` · `forge-design-explore` |
 | Build | `forge-build` · `forge-review` · `forge-polish` · `forge-dx` · `forge-ship` · `forge-docs` |
 | Look | `forge-debug` · `forge-retro` |
-| Wiki | `forge-wiki` · `forge-wiki-maintain` |
+| Wiki | `forge-wiki` |
 | Orchestrate | `forge` (resumable; `/forge help` for the map) |
 
 Per-skill notes in [`skills/INDEX.md`](./skills/INDEX.md). The quality bar is

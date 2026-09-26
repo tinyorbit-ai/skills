@@ -3,7 +3,7 @@
 Companion to `forge-discovery/SKILL.md`. The SKILL lists the questions; this
 defines, per question, **what "specific enough" sounds like** (push until you
 hear it) and **what a vague answer sounds like** (red flags — push once more,
-per `forge-principles`'s `references/voice.md`: push once, then push again, never
+per `../forge-principles/references/voice.md`: push once, then push again, never
 a third time).
 
 Every gate pushes on **specificity and observed reality** — never on demand,

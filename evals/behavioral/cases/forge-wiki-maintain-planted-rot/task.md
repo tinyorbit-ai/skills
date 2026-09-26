@@ -1,7 +1,7 @@
 This repo's wiki has accumulated rot after a run of ingests.
 
-Use the forge-wiki-maintain skill (read .claude/skills/forge-wiki-maintain/SKILL.md
-and follow it) to run a full HEALTH pass **with --fix**.
+Use the forge-wiki skill (read .claude/skills/forge-wiki/SKILL.md and follow its
+MAINTAIN mode) to run a full health pass **with --fix**.
 
 This is a NON-INTERACTIVE run: where the skill would offer choices or surface
 structural candidates for a decision, report them in the health report and your

@@ -12,7 +12,7 @@ The wiki has **two layers**, reachable from one top-level `index.md`:
 2. **Knowledge base** — `wiki/knowledge/` — *ingested context* the build rests on:
    business rationale, stakeholder email, domain research, user findings,
    conversations, competitive notes. Anything you can paste or point at. Written by
-   `forge-wiki`; maintained by `forge-wiki-maintain`. This is the Karpathy-style
+   `forge-wiki`; maintained by `forge-wiki` MAINTAIN. This is the Karpathy-style
    second brain that lives alongside the repo.
 
 **Context is welcome — more is better than less.** Ingest freely;
@@ -40,10 +40,10 @@ wiki/
 │
 │   ── Knowledge base ──
 └── knowledge/
-    ├── INDEX.md            Topic directory + top articles per topic. (forge-wiki-maintain)
+    ├── INDEX.md            Topic directory + top articles per topic. (forge-wiki MAINTAIN)
     ├── _compilation-log.md What was ingested / merged / skipped, per source. (forge-wiki)
     └── <topic>/            Flat, content-named topics (e.g. business-context/, domain/, users/).
-        ├── _index.md       Every article in the topic + a one-line summary. (forge-wiki-maintain)
+        ├── _index.md       Every article in the topic + a one-line summary. (forge-wiki MAINTAIN)
         └── <article>.md    A living article (see "Knowledge articles" below).
 ```
 
@@ -55,7 +55,7 @@ Markdown links between wiki files. **Everything must be reachable from `index.md
 the project-record files directly, and the knowledge base via a "Knowledge base"
 section in `index.md` that links to `[[knowledge/INDEX]]`. When you create any wiki
 file, add it to the relevant index in the same edit. Article basenames are unique
-within a topic; `forge-wiki-maintain` keeps every index honest.
+within a topic; `forge-wiki` MAINTAIN keeps every index honest.
 
 ## ADRs (`wiki/decisions/NNNN-slug.md`)
 
@@ -98,7 +98,7 @@ entry per review pass that found something worth remembering:
   the compounding is legible, never silent.
 - **Learnings can die.** A rule contradicted by reality gets struck (kept as
   `~~rule~~ retired YYYY-MM-DD — <why>`), not silently deleted — the reversal is
-  itself a lesson. `forge-wiki-maintain` flags stale references and
+  itself a lesson. `forge-wiki` MAINTAIN flags stale references and
   contradicting pairs.
 
 This is the project's accumulated taste — later reviews read it first.
@@ -179,7 +179,7 @@ This is what makes the wiki capture *not just what we decided but why, as it cha
   route it to nearest-fit until a cluster of ~3+ forms.
 - **Split only on a clean seam.** Size alone never forces a split. Split only when a
   topic exceeds ~150 articles *and* holds ≥2 self-contained sub-domains.
-  `forge-wiki-maintain` flags candidates as advisory; keeping a big coherent topic is
+  `forge-wiki` MAINTAIN flags candidates as advisory; keeping a big coherent topic is
   a valid answer.
 
 ## The capture rule
@@ -204,6 +204,6 @@ Never under-capture the *why*. When in doubt, write it down.
 - **`forge-wiki`** — ask anything against the wiki, and ingest any source into
   `knowledge/`. Plan-first: it proposes what it will write or merge (new vs Timeline
   append, target topic, Core Concept changes) and waits for approval before mutating.
-- **`forge-wiki-maintain`** — regenerate `index.md` / `knowledge/INDEX.md` / topic
+- **`forge-wiki` MAINTAIN** — regenerate `index.md` / `knowledge/INDEX.md` / topic
   `_index.md` files, and run health checks (orphans, broken wikilinks, missing
   summaries, stale evidence, duplicates, flat-invariant violations).

@@ -26,7 +26,7 @@ the reasoning legible.
 
 5. **Focus as subtraction.** The strongest move on a sprawling plan is what to
    *not* do — not for value reasons, for focus reasons. Fewer phases, each
-   sharper. (`forge-harden-scope` TRIM's reflex.)
+   sharper. (`forge-scope` TRIM's reflex.)
 6. **Subtraction default (design).** If a UI element doesn't earn its pixels, cut
    it. Feature bloat kills the feel faster than missing features. The general
    discipline behind #5, #6, and #10 — economy of means — lives in

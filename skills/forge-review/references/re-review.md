@@ -24,8 +24,9 @@ On invocation, read the most recent review record for this phase from
 `wiki/learnings.md`:
 
 - **No record** → full review at the triaged tier.
-- **Same `diff` fingerprint and the record ended green** → report "phase N already
-  reviewed at this state (head `<sha>`, all green)" and stop. Nothing to re-earn.
+- **Same `diff` fingerprint and the record ended green** → skip passes 0-7, report
+  "phase N already reviewed at this state (head `<sha>`)", then still run the terminal
+  command block. It is cheap and proves nothing regressed on base since.
 - **Same fingerprint but the record was not green** → the previous run ended with
   open findings or an escape to forge-debug; resume the fix loop, don't restart the
   review.

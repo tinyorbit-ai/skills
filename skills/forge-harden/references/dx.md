@@ -1,9 +1,8 @@
----
-name: forge-harden-dx
-description: Forge plan-time developer-experience persona, run by forge-harden — checks API and CLI naming, error intent, setup friction and the first five minutes in wiki/plan.md before build. Use when forge-harden runs it, or when asked to "DX-review the plan". For the built thing, use forge-dx.
----
+# dx persona
 
-# forge-harden-dx
+A forge-harden pass, run as an isolated subagent (or standalone as `forge-harden dx`).
+Paths below are relative to the forge-harden skill folder. Record taste calls for the
+orchestrator's batch; only the orchestrator asks the user.
 
 The DX lead's review of the **plan**, not the running thing. Asks: does
 this plan obligate a respectful, learnable developer surface, or does it
@@ -13,7 +12,7 @@ leave DX to chance? Runs *before* implementation.
 
 - **Auto:** `forge-harden` invokes this when the plan ships a library /
   API / CLI / SDK.
-- **Standalone:** invoke directly any time.
+- **Standalone:** `forge-harden dx`, any time.
 
 If the plan ships no developer-facing surface, say so and exit.
 
@@ -39,7 +38,7 @@ Prereq: `wiki/plan.md` exists and ships a dev-facing surface. Read it,
 ### 0. The persona card (gate — nothing proceeds without it)
 
 Every DX judgment is relative to *who* the developer is. From the brief's
-"Who & when" (or one AskUserQuestion if the brief doesn't pin it), write a
+"Who & when" (if the brief doesn't pin it, record your best read as a taste decision), write a
 persona card into the plan's `### DX` subsection:
 
 ```
@@ -58,7 +57,7 @@ respect, never a market to win.
 
 Estimate the plan's current time-to-first-success (TTHW — from "I have
 nothing" to "it did the thing once") by counting the actual steps the plan
-implies. Then have the user pick the bar via Decision Brief, calibrated
+implies. Then propose the bar as a taste decision, calibrated
 against tools they *admire* (craft reference, not competition):
 
 - **Excellent** — under ~2 minutes; usually demands a zero-config path.
@@ -88,8 +87,8 @@ moment ships a tool nobody *feels* — that's a finding, not a nice-to-have.
 
 ### 1. Rated walk — score each 0–10, fix to 10
 
-Run the **rate → fix-to-10 → re-rate loop** (forge suite's
-`references/scoring.md`) over these six. Deltas go in the report.
+Run the **rate → fix-to-10 → re-rate loop** (
+`../forge/references/scoring.md`) over these six. Deltas go in the report.
 
 - **The five-minute experience.** From "I have nothing" to "it did the
   thing once" — does the plan obligate this path? Which phase delivers it?
@@ -117,10 +116,10 @@ Walk the planned journey stage by stage (discover → install → first success
 → real usage → debug) *as the persona*, against what the plan actually
 obligates. Each friction point is **evidence-grounded** — not "install
 might be hard" but "step 3 assumes Docker is running; the plan checks
-nothing and this persona sees a raw connection error". Surface each
-friction point as its **own** Decision Brief (fix in plan / document it /
-accept the friction) — never batch frictions into one mega-question; each
-deserves its own decision.
+nothing and this persona sees a raw connection error". Record each
+friction point as its **own** taste decision (fix in plan / document it /
+accept the friction), never merged into one mega-question; the orchestrator
+batches them into its single end-of-run ask.
 
 ### 2. Fix policy
 
@@ -129,13 +128,12 @@ deserves its own decision.
   add to phase Work bullets or strengthen the phase gate to include the
   developer-side check.
 - **Taste** (which naming style, which docs flavor) → return as taste
-  decisions for the orchestrator's batch. Decision Brief shape (forge
-  suite's `references/question-style.md`).
+  decisions for the orchestrator's batch. Decision Brief shape (`../forge/references/question-style.md`).
 
 ### 3. Report
 
 ```
-forge-harden-dx (mode: EXPANSION | POLISH | TRIAGE)
+forge-harden dx (mode: EXPANSION | POLISH | TRIAGE)
   Persona: <one line> · First-run bar: <excellent | solid | current, N min>
   Magical moment: <moment> via <vehicle> (phase <n>)
   Scores (before → after): 5-min path <a>→<b> · ergonomics <a>→<b> · errors <a>→<b>
@@ -146,7 +144,7 @@ forge-harden-dx (mode: EXPANSION | POLISH | TRIAGE)
 ```
 
 If a previous `## Review` block exists, lead with the trend line per
-`references/scoring.md`. The persona card, first-run bar, and magical
+`../forge/references/scoring.md`. The persona card, first-run bar, and magical
 moment let `forge-dx` (runtime) test reality against what the plan
 promised — the boomerang: plan said 3 minutes, reality says 8.
 
@@ -162,7 +160,7 @@ the section yourself and present the taste batch.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format
-- forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- `forge-harden`'s `references/craft-patterns.md` — respect the developer's time
+- `../forge/references/question-style.md` — Decision Brief format
+- `../forge/references/scoring.md` — the rate → fix-to-10 → re-rate loop
+- `references/craft-patterns.md` — respect the developer's time
 - `forge-dx` — runtime counterpart; reads the persona card + first-run bar set here

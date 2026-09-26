@@ -9,7 +9,7 @@ The quality gate between building a phase and shipping it. Security, real tests,
 strict types, runtime verification, third-party eyes — then **fixes what it
 finds** and remembers the lesson. The third-party pass is configurable — Codex,
 Gemini, or Claude — via the shared reviewer abstraction
-(`forge/references/reviewer-agents.md`).
+(`../forge/references/reviewer-agents.md`).
 
 ## Scope
 
@@ -21,9 +21,9 @@ visibly: `Prior learning applied: <rule> (from <date>, phase <n>)` — the
 compounding should be legible, not silent.
 
 Re-runs are idempotent (`references/re-review.md`): an unchanged fingerprint whose
-record ended green is reported, not replayed; a changed one gets a **re-review** —
-prior findings audited first (resolved / still open), then the delta since the last
-reviewed HEAD. The terminal command block always runs in full either way.
+record ended green skips the passes; a changed one gets a **re-review** (prior findings
+audited first, then the delta since the last reviewed HEAD). The terminal command block
+runs in full either way.
 
 ## Triage — scale the machinery, not the bar
 
@@ -48,39 +48,23 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
 1. **Security & abuse.** Trust boundaries, input validation, authz, secrets, injection
    (SQL / command / LLM-prompt / path), unsafe deserialization, dependency risk,
    anything touching untrusted input. Severity-tag every finding.
-2. **Tests — covered, green, and no heavier than they need to be.** Every behavior
-   the phase added is **covered** by a test that goes red if it regresses. Covered,
-   not one-test-each: one test crossing the real seam beats five mirroring the
-   implementation, and the bar is the *fewest* tests that would actually catch it.
-   Missing/weak coverage is a finding to fix, not note. The full suite **passes** —
-   run it, show it; flaky or skipped count as failing. Test **cost** is reviewable
-   too: a phase that materially slows the suite, mocks what could have been real,
-   or ships fixtures far larger than their assertions is a finding, same as one
-   that under-tests (`references/review-standards.md`).
-3. **Strict type safety.** Enforce the project's strictest setting; escape hatches
-   **banned**. For TypeScript: `strict: true`, no `any` (explicit or implicit), no
-   unchecked `as`, no `@ts-ignore`/`@ts-expect-error` without a justified comment, no
-   non-null `!` on untrusted values. Equivalent rules per language in
-   `references/strictness.md`. Type check must pass clean.
-4. **Correctness & edges.** Nil/empty/overflow/timeout/concurrent/partial-failure
-   paths; idempotency; error propagation at the right layer; resource leaks.
+2. **Tests — covered, green, no heavier than needed.** Every behavior the phase
+   added goes red if it regresses (`forge-principles` rule 6). Missing or weak
+   coverage is a finding to fix. The suite passes, shown: scoped to the diff by
+   default, the full suite when it is fast or the diff touched shared code. Test cost
+   is reviewable too (`references/review-standards.md`).
+3. **Strict type safety.** The project's current strict config, escape hatches banned
+   (`references/strictness.md`). Type check passes clean.
+4. **Correctness & edges.** The edges in `forge-principles` rule 3, plus the
+   reachable input classes for this diff (`references/review-standards.md`).
 5. **Economy & performance — the whole diff, tests included.** Objective and
-   auto-fixable: collapse pass-through layers, inline premature abstractions
-   (single caller), delete unused extension points, reject speculative config,
-   prefer an existing path over a new parallel one, split giant functions, replace
-   an accidental quadratic with the straightforward algorithm.
-   - **Tests are not exempt.** Duplicate assertions of an already-covered behavior,
-     implementation-mirror tests, mocks standing in for an object that could be
-     real, and oversized fixtures are objective findings whose fix is **deletion**.
-   - **Superseded code.** For every path this diff touched, ask what it made dead:
-     the old branch, the now-unreferenced helper, the compat shim with no caller
-     left, the test whose behavior is gone. Removing it is an objective fix, not a
-     suggestion — and "keep it for compatibility" needs a *named* consumer, else
-     it's an unexamined default (`forge-principles/references/simplicity.md`).
-
-   The phase must be exactly what the plan asked — nothing more, nothing less, and
-   nothing it obsoleted left standing. A simpler, faster, smaller diff that still
-   passes the gate is a fix, not a suggestion.
+   auto-fixable: collapse pass-through layers, inline single-caller abstractions,
+   delete unused extension points and speculative config, reuse an existing path,
+   split giant functions, fix accidental quadratics. Duplicate, mirror or over-mocked
+   tests and oversized fixtures are fixed by **deletion**. For every path the diff
+   touched, remove what it made dead (old branch, orphaned helper, callerless shim,
+   test whose behavior is gone) (`../forge-principles/references/simplicity.md`). A
+   smaller diff that still passes the gate is a fix, not a suggestion.
 6. **Runtime verification.** Actually run it: execute the phase's verifiable gate
    and show it green, then exercise the phase **goal** like a real user (UI: drive
    the flow incl. loading/empty/error states; CLI/lib: real + adversarial inputs;
@@ -96,9 +80,9 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
      here (live onboarding/TTHW/error-message audit). Same: objective fixes fold in.
    - Both are scoped to what the phase changed and skip cleanly if out of scope.
 7. **Third-party adversarial pass (required at deep tier, else per config).**
-   Resolve the reviewer per **`forge/references/reviewer-agents.md`** — explicit
-   `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then auto-probe
-   `codex` → `gemini` → `claude`. State which one was picked and why. If none
+   Resolve the reviewer per **`../forge/references/reviewer-agents.md`** — explicit
+   `wiki/.forge/config.yaml`, then `$FORGE_REVIEWER`, then the first installed CLI
+   from a different model family than the driver, run read-only. State which one. If none
    available or config says `reviewer: none`, state the pass is skipped and
    continue (don't block) — at deep tier that degradation is disclosed in the
    receipts, never silent.
@@ -125,17 +109,16 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
   Never declare green to satisfy the loop.
 - **Subjective findings → one batch at the end.** Genuine tradeoffs with no right
   answer (and any unreconciled reviewer disagreement) go into a single
-  AskUserQuestion batch in the **Decision Brief** shape (forge suite's
-  `references/question-style.md`): concrete framing, named stakes,
-  recommendation with the *why* and the evidence that would flip it. Don't
-  drip questions mid-pass. Take a position on each; anti-sycophantic throughout.
+  AskUserQuestion batch in the **Decision Brief** shape
+  (`../forge/references/question-style.md`). Don't drip questions mid-pass. With no
+  one to ask, take your recommended option on each and list them as assumptions.
 
 ## Learnings → wiki
 
 For each non-trivial thing found and fixed, append to `wiki/learnings.md`: date,
 phase, a **confidence `N/10`** (structural lesson 8–9, one-off quirk 2–3), **what
 was found**, **how it was fixed**, and the **rule-to-remember** (phrased so
-`forge-build` avoids it next time). Format per forge suite's `references/wiki.md`;
+`forge-build` avoids it next time). Format per `../forge/references/wiki.md`;
 link from `wiki/index.md`. A real incident also gets `wiki/notes/`; a contradicted
 past learning is retired visibly (strike + why), never silently violated. **Tell
 the user what you captured, in the same turn.**
@@ -146,18 +129,15 @@ replaying the review, and the source the next review's trend line, the re-run
 fingerprint check, and `forge-retro`'s deltas all read. Without it the trend is
 unfalsifiable. Exact format and required lines: `references/re-review.md`.
 
-**Calibration — the review's own misses.** At review start, check whether any
-previously green-reviewed, shipped phase has since been hotfixed or reverted on the
-base branch, and append a `review-miss` learning for each confirmed one — a
-mandatory check in every future review (procedure in `references/re-review.md`).
-The review gets measurably better, or the trend line shows it isn't.
+**Calibration.** At review start, check whether a previously green, shipped phase has
+since been hotfixed or reverted on base, and append a `review-miss` learning for each
+(procedure in `references/re-review.md`).
 
 ## Evidence chain
 
-Number every finding (`finding-001`, …) when raised and keep the number through fix
-and re-verify. Visual/runtime findings get paired artifacts named by number
-(`finding-001-before.png` / `-after.png`); non-visual ones paste command output
-inline. "Fixed" without its numbered evidence is a claim, not a fix.
+Number every finding (`finding-001`, …) and keep the number through fix and
+re-verify. Visual findings get `finding-001-before.png` / `-after.png`; others paste
+command output inline.
 
 ## Hand off — the terminal command block is the pass condition
 
@@ -165,25 +145,22 @@ Review ends with one final command block, run as-is, **its raw output pasted int
 the review report**:
 
 ```
-<phase gate> && <typecheck> && <lint> && <tests scoped to the diff>
+<phase gate> && <typecheck> && <lint> && <tests: scoped, or full when fast or shared code changed>
 ```
 
-Substitute the project's real commands; prefer the full suite — if it's too slow to
-run here, that is itself a pass-2 finding. **No pasted output, no hand-off**: a
+Substitute the project's real commands. **No pasted output, no hand-off**: a
 described "all green" is a claim, not a state. Then report the summary — scope
 verdict, completion checklist, passes run, findings fixed by severity (trend vs.
-the previous review record, per forge suite's `references/scoring.md`), learnings
+the previous review record, per `../forge/references/scoring.md`), learnings
 recorded, open taste decisions — and hand to **`forge-ship`**. Never ship from here.
+The last line is the result from `../forge/references/headless.md`
+(`FORGE_RESULT {"skill":"forge-review","status":"done","phase":N,"gate":"green",…}`).
 
 ## Rules
 
-- Auto-fix objective; surface only true taste. Loop fixes until clean or the
-  3-attempt escape fires — unfixed objective findings without an escalation
-  mean the review is unfinished.
-- Evidence for every "green": show the command output, not a claim. The terminal
-  command block's pasted output is the hand-off condition.
-- Strict-types escape hatches are banned, not negotiated.
-- Respect branch discipline: fix on the phase branch, never base; never ship here.
+- Loop fixes until clean or the 3-attempt escape fires; unfixed objective findings
+  without an escalation mean the review is unfinished.
+- Fix on the phase branch, never base; never ship here.
 - Record learnings every pass that found something, and say so.
 
 ## References
@@ -191,6 +168,6 @@ recorded, open taste decisions — and hand to **`forge-ship`**. Never ship from
 - `references/review-standards.md` — what each pass checks, in depth
 - `references/re-review.md` — fingerprints, delta re-review, receipts template, miss detection
 - `references/strictness.md` — per-language strict-mode + banned-escape-hatch matrix
-- forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
-- forge suite's `references/question-style.md` — Decision Brief format for the taste batch
-- `forge-principles`'s `references/simplicity.md` — economy of means + the simplicity pass
+- `../forge/references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
+- `../forge/references/question-style.md` — Decision Brief format for the taste batch
+- `../forge-principles/references/simplicity.md` — economy of means + the simplicity pass

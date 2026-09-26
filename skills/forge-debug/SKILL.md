@@ -1,6 +1,6 @@
 ---
 name: forge-debug
-description: Root-cause debugging — no fix until the cause is named. Investigates, tests hypotheses, lands a minimal fix plus a regression test, and notes the incident in the forge wiki if one exists. Use when a test or gate fails, behaviour is wrong, or asked to "root cause this" or "why is this failing".
+description: Root-cause debugging — no fix until the cause is named. Investigates, tests hypotheses, lands a minimal fix plus a regression test, and notes the incident in the forge wiki if one exists. Use when asked to "root cause this" or "why is this failing", or when a forge gate or review fix loop fails.
 ---
 
 # forge-debug
@@ -55,6 +55,10 @@ If the failure was non-obvious, instructive, or forced a decision, write
 what it demonstrates. Link it from `wiki/index.md`. If it changed a design choice,
 also add/update the relevant ADR. **Tell the user you wrote it**, in the same reply.
 A clean fix without the lesson captured is a half-done fix.
+
+## Result
+
+If the fix would touch more than ~5 files and no one can confirm, end `blocked` with the root cause and proposed fix in `notes`. End with the `FORGE_RESULT` line from `../forge/references/headless.md`.
 
 ## Rules
 

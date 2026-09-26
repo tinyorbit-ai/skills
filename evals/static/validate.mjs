@@ -86,6 +86,14 @@ for (const s of skills) {
   if (bodyLines >= 200) fail(s.name, `SKILL.md body is ${bodyLines} lines (ceiling: <200)`);
   else if (bodyLines >= 185) warn(s.name, `SKILL.md body is ${bodyLines} lines (approaching the 200 ceiling)`);
 
+  // Word ceiling: SKILL.md loads whole on every trigger. Past ~1,500 words, move
+  // step-scoped detail into references/.
+  const words = body.split(/\s+/).filter(Boolean).length;
+  if (words > 1500) fail(s.name, `SKILL.md is ${words} words (ceiling: 1,500)`);
+
+  // description length: Codex and Claude both truncate or drop long descriptions.
+  if (desc && desc.length > 300) fail(s.name, `description is ${desc.length} chars (ceiling: 300)`);
+
   // internal flag / location agreement
   if (s.internal && !/^\s*internal:\s*true\s*$/m.test(parsed.fm)) {
     fail(s.name, 'lives in a dot-dir but frontmatter lacks `metadata.internal: true` (both are required for WIP skills)');
@@ -116,6 +124,10 @@ for (const s of skills) {
     if (rel.includes('*')) continue;
     if (!existsSync(join(SKILLS_DIR, rel))) missing.add(`skills/${rel}`);
   }
+  const dotRe = /\.\.\/([a-z0-9-]+\/(?:references|scripts|assets)\/[A-Za-z0-9._/-]+\.[a-z]{1,5})\b/g;
+  for (const m of body.matchAll(dotRe)) {
+    if (!existsSync(join(SKILLS_DIR, m[1]))) missing.add(`../${m[1]}`);
+  }
   for (const rel of missing) fail(s.name, `references missing file: ${rel}`);
 }
 
@@ -129,11 +141,10 @@ if (!allScope || inScope('forge-plan')) {
     ['forge-plan', 'references/phase-contract.md', /Human evidence gate[\s\S]*blocks every billing, scale, or polish phase/i, 'human evidence before billing/scale/polish'],
     ['forge-plan', 'references/phase-contract.md', /Release closure[\s\S]*security and authz[\s\S]*backup\/restore and upgrade[\s\S]*release smoke/i, 'explicit release closure'],
     ['forge-discovery', 'references/brief-contract.md', /Human evidence[\s\S]*Unknown[\s\S]*before billing\/scale\/polish/i, 'unknown real-use marker'],
-    ['forge-harden-eng', 'SKILL.md', /Numeric non-functional proof[\s\S]*Load\/latency[\s\S]*Crash\/restart[\s\S]*Backup\/restore[\s\S]*Upgrade/i, 'numeric scale/state proof'],
-    ['forge-harden-eng', 'SKILL.md', /External-reality pass[\s\S]*registries[\s\S]*OS\/CPU\/runtime\/browser platforms[\s\S]*real release path/i, 'external-reality pass'],
-    ['forge-ambition', 'SKILL.md', /Added proof burden[\s\S]*Paired cut or pressure valve/i, 'ambition proof burden and pressure valve'],
-    ['forge-harden-scope', 'SKILL.md', /added proof burden[\s\S]*paired cut or pressure valve/i, 'scope-expansion proof burden and pressure valve'],
-    ['forge-harden-security', 'SKILL.md', /Release-closure audit[\s\S]*authz matrix[\s\S]*packaged-artifact secret scan/i, 'security release closure'],
+    ['forge-harden', 'references/eng.md', /Numeric non-functional proof[\s\S]*Load\/latency[\s\S]*Crash\/restart[\s\S]*Backup\/restore[\s\S]*Upgrade/i, 'numeric scale/state proof'],
+    ['forge-harden', 'references/eng.md', /External-reality pass[\s\S]*registries[\s\S]*OS\/CPU\/runtime\/browser platforms[\s\S]*real release path/i, 'external-reality pass'],
+    ['forge-scope', 'SKILL.md', /added proof burden[\s\S]*paired cut or pressure valve/i, 'scope-expansion proof burden and pressure valve'],
+    ['forge-harden', 'references/security.md', /Release-closure audit[\s\S]*authz matrix[\s\S]*packaged-artifact secret scan/i, 'security release closure'],
   ];
   for (const [skill, rel, pattern, label] of contracts) {
     const path = join(SKILLS_DIR, skill, rel);

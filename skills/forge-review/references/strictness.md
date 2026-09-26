@@ -6,6 +6,11 @@ write to this standard from the start. Detect the language(s) from the phase dif
 and apply the matching row. If a stricter project config already exists, the project
 config wins — never loosen it.
 
+Enforce the project's **current** config on the diff. Don't retrofit tighter compiler
+flags (the `tsconfig` extras below, new lint rules) inside a phase: in an existing repo
+that turns one phase into a repo-wide change. Propose them as an ADR instead; new
+projects start with them.
+
 ## TypeScript / JavaScript
 
 - `tsconfig`: `"strict": true` (implies `noImplicitAny`, `strictNullChecks`, etc.)

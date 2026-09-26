@@ -1,9 +1,8 @@
----
-name: forge-harden-design
-description: Forge plan-time design and UX persona, run by forge-harden — checks hierarchy, UI states, accessibility and responsive intent in wiki/plan.md before build. Use when forge-harden runs it, or when asked to "design-review the plan" or for a "plan-time design audit". Built UI goes to forge-polish.
----
+# design persona
 
-# forge-harden-design
+A forge-harden pass, run as an isolated subagent (or standalone as `forge-harden design`).
+Paths below are relative to the forge-harden skill folder. Record taste calls for the
+orchestrator's batch; only the orchestrator asks the user.
 
 The senior designer's eye on the **plan**, not the running UI. Asks: does
 this plan, as written, set up a designed thing or an undesigned thing? Runs
@@ -12,7 +11,7 @@ this plan, as written, set up a designed thing or an undesigned thing? Runs
 ## When it runs
 
 - **Auto:** `forge-harden` invokes this when the plan ships a UI.
-- **Standalone:** invoke directly to audit a plan's UI ambition any time.
+- **Standalone:** `forge-harden design`, to audit a plan's UI ambition any time.
 
 If the plan has no UI surface, say so and exit.
 
@@ -48,13 +47,12 @@ existing `DESIGN.md` or design ADRs. Past `wiki/learnings.md` rules count.
    every AI-generated site, the plan under-specifies it.
 6. **Responsive is not "stacked on mobile".** Each viewport gets intent.
 7. **Accessibility is specified or it doesn't exist.**
-8. **Subtraction default** and **design for trust** — `forge-harden`'s
-   `references/craft-patterns.md`.
+8. **Subtraction default** and **design for trust** — `references/craft-patterns.md`.
 
 ### 1. Rated passes — each writes an artifact into the plan
 
-Run the **rate → fix-to-10 → re-rate loop** (forge suite's
-`references/scoring.md`) over the six passes. The fix for each pass is a
+Run the **rate → fix-to-10 → re-rate loop** (
+`../forge/references/scoring.md`) over the six passes. The fix for each pass is a
 **concrete artifact written into `wiki/plan.md`** (in the phase or a
 `### Design` subsection) — prose obligations don't count as fixes.
 
@@ -114,13 +112,12 @@ Each row becomes either a plan fix (objective) or a taste decision (below).
   Work bullets or strengthening its gate (e.g. "manual: keyboard-only flow
   completes the task").
 - **Taste** (which hierarchy, which interaction feel) → return as taste
-  decisions for the orchestrator's batch. Decision Brief shape (forge
-  suite's `references/question-style.md`).
+  decisions for the orchestrator's batch. Decision Brief shape (`../forge/references/question-style.md`).
 
 ### 3. Report
 
 ```
-forge-harden-design (mode: EXPANSION | POLISH | TRIAGE)
+forge-harden design (mode: EXPANSION | POLISH | TRIAGE)
   Scores (before → after): hierarchy <a>→<b> · states <a>→<b> · journey <a>→<b>
                            specificity <a>→<b> · system <a>→<b> · responsive+a11y <a>→<b>
   Artifacts written: <state table | storyboard | hierarchy sketches | decisions table>
@@ -129,7 +126,7 @@ forge-harden-design (mode: EXPANSION | POLISH | TRIAGE)
 ```
 
 If a previous `## Review` block exists, lead with the trend line per
-`references/scoring.md`.
+`../forge/references/scoring.md`.
 
 Orchestrator folds into the plan's `## Review` section. Standalone: write
 the section yourself and present the taste batch.
@@ -147,7 +144,7 @@ the section yourself and present the taste batch.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format
-- forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- `forge-harden`'s `references/craft-patterns.md` — constraint worship, subtraction default, design for trust
+- `../forge/references/question-style.md` — Decision Brief format
+- `../forge/references/scoring.md` — the rate → fix-to-10 → re-rate loop
+- `references/craft-patterns.md` — constraint worship, subtraction default, design for trust
 - `forge-design-system` — creates the DESIGN.md Pass 5 aligns against

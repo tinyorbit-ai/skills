@@ -1,9 +1,8 @@
----
-name: forge-harden-security
-description: Forge plan-time security persona, run by forge-harden — OWASP, STRIDE, secrets, supply chain, CI/CD and prompt injection against wiki/plan.md. Use when forge-harden runs it, or when asked to "threat model this plan", "security-review the plan" or for a "CSO review".
----
+# security persona
 
-# forge-harden-security
+A forge-harden pass, run as an isolated subagent (or standalone as `forge-harden security`).
+Paths below are relative to the forge-harden skill folder. Record taste calls for the
+orchestrator's batch; only the orchestrator asks the user.
 
 The CSO persona reviewing the **plan** for threat shape, before any code
 exists to attack. Covers infrastructure-first concerns (secrets, supply
@@ -21,13 +20,13 @@ risks if the build touches model APIs.
   the user can triage cheaply. Filter only true noise (test fixtures,
   placeholders, docs examples). Use periodically or before a release.
 
-The gates are defined in forge suite's `references/scoring.md`. State the
+The gates are defined in `../forge/references/scoring.md`. State the
 mode upfront. Default to DAILY.
 
 ## When it runs
 
 - **Auto:** `forge-harden` invokes this on every hardening pass.
-- **Standalone:** invoke any time, especially before a release or after
+- **Standalone:** `forge-harden security`, any time, especially before a release or after
   the surface area changes.
 
 ## Process
@@ -96,14 +95,13 @@ Severity-tag every finding (`high` / `med` / `low`).
   fix `wiki/plan.md` in place. Add the secure shape to phase Work bullets
   and the verification to the gate.
 - **Taste** (a real tradeoff — e.g. JWT vs. session, hashed vs. encrypted
-  at rest) → return as taste decisions. Decision Brief shape (forge
-  suite's `references/question-style.md`). Always tag the security
+  at rest) → return as taste decisions. Decision Brief shape (`../forge/references/question-style.md`). Always tag the security
   implication of each option in its description.
 
 ### 5. Report
 
 ```
-forge-harden-security (mode: DAILY | DEEP)
+forge-harden security (mode: DAILY | DEEP)
   Findings fixed: <N> (high: <h>, med: <m>, low: <l>; TENTATIVE: <t>)
   Trend: <N> last harden → <N> now | first run
   Trust boundaries named: <list>
@@ -113,7 +111,7 @@ forge-harden-security (mode: DAILY | DEEP)
 ```
 
 The trend line compares against the previous `## Review` block's security
-findings (per `references/scoring.md`) — visible compounding, so the user
+findings (per `../forge/references/scoring.md`) — visible compounding, so the user
 sees the threat surface shrinking (or growing) run over run.
 
 Orchestrator folds into the plan's `## Review` section. Standalone: write
@@ -129,5 +127,5 @@ the section yourself and present the taste batch.
 
 ## References
 
-- forge suite's `references/question-style.md` — Decision Brief format
-- forge suite's `references/scoring.md` — confidence gates + trend tracking
+- `../forge/references/question-style.md` — Decision Brief format
+- `../forge/references/scoring.md` — confidence gates + trend tracking
