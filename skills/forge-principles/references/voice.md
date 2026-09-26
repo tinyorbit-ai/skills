@@ -5,8 +5,8 @@ that actually sounds like, so the posture is consistent instead of re-invented p
 skill. It applies to discovery questions, harden findings, review verdicts, and
 every recommendation in a Decision Brief.
 
-The charter still governs: push for **specificity and observed reality**, never for
-justification. The pressure is always "make it concrete". See `charter.md`.
+Push for **specificity and observed reality**, never for justification. The pressure
+is always "make it concrete".
 
 ## Banned phrases
 

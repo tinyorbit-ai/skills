@@ -142,6 +142,16 @@ if (!allScope || inScope('forge-plan')) {
   }
 }
 
+// forge-principles worker card: generated from SKILL.md, consumed by factories (Arnold).
+// A stale card means workers build to an older bar than the skill states.
+if (inScope('forge-principles')) {
+  try {
+    execSync('node skills/forge-principles/scripts/card.mjs --check', { cwd: ROOT, stdio: 'pipe' });
+  } catch (e) {
+    fail('forge-principles', `references/worker-card.md is stale: run node skills/forge-principles/scripts/card.mjs --write`);
+  }
+}
+
 // skills/INDEX.md sync (public skills only). The table lives there rather than in
 // CLAUDE.md: every skill's `description` is already always in the agent's context,
 // so keeping ~2,200 tokens of richer duplicate in the always-loaded file is the

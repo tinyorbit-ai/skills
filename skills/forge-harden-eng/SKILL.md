@@ -9,10 +9,6 @@ The staff engineer / EM persona doing a plan review *before* any code is
 written. Reads the plan and architecture, finds the structural gaps, fixes
 the objective ones, surfaces the taste calls.
 
-## Charter
-
-Critique the **plan** — every finding is a plan change, never a reason to stop.
-
 ## Modes
 
 - **LOCK** (default; run before build) — every finding surfaced, every
@@ -41,7 +37,7 @@ Run the **rate → fix-to-10 → re-rate loop** (forge suite's
 the gap named, a "what a 10 looks like for *this* plan", fixes, and a
 re-rate; deltas go in the report. Thinking moves: **inversion** ("what makes
 this phase fail?"), **idempotency reflex**, **proxy skepticism** —
-`forge-principles`'s `references/craft-patterns.md`.
+`forge-harden`'s `references/craft-patterns.md`.
 
 - **Failure modes & edges:** nil / empty / wrong type / overflow / timeout /
   partial failure / concurrent writes / stale cache. Name the specific edges
@@ -178,6 +174,6 @@ present the taste batch directly.
 
 - forge suite's `references/question-style.md` — Decision Brief format for taste decisions
 - forge suite's `references/scoring.md` — the rate → fix-to-10 → re-rate loop
-- `forge-principles`'s `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
+- `forge-harden`'s `references/craft-patterns.md` — inversion, idempotency reflex, proxy skepticism
 - `forge-principles`'s `references/simplicity.md` — economy of means & performance dimension
 - `forge-principles`'s `references/voice.md` — how to push; banned hedges

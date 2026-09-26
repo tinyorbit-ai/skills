@@ -8,12 +8,6 @@ description: Turns a raw idea or an existing one-pager into a precise forge brie
 Pins a fuzzy idea into a precise brief. Output: `wiki/brief.md` — the outcome
 pinned so the rest of forge can build it as high-quality, simple, performant software.
 
-## Charter
-
-**Ask nothing about money, market, demand, or whether it's "worth it."** Understand
-the build the user wants and don't qualify it — if only they will ever use it,
-that's a complete answer.
-
 ## Process
 
 If `wiki/` doesn't exist, run `forge-init` first.

@@ -9,12 +9,6 @@ The wiki's read/write brain. Two jobs: **answer questions** from the wiki, and
 **ingest context** into it. The wiki layout, article format, and Timeline rules live
 in the forge orchestrator's `references/wiki.md` — read it before writing anything.
 
-## Charter
-
-Context is welcome — **more is better than less**. Ingest freely and let it sharpen
-*what* and *how* the project gets built (`forge-principles`'s
-`references/charter.md`).
-
 ## Routing
 
 Read the request and pick the mode. If `wiki/` doesn't exist, run `forge-init` first.

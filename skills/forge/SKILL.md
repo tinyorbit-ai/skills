@@ -7,10 +7,7 @@ description: Resumable build pipeline for a forge project — finds where you le
 
 The orchestrator. It is **resumable**: every run starts by reading the project's state and telling you exactly where you left off, then continues from there.
 
-## Charter (governs everything)
-
-**Context is welcome** — more is better than less, as *input* that sharpens the build. forge optimizes for craft and durability over speed-to-value. Full charter in
-`forge-principles`'s `references/charter.md` — a **mandatory read before anything**.
+Every stage builds to the bar in `forge-principles`.
 
 ## Help mode (short-circuit)
 
@@ -177,12 +174,12 @@ forge · crack-on — complete | stopped at phase <n>
 
 ## References
 
-- `forge-principles`'s `references/charter.md` — the worldview (mandatory read)
+- `forge-principles` — the quality bar every stage builds to
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
 - `forge-principles`'s `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
-- `forge-principles`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
+- `forge-harden`'s `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
 - `references/phase-lanes.md` — frontier-led model allocation inside a Forge phase

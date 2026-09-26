@@ -10,11 +10,6 @@ exists to attack. Covers infrastructure-first concerns (secrets, supply
 chain, pipelines) and app-layer concerns (OWASP, STRIDE), plus LLM-specific
 risks if the build touches model APIs.
 
-## Charter
-
-Critique the plan — a finding's fix is always a plan change, never a reason to
-stop. Threat-model the build as the plan specifies it.
-
 ## Modes
 
 - **DAILY** (default) — zero-noise pass. Every finding carries a

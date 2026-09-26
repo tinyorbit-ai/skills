@@ -240,8 +240,7 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
   `forge-harden` (192) — forge-review is two lines off the wall, so its next edit must
   extract first.** Removing the settled-questions charter language improved both
   (from 199 and 196) but did *not* clear either — it freed a few lines apiece and they
-  were largely spent in place rather than banked. `forge-principles` is now in the
-  band too, at 195 (2026-09-26, after the building-rules additions).
+  were largely spent in place rather than banked.
   (forge-plan and forge-discovery left the band when their contracts moved to
   `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
@@ -250,6 +249,11 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
   churn. Extract only **step-scoped** material (needed at one step of the process);
   hot-path content used every run belongs in `SKILL.md` — moving it out trades a
   lint warning for the agent skipping it.
+- **forge-principles feeds a generated card.** Each rule's bold first line becomes
+  `references/worker-card.md` via `scripts/card.mjs`; Arnold injects that card into
+  every worker. After editing a rule run `node skills/forge-principles/scripts/card.mjs
+  --write`. The validator fails on a stale card, and
+  `node --test skills/forge-principles/scripts/card.test.mjs` covers the generator.
 - **Folder name must equal `name`.** Mismatches break discovery/install.
 - **Experimental needs both** the `.experimental/` location *and* `metadata.internal:
   true` — the dir alone won't gate it once discovery falls back to recursive search.

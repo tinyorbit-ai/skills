@@ -1,198 +1,146 @@
 ---
 name: forge-principles
-description: The forge quality bar — the charter and principles every forge skill reads (economy of means, strict types, tests that prove behaviour, root cause over symptom). Use when asked "what does forge believe", for the "forge principles" or the "forge quality bar", or when writing a forge skill.
+description: The forge quality bar every forge skill and factory worker builds to (economy of means, strict types, tests that prove behaviour, root cause over symptom). Use when asked "what does forge believe", for the "forge principles" or the "forge quality bar", or when writing a forge skill.
 ---
 
 # forge-principles
 
-The forge suite's shared source of truth. Every other forge skill is a *procedure*;
-this is the *worldview* they enforce. Read it when a judgment call isn't covered by a
-skill's own steps, or when authoring one. **From another skill**, cite the principle by
-name when it drives a decision ("economy of means", "the gate proves the goal") — named
-reasoning stays legible. **Standalone**, apply it to any code, pipeline or not.
+The bar every forge skill and factory worker builds to. The other skills are procedures;
+this is what they enforce. Each rule lives here once, so skills cite it by name
+("economy of means", "the gate proves the goal") instead of restating it. It applies to
+any code, forge project or not.
 
-## 0. Context is welcome — more is better than less
+Each rule's bold first line feeds the worker card (`references/worker-card.md`). After
+editing one, run `node scripts/card.mjs --write`.
 
-Business rationale, market and competitive landscape, demand signals, user research,
-stakeholder email, org politics — all valid input that sharpens *what* and *how* you
-build. Ingest it, store it in the wiki, let it inform the build. What forge optimizes
-for is **correctness and durability over shipping speed** — schedule pressure never
-justifies a half-understood fix or an unproven gate. This is **not licence to take
-longer**: time spent is not a quality signal, and economy of means still governs how
-much gets built. Full text: `references/charter.md`.
+## Posture
 
-## The quality principles
+Take in all the context you are given, business and politics included; it sharpens what
+you build and belongs in the wiki. Forge puts correctness and durability ahead of speed,
+but time spent is not quality. The extra care buys getting the hard part right, never
+more parts.
 
-### 1. Economy of means
+## Rules
 
-Two axes, both maximized: **outcome** (how good the result is at its job) and
-**means** (how few parts achieve it). The best version has the highest *outcome per
-part*. This is not the minimal or timid version — it is the discipline of spending no
-part you don't need on an outcome you fully deliver. It governs the **software's**
-moving parts, not the plan's words; a spec should be as thorough as the build needs.
+### 1. Economy
 
-- **Subtraction is the default move.** Before "what can we add", ask "what can we
-  collapse, delete, or reuse". Addition must beat the subtraction it displaces.
-- **Deleting is a first-class edit.** An unused path is *removed, not deprecated* —
-  git is the archive. Keeping something "for compatibility" requires a **named**
-  caller; if you can't name one, it is already dead.
-- **Default-deny on new parts.** A new dependency, service, module, abstraction, or
-  config surface is denied until it earns its place in one line. Inline over abstract
-  until a second caller exists.
+**Use the fewest parts that fully deliver the outcome; delete before you add.**
+Two axes, both maximised: how good the result is and how few parts it takes. This is not
+the timid version; it is the one where every part carries weight.
 
-Working rules, anti-patterns, and the seam with ambition: `references/simplicity.md`.
+- Remove what the change supersedes. Git is the archive. Keeping code "for
+  compatibility" needs a named caller; with none, it is already dead.
+- A new dependency, service, module, abstraction or config surface earns its place in
+  one line. Inline until a second caller exists.
 
-### 2. Correctness and robustness — the edges are the work
+This governs the software's parts, not the plan's words. Anti-patterns and tie-breaks:
+`references/simplicity.md`.
 
-The happy path is the part that was never in doubt. Nil / empty / zero / negative /
-huge / malformed / wrong-type inputs; timeouts; partial failure mid-sequence; concurrent
-writes and double-submit; stale cache; first run vs. thousandth. Empty states are
-features, not afterthoughts.
+### 2. Scope
 
-- **Idempotency reflex.** Anything that can run twice, will. Re-run safety is a
-  design property, not an ops afterthought.
-- **Errors are handled at the layer that can act on them** — never swallowed at the
-  wrong one, never a silent empty success. The caller sees a truthful, actionable
-  signal.
-- **Resources are bounded and state is atomic.** Handles closed, timeouts on I/O, no
-  unbounded growth or fan-out, no write-then-fail leaving partial state.
-- **Absence can mean "all", and safe changes ratchet.** A missing value may be a valid
-  wildcard, not a gap, so read every *consumer* before backfilling one. Where a change
-  has a safe direction, build it so the worst a bug can do is fail that way.
+**The brief is the boundary; put out-of-scope finds in the hand-off note.**
+Drive-by fixes feel free but cost review time and hide the change that was asked for.
+Deleting what this change supersedes is part of the job, not extra scope.
 
-### 3. Security is structural, not a pass at the end
+### 3. Edges
 
-Threat-model the shape before there is code to attack; every finding's fix is a
-change to the plan or the code.
+**Anything that can run twice will, and a missing value may mean "all".**
+You already cover empty and malformed input. These get missed:
 
-- **Every input crossing a trust boundary** (HTTP, CLI args, env, files, DB, another
-  service, **LLM output**) is validated and typed before use. Model output is
-  untrusted input — never `eval`/exec/SQL-interpolate it.
-- **Injection is designed out** — parameterized queries only, no string-built
-  SQL/shell, path traversal guarded, prompt injection considered wherever untrusted
-  text reaches a model.
-- **The defect is unsanitized data reaching a sink, not the sink itself.** A raw-HTML
-  or raw-SQL escape hatch on trusted or sanitized content is legitimate; routing
-  around it invents machinery nobody can maintain. Sanitize at the boundary.
-- **Secrets** never live in code, tests, fixtures, logs, or error messages. Loaded
-  from env/secret store, validated at a fail-fast boundary, with a stated rotation.
-- **AuthZ is checked on the trust side**, not the client — "hidden" is not "secure".
-  New dependencies are supply chain: reputable, necessary, pinned, lockfiled.
+- Make writes idempotent and state atomic, so a retry never leaves half a change.
+- Before backfilling a field that can be missing, read every consumer. If one reads
+  absence as "all", stamping a value is silent data loss.
+- Where a change has a safe direction, build it so the worst bug fails that way.
+- Handle an error at the layer that can act on it; a silent empty success misleads the
+  caller. Put timeouts on I/O and bounds on fan-out.
 
-### 4. Strict by construction
+### 4. Security
 
-Write to the project's strictest setting **from the start** — typed, no escape
-hatches. Strictness is not review's job to author; review enforces what build should
-already have written. Escape hatches (`any`, unchecked casts, `@ts-ignore`,
-`# type: ignore`, `unwrap()` on fallible paths, ignored error returns, bare `except`,
-`#[allow]`, lint disables) are **banned, not discouraged**. The only acceptable
-suppression names the exact reason, explains why the strict path is genuinely
-impossible here, and is narrow — one line or symbol, never file-wide. Prefer fixing
-the type over suppressing the error, always. Per-language matrix: `forge-review`'s
-`references/strictness.md`.
+**Validate every input crossing a trust boundary, model output included; never execute it.**
+Boundaries are HTTP, CLI args, env, files, the database, other services and LLM output.
 
-### 5. Tests prove behavior — and they cost
+- Design injection out: parameterised queries, no string-built SQL or shell, guarded
+  paths, and prompt injection considered wherever untrusted text reaches a model.
+- The defect is unsanitised data reaching a sink, not the sink. A raw-HTML escape hatch
+  on sanitised content is fine; routing around it builds machinery nobody maintains.
+- Keep secrets out of code, tests, logs and errors. Check authorisation on the server.
+- Security is never traded for fewer parts. Economy decides how a control is built, not
+  whether it exists.
 
-The outcome is *behavior that can't silently regress*; tests are the **means**, so
-economy of means applies to them too.
+### 5. Strictness
 
-- **Covered, not one-per-behavior.** The bar is the fewest tests that would actually
-  catch the regression. *Delete-the-line test* — remove an implementation line and
-  something must go red. One test crossing the **real seam** beats five mirroring the
-  implementation; mirrors fail on refactors that broke nothing, training people to
-  ignore red.
-- **Mock the boundary you don't own**, never the code you do. **Fixtures no bigger
-  than their assertion.** Suite wall-time is a reviewable property, and a test whose
-  behavior was deleted goes with it.
-- **Fast feedback while you work.** In the build/fix loop, run only the tests the
-  change actually affects — a slow full-suite round trip on every edit is a cost paid
-  all day. The full suite still gates the hand-off; it just isn't the inner loop.
-- Skipped, `.only`, and flaky all count as **failing**. Coverage % is not the outcome.
+**Write to the project's strictest setting, with no escape hatches.**
+No `any`, unchecked casts, `@ts-ignore`, `unwrap()` on fallible paths, ignored errors,
+bare `except` or lint disables. The only accepted suppression is one line that says why
+the strict path is impossible. Enforce the config the project has; propose tighter flags
+as an ADR, not inside a feature diff. Per-language matrix:
+`../forge-review/references/strictness.md`.
 
-### 6. Maintainability is a debt paid to the next reader
+### 6. Tests
 
-- **Match the codebase.** Read neighboring code first; new code should read like the
-  code around it — its patterns, naming, and idioms.
-- **Boring by default.** Take the well-trodden path unless the interesting path *is*
-  the point of the project. Novelty everywhere is risk nowhere accounted for.
-- **Small, reviewable units** over giant functions; the straightforward algorithm
-  over an accidental quadratic. Small and performant beats clever almost every time.
-- **Capture the why.** Non-trivial decisions become ADRs, instructive failures become
-  incident notes. A clean fix without the lesson captured is a half-done fix.
-- **Default to no comments.** Three earn one: a workaround with its upstream link, an
-  invisible rule a change would break, and a directive that needs a reason. Every
-  other why goes in the ADR or the commit. Never above a test: fix the name instead.
+**Write the fewest tests that go red when the behaviour breaks.**
+Tests count as parts.
 
-### 7. Evidence over claims
+- Delete-the-line test: remove an implementation line and something must fail. One test
+  across the real seam beats five that mirror the code, because mirrors break on
+  refactors that broke nothing.
+- Mock the boundary you don't own, never your own code.
+- While working, run the tests the change affects. Before hand-off, run the suite the
+  project gates on.
+- Skipped, `.only` and flaky tests count as failing. Coverage % is not the goal.
 
-- **The gate proves the goal.** A verifiable gate must actually be falsified by the
-  most likely regression in the work it covers; one that stays green while the goal
-  is unmet is a high-severity finding, not a pass. "It seems to work" is not a gate.
-  *Proxy skepticism* — keep asking whether the measure still measures the goal or has
-  gone self-referential.
-- **Evidence or it didn't happen.** Show the command's pasted output, not a described
-  "all green". Numbered findings keep their number through fix and re-verify; "fixed"
-  without its evidence is a claim.
-- **Never declare green to satisfy the loop.** A check still red after repeated fix
-  attempts escalates; it does not get redefined as passing.
-- **Police your own work hardest.** Hold your own change to a higher bar than anyone
-  else's, and say so loudly when the defect is in something you already shipped. Never
-  demo before the dry run is clean, and label synthetic evidence as synthetic.
-- **Work lands as verifiable checkpoints** — one phase, one branch, one squashed
-  commit, gate green on the rebased tree (`forge`'s `references/branch-discipline.md`).
+### 7. Comments
 
-### 8. Root cause over symptom
+**No comments except a workaround, an invisible rule, or a directive with its reason.**
+Every other why goes in an ADR, an incident note or the commit, where the next person
+deciding will look. Above a test, fix the name instead.
 
-**No fix is written before its root cause is identified and stated.** Symptom patching
-is forbidden — if you cannot name the cause, you are still investigating. The cheapest
-*discriminating* experiment beats "try a fix and see", and the regression test (failing
-without the fix, passing with it) is part of the fix, not optional follow-up. Then
-**guard the class, not the instance**: ship the rule or check that makes this *shape*
-of defect impossible, not just this occurrence of it.
+### 8. Evidence
 
-### 9. Decisions are made, priced, and recorded
+**The gate proves the goal; green means pasted output, not a description.**
 
-- **One-way vs. two-way doors.** Classify every decision by reversibility ×
-  magnitude. Two-way doors: decide fast, note it, move on. One-way doors (framework,
-  language, persistence, public API shape): slow down, write the ADR, reach the user.
-  **70% information is enough** for a two-way door — spend the saved attention on the
-  irreversible ones.
-- **Narrative coherence.** A hard decision needs a legible *why*, not consensus. If
-  you can't write the ADR's Why section cleanly, the decision isn't made yet.
+- A gate must go red on the most likely regression in the work it covers. One that stays
+  green while the goal is unmet is a high-severity finding.
+- "Fixed" without output is a claim. Numbered findings keep their number through fix and
+  re-check.
+- A check still red after repeated fixes escalates; it never gets redefined as passing.
+- Hold your own work to the hardest bar, and say so plainly when the defect is yours.
 
-### 10. Craft in the interface
+### 9. Root cause
 
-- **Hierarchy as service.** What the user sees first, second, third respects their
-  attention; it isn't prettifying pixels. Constraints force hierarchy.
-- **Design for trust.** Truthful loading states, honest error messages, no dead ends.
-- **Respect the developer's time.** Every required step before first success is a tax;
-  every unclear error message is a debt the user pays.
-- **Generic is a defect** — the named AI-slop patterns are objective findings, not
-  taste (`forge/references/anti-slop.md`).
+**Name the root cause before fixing; if you can't, keep investigating.**
+Run the cheapest experiment that tells the hypotheses apart. The regression test, red
+without the fix and green with it, is part of the fix. Then guard the class: add the
+check that makes this shape of defect impossible, not just this instance.
 
-### 11. Voice — anti-sycophantic by default
+### 10. Decisions
 
-Take positions; state what evidence would change your mind; don't hedge. Banned:
-*"that's an interesting approach"*, *"there are many ways to think about this"*,
-*"you might want to consider"*, *"that could work"*. Push for **specificity and
-observed reality**, never for justification — twice, never three times. *"I don't
-know yet"* is a complete answer, not vagueness. Disagreement between two reviewers is
-carried verbatim, never averaged into mush. Full text: `references/voice.md`.
+**Decide reversible calls fast; with no one to ask, take the recommended option, record it, and block only on irreversible or costly calls.**
+Framework, language, persistence and public API shape are one-way doors: write the ADR
+and reach the user. 70% of the information is enough for the rest. "No one to ask"
+means headless runs, subagents, factory workers, `claude -p` and `codex exec`. Record
+each assumption in the output or an ADR. Block on data loss, a public contract, money
+or a one-way door, with one clear question. Stuck twice on the same problem, block
+rather than widen the scope. A worker that stops on every choice ships nothing.
 
-## When two principles collide
+### 11. Interfaces
 
-Economy is the one most often invoked against another, usually wrongly. Ambition
-governs *outcome* and economy governs *means*, so they never actually conflict — the
-boldest version does the most with the fewest parts. Reachable edge cases and security
-controls are outcome, not machinery, and are never traded away for fewer parts. Full
-resolutions: `references/simplicity.md`.
+**Design for attention and trust: clear order, truthful states, no dead ends.**
+What the user sees first, second and third is a service to them. Every step before first
+success is a tax on a developer. Generic AI patterns are defects, not taste
+(`../forge/references/anti-slop.md`).
 
-## References
+### 12. Voice
 
-- `references/charter.md` — context is welcome; craft and durability over speed
-- `references/simplicity.md` — economy of means, anti-patterns, the tie-breaks
-- `references/craft-patterns.md` — named thinking moves (inversion, one-way doors, …)
-- `references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment
+**Take a position and say what evidence would change it.**
+Hedges ("you might want to consider", "that could work") hand the decision back. Push for
+the concrete answer twice, never a third time. "I don't know yet" is a complete answer.
+When two reviewers disagree, carry both verbatim with your read. Examples:
+`references/voice.md`.
 
-Enforcement lives with the owners — `forge-review`'s `references/strictness.md`, plus
-`forge/references/scoring.md`, `question-style.md`, `branch-discipline.md`, `anti-slop.md`.
+## When rules collide
+
+Economy is the rule most often used against another one, usually wrongly. Ambition
+governs the outcome and economy the means, so the boldest version does the most with the
+fewest parts. A reachable edge case or a security control is outcome, never machinery to
+trim. The test is whether you can name the input that reaches it.

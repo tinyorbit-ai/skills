@@ -8,11 +8,6 @@ description: Live developer-experience audit of a built CLI, API, SDK or library
 Tests the *experienced* developer journey by living it, not by reading the plan
 (that's `forge-harden`'s DevEx angle). For libraries, APIs, CLIs, SDKs, tools.
 
-## Charter
-
-DX quality is about respect for the developer's time and attention — never about
-adoption metrics or market positioning.
-
 ## When it runs
 
 - **Auto:** `forge-review`'s runtime pass invokes this when the build is

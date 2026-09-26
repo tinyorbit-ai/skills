@@ -8,15 +8,9 @@ description: Builds the next phase of a locked forge plan (wiki/plan.md) on its 
 Builds one phase of `wiki/plan.md`. Staff-engineer mode: the best version of *this
 phase*, not the fastest, not beyond its boundary.
 
-## Charter
-
-"Best version" means craft and durability, **not** scope expansion and **not**
-speed-to-value — build the phase as written, excellently (`forge-principles`'s
-`references/charter.md`).
-
 ## Before building
 
-1. Read `forge-principles`'s `references/charter.md` and `wiki/learnings.md` — past
+1. Read `forge-principles` and `wiki/learnings.md` — past
    review lessons are rules you build by *now*, so review doesn't have to catch them
    again.
 2. Read the phase in `wiki/plan.md`: its **goal**, **verifiable gate**, **work**

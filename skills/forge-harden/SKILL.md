@@ -9,11 +9,6 @@ The orchestrator. Writes no findings itself — it routes the persona passes,
 the economy sweep, and the independent reviewer, then consolidates everything
 into the plan's `## Review` section and the lock gate.
 
-## Charter
-
-**Critique the plan** — every finding is a plan change or a surfaced taste
-decision, never a reason to stop.
-
 ## Modes
 
 - **Interactive** (default) — persona passes run; taste decisions reach the
@@ -189,7 +184,7 @@ Brief shape (`references/question-style.md`); on confirm, set
 - forge suite's `references/reviewer-agents.md` — reviewer selection, invocation, prompt envelope
 - forge suite's `references/question-style.md` — Decision Brief format for the taste batch
 - forge suite's `references/scoring.md` — the personas' rating loop + trend lines
-- `forge-principles`'s `references/craft-patterns.md` — the thinking moves the personas cite
+- `references/craft-patterns.md` — the thinking moves the personas cite
 - `forge-principles`'s `references/simplicity.md` — economy of means (subtraction-first fix policy)
 - `forge-harden-eng`, `forge-harden-security`, `forge-harden-design`,
   `forge-harden-dx`, `forge-harden-scope` — the five persona skills

@@ -8,12 +8,6 @@ description: Turns a forge brief into wiki/plan.md — ordered phases, each with
 Turns `wiki/brief.md` into `wiki/plan.md`: an ordered list of **verifiable phases**,
 each on its own branch, with every real decision locked and recorded as an ADR.
 
-## Charter
-
-The scope is what the brief says — your job is to make it *buildable*, never
-smaller-for-business-reasons, and splitting or reordering for engineering soundness
-is not the same as cutting ambition (`forge-principles`'s `references/charter.md`).
-
 ## Process
 
 Prereq: `wiki/brief.md` exists and is filled. If not, run `forge-discovery` first.

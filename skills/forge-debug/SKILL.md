@@ -8,11 +8,6 @@ description: Root-cause debugging — no fix until the cause is named. Investiga
 Finds the actual cause before changing anything, fixes it minimally, proves the fix
 with a test, and captures instructive failures in the wiki.
 
-## Charter
-
-Debugging is craft, not triage-for-speed — the bar is "we understand why it broke",
-not "make it go away" (`forge-principles`'s `references/charter.md`).
-
 ## Iron law
 
 **No fix is written before its root cause is identified and stated.** Symptom

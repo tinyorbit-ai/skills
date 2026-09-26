@@ -9,11 +9,6 @@ Closes the gap between what shipped and what the docs claim. Runs after a
 phase lands (or any time on demand). Diataxis-aware so it knows which
 docs surface a given change belongs in.
 
-## Charter
-
-The bar is "the docs match what shipped, in the right Diataxis quadrant", never
-"rank for SEO" or "convert".
-
 ## When it runs
 
 - **Auto:** `forge-ship` invokes this after writing the build-log entry

@@ -8,11 +8,6 @@ description: Designer-eye QA on a running UI — finds inconsistent spacing, wea
 The designer's eye on the *running* thing (not the plan — that's `forge-harden`).
 Catches what static review can't see: how it actually looks and feels.
 
-## Charter
-
-Polish is about taste and coherence, never about market appeal or conversion — make
-it feel intentional.
-
 ## When it runs
 
 - **Auto:** `forge-review`'s runtime pass invokes this when the phase diff touched
