@@ -1,6 +1,6 @@
 ---
 name: forge-polish
-description: Designer's-eye QA on the running build — finds visual inconsistency, broken spacing rhythm, weak hierarchy, generic "AI-slop" patterns, and sluggish interactions, then fixes them in source with before/after evidence. Auto-invoked by forge-review when the phase touched UI; also standalone. Use when asked to "polish the UI", "design QA", "make it look right", "visual audit", or after shipping a UI phase.
+description: Designer-eye QA on a running UI — finds inconsistent spacing, weak hierarchy, generic AI-slop patterns and slow interactions, then fixes them in source with evidence. Run by forge-review when a phase touched UI. Use when asked to "polish the UI", for "design QA" or to "make it look right".
 ---
 
 # forge-polish

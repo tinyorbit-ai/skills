@@ -1,6 +1,6 @@
 ---
 name: forge-harden-scope
-description: Plan-time scope review (CEO analogue) — pressure-tests whether the plan is the boldest version of what the user already chose. Three modes — EXPAND (raise ambition within the chosen intent), HOLD (lock the current scope deliberately), TRIM (strip non-essential phases). "Smaller on purpose" is a respected answer that ends the review. Use after forge-plan when ambition feels off, when asked "scope review", "is this ambitious enough", "trim the plan", or via forge-harden orchestration. Complements forge-ambition (which runs at brief time).
+description: Forge plan-time scope persona, run by forge-harden on request — expands, holds or trims the phases in wiki/plan.md within the chosen intent (smaller on purpose is valid). Use when asked for a "scope review", "is this plan ambitious enough" or to "trim the plan". Brief-time twin is forge-ambition.
 ---
 
 # forge-harden-scope

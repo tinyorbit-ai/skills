@@ -1,6 +1,6 @@
 ---
 name: forge-harden-eng
-description: Plan-time engineering review (staff eng / EM persona). Walks wiki/plan.md and wiki/architecture.md for failure modes, edge cases, idempotency, test coverage gaps, and whether each phase's verifiable gate actually proves its goal. Two modes — LOCK (mandatory before build, all findings) and TRIAGE (critical issues only). Auto-fixes structural plan gaps; surfaces taste decisions. Use after forge-plan, when asked to "engineer the plan", "lock the plan", "eng review", or via forge-harden orchestration.
+description: Forge plan-time engineering persona, run by forge-harden — checks wiki/plan.md for failure modes, edge cases, idempotency, test gaps and gates that do not prove their goal, and fixes structural gaps. Use when forge-harden runs it, or when asked to "eng review the plan" or "lock the plan".
 ---
 
 # forge-harden-eng

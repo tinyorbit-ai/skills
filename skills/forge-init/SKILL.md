@@ -1,6 +1,6 @@
 ---
 name: forge-init
-description: One-time project setup for the forge workflow. Scaffolds an Obsidian-style wiki/ with two layers — a project record (index, brief, plan, architecture, decisions/ ADRs, notes/, improvements) and a knowledge/ base for ingested context — and injects wiki + ADR + phase/branch discipline rules into CLAUDE.md and AGENTS.md (creating them if absent, idempotently). Use when starting a forge project, when asked to "init forge", "set up the wiki", "scaffold docs", or before forge-discovery/forge-plan on a fresh repo.
+description: One-time forge setup — scaffolds wiki/ (brief, plan, architecture, ADRs, knowledge base) and adds the wiki, ADR and branch rules to CLAUDE.md and AGENTS.md. Use when asked to "init forge" or "set up the forge wiki", or before forge-discovery on a fresh repo.
 ---
 
 # forge-init

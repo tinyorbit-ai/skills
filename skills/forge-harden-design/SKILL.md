@@ -1,6 +1,6 @@
 ---
 name: forge-harden-design
-description: Plan-time design/UX review (senior designer persona). Walks the plan for information hierarchy, interaction states (loading / empty / error / success / partial), accessibility (keyboard, contrast, targets, screen reader), responsive intent, and the user journey's rough edges — BEFORE implementation. Three modes — EXPANSION (raise the bar), POLISH (bulletproof every touchpoint), TRIAGE (critical gaps only). Use when plan has a UI, when asked to "design-review the plan", "plan-time design audit", or via forge-harden orchestration. For runtime design QA on the built thing, see forge-polish.
+description: Forge plan-time design and UX persona, run by forge-harden — checks hierarchy, UI states, accessibility and responsive intent in wiki/plan.md before build. Use when forge-harden runs it, or when asked to "design-review the plan" or for a "plan-time design audit". Built UI goes to forge-polish.
 ---
 
 # forge-harden-design

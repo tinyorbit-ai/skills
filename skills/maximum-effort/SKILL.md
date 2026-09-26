@@ -1,6 +1,6 @@
 ---
 name: maximum-effort
-description: Frontier-led task runner for accepted quality per token — a Sol or Opus owner keeps judgment and final accountability while delegating bounded factual lookup to Luna or Haiku and exact reversible work to Terra or Sonnet. Invoked by name, not inference. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume an unfinished `.maximum-effort/plan.md`.
+description: Frontier-led task runner — a Sol or Opus owner keeps judgment and final review and hands bounded lookups to Luna or Haiku and exact edits to Terra or Sonnet. Invoked by name only. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume .maximum-effort/plan.md.
 model: opus
 effort: medium
 ---

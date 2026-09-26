@@ -1,6 +1,6 @@
 ---
 name: forge-build
-description: Builds the next phase of a locked forge plan as a staff engineer would — the best possible version of THAT phase, on its own branch, within its boundary, then hands off to forge-review. Use when a plan is locked and a phase is ready to build, when asked to "build the next phase", "build phase N", "implement this phase", or as the build step of the forge loop.
+description: Builds the next phase of a locked forge plan (wiki/plan.md) on its own branch and within the phase boundary, then hands off to forge-review. Use when asked to "build the next phase", "build phase N" or "implement phase N", or as the build step of the forge loop.
 ---
 
 # forge-build

@@ -1,6 +1,6 @@
 ---
 name: forge-principles
-description: The forge worldview in one place — what forge believes good software is. Carries the charter (context is welcome and more is better than less; forge optimizes for craft and durability, never speed-to-value) plus the quality principles every forge skill applies — economy of means, correctness and robustness, security as structure, strictness by construction, tests that prove behavior and pay their cost, maintainability for the next reader, evidence over claims, root cause over symptom, recorded decisions, craft in the interface, and anti-sycophantic voice. Read by other forge skills as their shared source of truth; also runs standalone. Use when asked "what does forge believe", "forge principles", "what is the quality bar", when writing or reviewing a forge skill, or any time a skill needs the charter or the economy-of-means rules.
+description: The forge quality bar — the charter and principles every forge skill reads (economy of means, strict types, tests that prove behaviour, root cause over symptom). Use when asked "what does forge believe", for the "forge principles" or the "forge quality bar", or when writing a forge skill.
 ---
 
 # forge-principles

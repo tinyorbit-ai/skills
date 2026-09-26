@@ -1,6 +1,6 @@
 ---
 name: forge-harden
-description: Plan-time hardening orchestrator — detects scope and runs the applicable persona reviews (forge-harden-eng + forge-harden-security always; -design if UI; -dx if dev-facing; -scope on request), then the independent reviewer pass via a configurable third-party agent (Codex / Gemini / Claude). Two modes — interactive (default; surfaces taste decisions to the user) and --auto (auto-decides everything except irreversible-feeling shape calls, per five named principles). Use after forge-plan, when asked to "harden the plan", "review the plan from every angle", "stress test this", "auto-harden", or as stage 3 of forge.
+description: Hardens a forge plan (wiki/plan.md) before build — runs the eng and security personas, plus design, DX or scope when relevant, then an independent reviewer from another model. Stage 3 of forge; --auto decides reversible calls. Use when asked to "harden the plan" or "stress test this plan".
 ---
 
 # forge-harden

@@ -1,6 +1,6 @@
 ---
 name: forge-design-system
-description: Creates the project's design source of truth — DESIGN.md — before UI implementation. Forces the memorable-thing question, proposes 2-3 named aesthetic directions, locks typography (anti-default — never system-ui-as-personality), color philosophy, a 4px spacing scale, radius and motion discipline, and generates an HTML specimen page so the user picks with their eyes. Taste and coherence, never brand-as-market. Use when a plan implies UI surfaces and no DESIGN.md exists, when asked to "set up a design system", "pick fonts and colors", "make a DESIGN.md", or when forge-harden-design flags a missing system.
+description: Creates the project DESIGN.md before UI work — 2-3 named aesthetic directions, then locked type, color, 4px spacing, radius and motion, with an HTML specimen. Use when a plan has UI and no DESIGN.md exists, or when asked to "set up a design system", "pick fonts and colors" or "make a DESIGN.md".
 ---
 
 # forge-design-system
