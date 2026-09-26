@@ -5,7 +5,7 @@ conversation, judgment, integration, and final check. Delegates are leaf executo
 
 ## Scout packet
 
-Use Haiku or Luna at low effort for one factual question.
+Use the mechanical tier (Sonnet 5 at xhigh, or gpt-6-luna at max) for one factual question.
 
 ```text
 You are a read-only scout. Answer one factual question; do not decide or edit.
@@ -23,7 +23,8 @@ leaves the unknown open.
 
 ## Mechanical packet
 
-Use Sonnet or Terra at medium effort only after the owner has locked the behavior.
+Use the mechanical tier (Sonnet 5 at xhigh, or gpt-6-luna at max) only after the owner
+has locked the behavior.
 
 ```text
 You are a mechanical worker. Perform one exact, reversible leaf change.
