@@ -1,6 +1,6 @@
 ---
 name: forge-review
-description: Staff-grade review of a freshly built phase — security, high-quality tests written and all passing, strict type safety with escape hatches banned, runtime verification of the gate and goal, plus a third-party adversarial pass (Codex, Gemini, or Claude per config; required at deep tier). Triages review depth to the diff, fingerprints the phase diff so re-runs audit prior findings and review only the delta, appends an auditable receipts record, and tracks its own misses (shipped phases later hotfixed) as calibration. Auto-fixes every objective finding, surfaces only genuine taste decisions, and records lessons in the wiki. Use after forge-build, when asked to "review this", "review the phase", "security and quality review", or as the review step of the forge loop.
+description: Staff-grade review of a just-built forge phase — security, tests, strict types, a gate check and a cross-model pass, auto-fixing objective findings. Step after forge-build. Use only for a forge phase, when asked to "review the phase" or for a "security and quality review". Not for ad-hoc diffs/PRs.
 ---
 
 # forge-review

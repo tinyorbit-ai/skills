@@ -1,6 +1,6 @@
 ---
 name: forge-ship
-description: Lands a completed phase under forge's branch discipline — rebases the phase branch onto the latest base, verifies the phase's gate plus scoped typecheck/lint/tests on the rebased tree, squash-merges back as exactly one commit, reconciles wiki/architecture.md, appends the build-log entry, and runs wiki index upkeep. Use when a phase from wiki/plan.md is done and ready to merge, or when asked to "ship this phase", "land it", "merge the phase", or "close out phase N".
+description: Lands a finished forge phase — rebases onto base, reruns the gate plus typecheck, lint and tests, squash-merges it as one commit, and updates the build log and wiki. Use when a phase in wiki/plan.md is done, or when asked to "ship this phase", "merge the phase" or "close out phase N".
 ---
 
 # forge-ship

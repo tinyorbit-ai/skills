@@ -1,6 +1,6 @@
 ---
 name: forge-harden-dx
-description: Plan-time developer-experience review (DX lead persona) for dev-facing builds. Audits API/CLI ergonomics, naming, error-message intent, setup friction, the first five-minute experience, and which docs surface the plan obliges — BEFORE implementation. Three modes — EXPANSION (competitive bar), POLISH (every touchpoint), TRIAGE (critical gaps only). Use when plan ships a library / API / CLI / SDK, when asked to "DX-review the plan", "plan-time DX audit", or via forge-harden orchestration. For runtime DX testing of the built thing, see forge-dx.
+description: Forge plan-time developer-experience persona, run by forge-harden — checks API and CLI naming, error intent, setup friction and the first five minutes in wiki/plan.md before build. Use when forge-harden runs it, or when asked to "DX-review the plan". For the built thing, use forge-dx.
 ---
 
 # forge-harden-dx

@@ -1,6 +1,6 @@
 ---
 name: forge-wiki-maintain
-description: Keep the project wiki healthy — regenerate every index from current state (wiki/index.md, wiki/knowledge/INDEX.md, per-topic _index.md) and run health checks (orphaned articles, broken [[wikilinks]], missing summaries/frontmatter, stale evidence, duplicate coverage, oversized topics, flat-invariant violations). Outputs wiki/knowledge/_health-report.md. Use after a batch of forge-wiki ingests, when indexes feel out of date, when links break, or when asked to "regenerate the wiki index", "wiki health", "check the wiki", or "tidy the wiki".
+description: Regenerates the forge wiki indexes and runs health checks (orphans, broken wikilinks, missing frontmatter, stale articles), writing wiki/knowledge/_health-report.md. Run by forge-ship. Use when asked to "regenerate the wiki index", for "wiki health" or to "check the wiki for broken links".
 ---
 
 # forge-wiki-maintain

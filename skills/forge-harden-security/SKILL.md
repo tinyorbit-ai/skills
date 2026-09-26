@@ -1,6 +1,6 @@
 ---
 name: forge-harden-security
-description: Plan-time security review (CSO persona) covering OWASP Top 10, STRIDE threat modeling, secrets archaeology, dependency supply-chain risk, CI/CD pipeline exposure, and LLM-prompt injection where applicable. Two modes — DAILY (zero-noise high-confidence findings only) and DEEP (comprehensive monthly-style audit, broader coverage). Severity-tagged findings; auto-fixes structural plan gaps that mandate insecure shapes. Use after forge-plan, when asked to "security-review the plan", "threat model this", "CSO review", or via forge-harden orchestration.
+description: Forge plan-time security persona, run by forge-harden — OWASP, STRIDE, secrets, supply chain, CI/CD and prompt injection against wiki/plan.md. Use when forge-harden runs it, or when asked to "threat model this plan", "security-review the plan" or for a "CSO review".
 ---
 
 # forge-harden-security

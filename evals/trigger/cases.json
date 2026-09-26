@@ -1,11 +1,11 @@
 {
-  "_comment": "Trigger routing cases — forge suite plus explicit maximum-effort invocations. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs catch descriptions that steal or lose routing. Maximum-effort is explicit-only by description: ordinary work without a Maximum Effort or cheap-agent request must not trigger it.",
+  "_comment": "Trigger routing cases — forge suite plus explicit maximum-effort invocations. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs catch descriptions that steal or lose routing. Maximum-effort is explicit-only by description: ordinary work without a Maximum Effort or cheap-agent request must not trigger it. Generic session phrases (keep going, review this, remember this, retro) are expected to route to none so forge does not fire outside forge work; code-review is the harness built-in and counts as not-forge.",
   "cases": [
     { "utterance": "I have an idea for a tool that renames my screenshots — help me shape it", "expect": ["forge-discovery"] },
     { "utterance": "help me pin down exactly what we're building", "expect": ["forge-discovery", "forge"] },
     { "utterance": "forge help", "expect": ["forge"] },
-    { "utterance": "continue where we left off", "expect": ["forge"] },
-    { "utterance": "where was I on this project?", "expect": ["forge"] },
+    { "utterance": "continue the forge build where we left off", "expect": ["forge"] },
+    { "utterance": "where was I in the forge pipeline?", "expect": ["forge"] },
     { "utterance": "what does forge believe about good software?", "expect": ["forge-principles"] },
     { "utterance": "what's the quality bar for a forge build?", "expect": ["forge-principles"] },
     { "utterance": "show me the forge principles", "expect": ["forge-principles"] },
@@ -28,7 +28,7 @@
     { "utterance": "security and quality review of what we just built", "expect": ["forge-review"] },
     { "utterance": "review this phase for security and test coverage", "expect": ["forge-review"] },
     { "utterance": "ship this phase", "expect": ["forge-ship"] },
-    { "utterance": "land it", "expect": ["forge-ship"] },
+    { "utterance": "close out phase 2", "expect": ["forge-ship"] },
     { "utterance": "why is this failing? it worked yesterday", "expect": ["forge-debug"] },
     { "utterance": "root cause this crash", "expect": ["forge-debug"] },
     { "utterance": "polish the UI", "expect": ["forge-polish"] },
@@ -37,10 +37,10 @@
     { "utterance": "show me a few design variants for the settings page", "expect": ["forge-design-explore"] },
     { "utterance": "test the DX of our CLI onboarding", "expect": ["forge-dx"] },
     { "utterance": "what docs need updating after that ship?", "expect": ["forge-docs"] },
-    { "utterance": "retro time — what did we ship?", "expect": ["forge-retro"] },
+    { "utterance": "forge retro — what did we ship?", "expect": ["forge-retro"] },
     { "utterance": "ingest this research doc into the wiki", "expect": ["forge-wiki"] },
     { "utterance": "what do we know about the client's deadline?", "expect": ["forge-wiki"] },
-    { "utterance": "remember this — the client wants the demo projected on a big screen", "expect": ["forge-wiki"] },
+    { "utterance": "add this to the wiki — the client wants the demo projected on a big screen", "expect": ["forge-wiki"] },
     { "utterance": "regenerate the wiki index", "expect": ["forge-wiki-maintain"] },
     { "utterance": "check the wiki for broken links", "expect": ["forge-wiki-maintain"] },
     { "utterance": "init forge in this repo", "expect": ["forge-init"] },
@@ -56,6 +56,10 @@
     { "utterance": "what's the weather in Tokyo?", "expect": ["none"] },
     { "utterance": "convert this png to webp", "expect": ["none"] },
     { "utterance": "write a limerick about gophers", "expect": ["none"] },
-    { "utterance": "what's a good name for a pet lizard?", "expect": ["none"] }
+    { "utterance": "what's a good name for a pet lizard?", "expect": ["none"] },
+    { "utterance": "keep going", "expect": ["none"] },
+    { "utterance": "review this diff for bugs", "expect": ["none", "code-review"] },
+    { "utterance": "remember this — I prefer tabs over spaces", "expect": ["none"] },
+    { "utterance": "let's do a retro on last sprint's standups", "expect": ["none"] }
   ]
 }

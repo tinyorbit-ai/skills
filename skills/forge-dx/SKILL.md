@@ -1,6 +1,6 @@
 ---
 name: forge-dx
-description: Live developer-experience audit for dev-facing builds — actually runs the getting-started flow, times hello-world, screenshots error messages, and evaluates CLI help and docs, producing a scorecard with evidence. Auto-invoked by forge-review when the build is developer-facing; also standalone. Use when asked to "test the DX", "DX audit", "try the onboarding", or after shipping a CLI/API/SDK/library phase.
+description: Live developer-experience audit of a built CLI, API, SDK or library — runs the getting-started flow, times hello-world, checks errors, help and docs, and scores it with evidence. Run by forge-review for dev-facing phases. Use when asked to "test the DX", for a "DX audit" or to "try the onboarding".
 ---
 
 # forge-dx

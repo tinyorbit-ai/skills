@@ -1,6 +1,6 @@
 ---
 name: lizard
-description: AI PR reviewer with one binary verdict — an approval's entire body is 🦎, and if you see the lizard the PR is good to merge. Triages PR complexity (quick pass for trivial diffs, multi-agent + cross-model adversarial review for large or risky ones), verifies PR claims against linked Linear/Notion/issue context, anchors every finding inline with a concrete fix, and discloses receipts of what it checked. Works in an active session, on a loop, or on a routine, from any agent. Use when asked to "lizard", "lizard this PR", "lizard sweep", to review a pull request, or as the reviewer in an automated PR-review loop.
+description: PR reviewer with one binary verdict, where an approval is just 🦎. Sizes the review to the diff (quick pass up to multi-agent and cross-model), checks claims against linked tickets, and posts inline fixes. Use when asked to "lizard" a PR, for a "lizard sweep", or to review a pull request.
 ---
 
 # Lizard

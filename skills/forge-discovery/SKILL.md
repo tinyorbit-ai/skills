@@ -1,6 +1,6 @@
 ---
 name: forge-discovery
-description: Discovery conversation that turns a raw idea into a precise brief — base seven questions (what / who & when / how it should feel / hard part / constraints / non-goals / alternatives) plus a sharpening six (the specific moment, the friction it replaces, smallest useful version, watched-it-done observation, drawn-to/unsure, three-year fit), each with a push-until gate so vague answers get one sharp follow-up. Deliberately asks nothing about money, market, demand, or whether it's "worth it". Works from either a one-sentence idea or an existing one-pager/research doc — anchors on what you give it and never guesses the project from folder names. Use when you have an idea and need it pinned down, when asked to "shape this", "what are we building", or as stage 1 of forge before forge-plan.
+description: Turns a raw idea or an existing one-pager into a precise forge brief through a short question set that pushes back on vague answers, and never asks about money or market. Stage 1 of forge. Use when asked to "shape this idea", "what are we building", or to pin an idea down before planning.
 ---
 
 # forge-discovery

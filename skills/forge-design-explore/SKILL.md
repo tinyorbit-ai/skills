@@ -1,6 +1,6 @@
 ---
 name: forge-design-explore
-description: Design exploration — generates 3-4 visual/interaction variants for a named UI surface BEFORE implementation. Rendered HTML variants on a served feedback board (ASCII only when the surface itself is a terminal UI), structured taste feedback, lock the direction as an ADR. Never about market appeal or conversion — only about which shape the user wants to build. Use after the plan names a UI surface or marks a phase Design explore, when asked to "explore designs", "show me variants", "design shotgun", "I don't know what this should look like", or any time you want options before committing.
+description: Generates 3-4 rendered design variants for a named UI surface before it is built, collects taste feedback on a served board, and locks the choice as an ADR. Use when a forge plan marks a phase Design explore, or when asked to "explore designs" or "show me variants" for a screen.
 ---
 
 # forge-design-explore

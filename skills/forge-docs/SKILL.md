@@ -1,6 +1,6 @@
 ---
 name: forge-docs
-description: Post-ship documentation drift check using the Diataxis framework (tutorial / how-to / reference / explanation). Reads the project's docs, cross-references the just-landed phase diff, auto-fixes concrete drift (renamed commands, changed signatures, moved env vars), and surfaces structural gaps (new feature with no docs presence) as taste decisions. Auto-invoked by forge-ship when the landed phase touched a documented surface; runs standalone any time the docs feel behind reality. Use when asked to "update docs", "doc drift", "post-ship docs", or "what docs need updating".
+description: Post-ship docs drift check (Diataxis) — compares the just-landed forge phase diff with the docs, fixes concrete drift and flags missing coverage. Run by forge-ship when a documented surface changed. Use when asked "what docs need updating", for "doc drift" or for "post-ship docs".
 ---
 
 # forge-docs

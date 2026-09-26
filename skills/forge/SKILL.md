@@ -1,6 +1,6 @@
 ---
 name: forge
-description: Resumable end-to-end build pipeline for makers — tells you where you left off and continues from exactly there. Routes through setup, discovery, planning, hardening, then a build→review→ship loop one phase at a time, with a wiki knowledge base alongside. Add `crack-on` to run every remaining phase back-to-back instead of stopping after each one; invoke with `help` (or `--help` / `?`) to print a status-aware usage map instead of running. Use when starting OR resuming a project, when asked to "forge this", "forge help", "forge crack-on", "crack on", "keep going", "don't stop", "run it all", "continue", "where was I", "build the next phase", "let's build X", or any time you want forge to pick up the thread.
+description: Resumable build pipeline for a forge project — finds where you left off and continues through setup, discovery, plan and harden, then build, review and ship one phase at a time. Use when asked to "forge this", "forge help", "forge crack-on" (run every remaining phase), or "let's build X".
 ---
 
 # forge

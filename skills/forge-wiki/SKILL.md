@@ -1,6 +1,6 @@
 ---
 name: forge-wiki
-description: Ask anything against the project's wiki, and capture any context into its knowledge base — email, business context, research, conversations, pasted notes, files, or durable facts the user mentions in passing. Answers from indexes then articles with citations; files context through a quality filter into flat Timeline-based living articles under wiki/knowledge/. Explicit ingest is plan-first (proposes writes/merges before mutating); ambient capture of conversational context auto-files additive notes and confirms only on rewrites. Use when asked to "ask the wiki", "what do we know about X", "ingest this", "add this context", "remember this", "compile this into the wiki", or any time context should live alongside the repo.
+description: Answers questions from a forge project wiki/ with citations, and files new context (notes, research, email, decisions) into wiki/knowledge/, proposing writes before making them. Use in a repo with wiki/ when asked to "ask the wiki", "what do we know about X", "ingest this" or "add this to the wiki".
 ---
 
 # forge-wiki

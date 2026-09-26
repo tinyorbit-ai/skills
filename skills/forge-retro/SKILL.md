@@ -1,6 +1,6 @@
 ---
 name: forge-retro
-description: Build retrospective — synthesizes wiki/build-log.md, wiki/learnings.md, and git history since the last retro into "what shipped, recurring patterns, what to improve next", then files durable lessons and action items back into the wiki. About craft and process, never velocity or business. Auto-invoked by forge when all plan phases have landed; also standalone anytime. Use when asked "retro", "what did we ship", "what should we do better", or at a natural milestone.
+description: Forge build retrospective — reads wiki/build-log.md, learnings and git history since the last retro, writes what shipped and what to improve, and files lessons into the wiki. Run by forge after the last phase lands. Use when asked for a "forge retro" or "what did we ship" in a forge project.
 ---
 
 # forge-retro

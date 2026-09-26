@@ -1,6 +1,6 @@
 ---
 name: forge-plan
-description: Turns the brief into a buildable, phased plan with every decision locked. Produces wiki/plan.md as ordered phases, each with a concrete verifiable gate and its own branch, plus seed ADRs for the real decisions. Prototype-first — phase 1 is the thinnest end-to-end thing that runs. Use after forge-discovery, when asked to "plan this", "make the build plan", or as stage 2 of forge before forge-harden.
+description: Turns a forge brief into wiki/plan.md — ordered phases, each with a verifiable gate and its own branch, plus seed ADRs, with phase 1 as the thinnest end-to-end slice. Stage 2 of forge. Use when asked to "plan this", "make the build plan" or "turn the brief into phases".
 ---
 
 # forge-plan

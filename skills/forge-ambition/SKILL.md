@@ -1,6 +1,6 @@
 ---
 name: forge-ambition
-description: Ambition check — pressure-tests whether you're building the most ambitious version of the thing YOU already chose to build. Challenges self-imposed limits and timid premises; the boldness it argues for is about craft and intent, never market upside. Auto-invoked by forge-discovery before the brief locks; also standalone. Use when asked "am I thinking big enough", "challenge this", "ambition check", or when a brief/plan feels smaller than it could be.
+description: Brief-time ambition check — pressure-tests whether you are building the boldest version of what you already chose, in craft terms, never market ones. Run by forge-discovery before the brief locks. Use when asked "am I thinking big enough", for an "ambition check", or when a brief feels small.
 ---
 
 # forge-ambition
