@@ -48,13 +48,25 @@ the reasoning legible.
     the one licensed exception). Novelty everywhere is risk nowhere accounted for.
 11. **Idempotency reflex.** Anything that can run twice, will. Re-run safety is a
     design property, not an ops afterthought.
+12. **Guard the class, not the instance.** Naming the root cause is half the fix. The
+    other half is the rule, check or test that makes this *shape* of defect
+    impossible, so the next instance cannot be written. Ask what would have caught
+    every occurrence, not just this one.
+13. **Absence is a wildcard.** Before changing or backfilling a field that can be
+    missing, read every *consumer*, not just the writers. If any consumer reads a
+    missing value as "all", stamping a value there is silent data loss, and the fix
+    belongs in the read rather than the data. Write the expected end state down before
+    running anything, so a reviewer can tell you it is wrong. Where a change has a safe
+    direction, build it so the worst a bug can do is fail that way. If nothing in the
+    data distinguishes a legitimate row from a broken one, delete the script rather
+    than guard it.
 
 ## Designing for people
 
-12. **Hierarchy as service.** "What should the user see first, second, third?" is
+14. **Hierarchy as service.** "What should the user see first, second, third?" is
     about respecting their attention, not prettifying pixels.
-13. **Design for trust.** Every interface decision either builds or erodes trust —
+15. **Design for trust.** Every interface decision either builds or erodes trust —
     truthful loading states, honest error messages, no dead ends. Pixel-level
     intentionality about whether the thing feels dependable.
-14. **Respect the developer's time** (DX variant of 12): every required step before
+16. **Respect the developer's time** (DX variant of 14): every required step before
     first success is a tax; every unclear error message is a debt the user pays.

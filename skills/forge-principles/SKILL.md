@@ -56,6 +56,9 @@ features, not afterthoughts.
   signal.
 - **Resources are bounded and state is atomic.** Handles closed, timeouts on I/O, no
   unbounded growth or fan-out, no write-then-fail leaving partial state.
+- **Absence can mean "all", and safe changes ratchet.** A missing value may be a valid
+  wildcard, not a gap, so read every *consumer* before backfilling one. Where a change
+  has a safe direction, build it so the worst a bug can do is fail that way.
 
 ### 3. Security is structural, not a pass at the end
 
@@ -116,6 +119,9 @@ economy of means applies to them too.
   over an accidental quadratic. Small and performant beats clever almost every time.
 - **Capture the why.** Non-trivial decisions become ADRs, instructive failures become
   incident notes. A clean fix without the lesson captured is a half-done fix.
+- **Default to no comments.** Three earn one: a workaround with its upstream link, an
+  invisible rule a change would break, and a directive that needs a reason. Every
+  other why goes in the ADR or the commit. Never above a test: fix the name instead.
 
 ### 7. Evidence over claims
 
@@ -129,6 +135,9 @@ economy of means applies to them too.
   without its evidence is a claim.
 - **Never declare green to satisfy the loop.** A check still red after repeated fix
   attempts escalates; it does not get redefined as passing.
+- **Police your own work hardest.** Hold your own change to a higher bar than anyone
+  else's, and say so loudly when the defect is in something you already shipped. Never
+  demo before the dry run is clean, and label synthetic evidence as synthetic.
 - **Work lands as verifiable checkpoints** — one phase, one branch, one squashed
   commit, gate green on the rebased tree (`forge`'s `references/branch-discipline.md`).
 
@@ -137,7 +146,9 @@ economy of means applies to them too.
 **No fix is written before its root cause is identified and stated.** Symptom patching
 is forbidden — if you cannot name the cause, you are still investigating. The cheapest
 *discriminating* experiment beats "try a fix and see", and the regression test (failing
-without the fix, passing with it) is part of the fix, not optional follow-up.
+without the fix, passing with it) is part of the fix, not optional follow-up. Then
+**guard the class, not the instance**: ship the rule or check that makes this *shape*
+of defect impossible, not just this occurrence of it.
 
 ### 9. Decisions are made, priced, and recorded
 

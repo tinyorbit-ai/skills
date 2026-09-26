@@ -241,8 +241,8 @@ default). `--copy` copies instead of symlinking. `-a/--agent '*'` targets all ag
   `forge-harden` (192) — forge-review is two lines off the wall, so its next edit must
   extract first.** Removing the settled-questions charter language improved both
   (from 199 and 196) but did *not* clear either — it freed a few lines apiece and they
-  were largely spent in place rather than banked. `forge-principles` sits at 184 —
-  one line under the warn threshold, so treat it as a third file in the band.
+  were largely spent in place rather than banked. `forge-principles` is now in the
+  band too, at 195 (2026-09-26, after the building-rules additions).
   (forge-plan and forge-discovery left the band when their contracts moved to
   `references/` in #16.)
   When you next edit one substantively, extract *then* — you're already paying for
