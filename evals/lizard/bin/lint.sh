@@ -9,7 +9,7 @@
 #
 # Contracts enforced here are the payload-checkable subset of the plan's Layer-1
 # table, sourced from skills/lizard/SKILL.md and references/{context,dedup,
-# github-review-api,loop-mode}.md. Judgment-only checks (groundedness, severity,
+# github-review-api}.md. Judgment-only checks (groundedness, severity,
 # scope ownership) belong to grade.mjs, not here.
 set -euo pipefail
 

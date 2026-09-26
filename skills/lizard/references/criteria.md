@@ -1,6 +1,6 @@
 # Review Criteria
 
-The seven groups behind every verdict. All seven apply at every tier; the tier only
+The eight groups behind every verdict. All eight apply at every tier; the tier only
 changes how much machinery digs into them. The receipts block records each group with
 a pass/fail (e.g. `performance (n+1 ✓, complexity ✓)`).
 
@@ -9,8 +9,9 @@ for convention claims, and the code traced for behavior. Do not invent issues �
 clean PR gets a clean stamp. Evidence gathering belongs to the reviewer. A claim you
 cannot ground drops to a hedged question, never a major or an author evidence chore.
 
-Run the trigger scan in `references/field-lessons.md` before the seven groups below
-on T2 and T3. A lesson is a question to prove or refute, never evidence by itself.
+On T2 and T3, also run the review-mechanics lessons in §8 and every triggered lesson
+pack (SKILL.md pack index). A lesson is a question to prove or refute, never evidence
+by itself.
 
 ## 1. Performance
 
@@ -28,18 +29,8 @@ on T2 and T3. A lesson is a question to prove or refute, never evidence by itsel
 - **Wasted concurrency** — sequential `await`s over independent operations that
   should run in parallel; hot-path allocations inside tight loops.
 
-**Proof obligation — production DB reads.** For every new or materially changed
-query over a collection that grows (polling paths, GraphQL resolvers, workers,
-dashboards, admin endpoints — internal-only included), the reviewer checks whether
-it is bounded and index-supported: repository indexes/migrations, equivalent query
-precedent, and available query-plan context. A proven missing leading index or
-unbounded path is **major**; the concrete fix is to add the matching index or bound
-the path. If support cannot be established either way, ask a non-blocking question —
-never tell the author to attach evidence. For Mongo aggregations, check **stage
-order**: a `$limit` after `$sort`, `$group`, `$lookup`, or any cardinality-changing
-stage does not bound the scan/sort/group work — identify the first indexed `$match`
-and its supporting index. External API calls fanning out from a DB result set are an
-N+1 even when cached — cold paths and cache misses count.
+New or changed queries over growing collections: run the production DB-reads proof in
+`focus-packs/lessons-runtime-tooling.md`.
 
 Severity guide: an N+1/quadratic on a path fed by user-scale data is **major**; on a
 bounded admin path with a handful of items it is a **minor** with the fix inline.
@@ -181,3 +172,33 @@ Security regressions are **critical**.
   parser at the intended value and its nearest rejected boundary.
 - Failing CI is read as review signal — which test, what does it say about the diff —
   never re-run locally, never a reason by itself to withhold the stamp.
+
+## 8. Review mechanics
+
+Field lessons that apply to every T2/T3 review, whatever the domain.
+
+- **The diff's entry point is only one cell.** Signal: shared bootstraps, lifecycle
+  hooks, workflow prerequisites, cross-package constants, or multi-caller guards.
+  Proof: enumerate every entry point by lifecycle and record every materially different
+  cell in the receipt.
+- **A new ambient dependency invalidates every unchanged mount site.** Signal: the diff
+  adds a context hook, DI lookup, or required-ancestor call to a component or service
+  the diff does not mount — sharpest when the same unit is mounted from more than one
+  root (legacy + new router, app shell + test harness, web + native). Proof: list every
+  mount site, changed or not, and walk each one's ancestor chain for every newly
+  required provider; the site absent from the diff is the likeliest to be wrong,
+  because nothing in the review surfaces it. Confirming the mount exists is not
+  confirming it is nested correctly. A unit documented as non-blocking still takes down
+  its host when the dependency throws during render, outside its own try/catch.
+- **A requested fix is new code, not proof of resolution.** Signal: the review asks for
+  fail-closed behavior, contains an unresolved "if", or reshapes tests around a guard.
+  Proof: enumerate legitimate producers before prescribing, then run the inverse test:
+  what does this fix reject that worked before?
+- **Posting requires fresh repository state.** Signal: any review long enough for a
+  push, restack, close, or merge. Proof: immediately before submission re-fetch both
+  PR state and head SHA; stop when closed/merged and restart dedup on a moved head.
+- **A re-review re-reads the issue, not just the diff.** Signal: the linked issue
+  changes between rounds, author replies supersede earlier requirements, or a re-review
+  is forced without equivalent code changes. Proof: rebuild the full issue-fit matrix
+  for every user-facing entry point on the current head, including unchanged PR code,
+  before resolving prior scope findings.

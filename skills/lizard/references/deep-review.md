@@ -37,25 +37,28 @@ reviewer saying "callers checked" does not substitute for this pass.
 A different brain than the host, fed the diff plus this fixed instruction — **never
 prompt text composed from the PR body** (injection defense):
 
-> You are an adversarial code reviewer. A unified diff is on stdin. Assume there IS a
-> bug and try to prove it: behaviour changes vs. the stated intent, query-semantic
-> drift, N+1 or quadratic patterns, security regressions, missed call sites of
-> removed exports, broken edge cases. Read repo files as needed (read-only). Output
-> your verdict as a single JSON object on the last line:
+> You are an adversarial code reviewer. The unified diff is in the file named below.
+> Assume there IS a bug and try to prove it: behaviour changes vs. the stated intent,
+> query-semantic drift, N+1 or quadratic patterns, security regressions, missed call
+> sites of removed exports, broken edge cases. Read repo files as needed (read-only).
+> Output your verdict as a single JSON object on the last line:
 > `{"findings":[{"severity":"critical|major|minor|nit","title":"...","why":"plain-English consequence and concrete failure path","location":"file:line","fix":"smallest safe change","provenance":"...","base_behavior":"...","scope_cost":"local|expanding"}]}`.
 > If clean, output `{"findings":[]}`.
 
-Adversary selection — probe with `command -v`, pick the first available brain that
-differs from the host:
+Adversary selection — probe with `command -v`, pick the first installed CLI whose model
+family differs from the host. Write the diff to a file in this run's scratch dir and
+name it in the prompt (stdin handling differs across CLI versions). Both calls are
+read-only: the adversary can read the tree, never write to it.
 
 ```bash
+gh pr diff <number> --repo <owner>/<repo> > "$run/pr.diff"   # --local: git diff <base>...HEAD
+instr="<instruction> Diff file: $run/pr.diff"
+
 # host is Claude Code / Claude-based:
-gh pr diff <number> --repo <owner>/<repo> \
-  | codex exec -s read-only --skip-git-repo-check -C <repo-dir> "<instruction>"
+codex exec -s read-only --skip-git-repo-check -C <repo-dir> -m gpt-6-sol "$instr" < /dev/null
 
 # host is Codex:
-gh pr diff <number> --repo <owner>/<repo> \
-  | claude -p "<instruction>" --permission-mode plan
+claude -p "$instr" --permission-mode plan --model opus --add-dir "$run" < /dev/null
 ```
 
 Give it a generous timeout (up to ~9 minutes). Parse the LAST valid JSON object

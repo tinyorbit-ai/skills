@@ -41,35 +41,23 @@ duplicate review is less bad than skipping a genuinely changed PR.
 
 ## Parallel-run guard — one standing verdict per head
 
-The skip checks alone don't stop a race: two runs (a sweep and a session, overlapping
-crons) can both pass them before either has posted, and both stamp. The invariant is
-**at most one standing lizard verdict per head SHA**, held by three layers — each
-fail-open, so a layer that errors never blocks a review:
+Two runs (a sweep and a session, overlapping crons) can both pass the skip checks and
+both stamp. The invariant is **at most one standing lizard verdict per head SHA**,
+held by three layers. Each fails open, so a layer that errors never blocks a review:
 
-1. **Claim before reviewing.** The 👀 reaction is the in-flight claim, not just a
-   cue. Before adding yours, list the PR's reactions **filtered to the account
-   lizard posts as** — anyone can react 👀 on a PR, and a bystander's reaction is
-   never a claim. Your own `eyes` reaction created within the last 30 minutes means
-   another run on this account is in flight — stop without posting anything. Older
-   than 30 minutes is a crashed run's leftover — remove it (best effort) and
-   proceed. An explicit user request to review overrides the claim, like any
-   explicit rerun; layers 2–3 still apply. A race across two different accounts has
-   no claim to see — layers 2–3 catch it. Commands in
-   `references/github-review-api.md`.
-2. **Re-check before the POST.** A review takes minutes; a claim can be missed in the
-   seconds before it lands. Immediately before submitting, re-run the
-   previous-review lookups (formal reviews AND issue comments). A lizard verdict at
-   the current `headRefOid` that appeared mid-review wins the race — do not post;
-   append a `duplicate-averted` line to the ledger.
-3. **Verify after the POST.** Fetch lizard verdicts at this head once more. If two
-   stand, **the later one yields**: delete your own later stamp-as-comment; a
-   submitted formal review cannot be deleted — dismiss your own later duplicate
-   (write access required), otherwise leave it and record the collision in the
-   ledger. Commands in `references/github-review-api.md`.
+1. **Claim before reviewing.** Your own 👀 reaction is the claim. Filter reactions to
+   the account lizard posts as; a bystander's 👀 is never a claim. Yours under 30
+   minutes old means another run is in flight: stop without posting. Older is a
+   crashed run's leftover: remove it and proceed. An explicit user request overrides
+   the claim; layers 2–3 still apply, and they also catch races across two accounts.
+2. **Re-check before the POST.** Re-run the previous-review lookups (formal reviews
+   AND issue comments). A verdict at the current `headRefOid` that appeared
+   mid-review wins: don't post, append a `duplicate-averted` ledger line.
+3. **Verify after the POST.** If two verdicts stand at this head, the later one yields
+   (commands in `references/github-review-api.md`).
 
-Fail open is still the law: no lock files, no hard barriers, a staleness bound on
-every claim. A PR stranded unreviewed is worse than a rare duplicate — the first two
-layers make the duplicate rare, and the third removes it when it happens anyway.
+No lock files, no hard barriers, a staleness bound on every claim. A PR stranded
+unreviewed is worse than a rare duplicate.
 
 ## Diff fingerprint
 
@@ -126,42 +114,67 @@ not move it; edits must); lizard's own reviews are excluded by marker/metadata, 
 author login, so the fingerprint is stable regardless of which account runs the
 skill; arrays stay in API order — `-S` sorts object keys only.
 
-## Delta re-review
+## Lookup commands
 
-When a prior lizard review exists and the diff has genuinely changed:
+All `gh` commands take `--repo <owner>/<repo>`; for GitHub Enterprise export `GH_HOST=<host>` first.
 
-1. **Audit prior findings first** — resolve any prior finding the author disputed per
-   scope.md's author-dispute rule before anything else, including its re-earn and
-   present-tense gates: a prior blocker only stays blocking if it clears the proof bar
-   again on *this* head. A carried-forward finding is a decision, not a default.
-   Then, for each blocking finding in the last lizard review, check the current head:
-   resolved or still open? Record both lists in the receipts — for anything still
-   open, record what re-proved it, not merely that it was reviewed. Label new findings as pre-existing misses,
-   author-fix regressions, or lizard-fix regressions. Never imply that an old miss was
-   caused by the new push.
-   **A change lizard asked for is new code, not a resolved finding.** When a delta hunk
-   exists because lizard prescribed it, review it at full depth as if it had arrived
-   unprompted — never grade it `prior finding resolved ✓` and move on. Run the inverse
-   test first: *what does this new guard, restriction, or fail-closed path now reject
-   that used to work?* Enumerate the reachability grid of the state it rejects
-   (`criteria.md` §3), including the caller that made the old permissive branch
-   necessary. This is the highest-asymmetry stamp in the system — lizard wrote the
-   requirement and is now grading it, so no second party is left to catch the gap, and
-   an outage caused here is one lizard authored rather than missed.
+### Previous lizard reviews
 
-2. **Review the delta** — fetch what changed since the last reviewed head:
+```bash
+gh api "repos/<owner>/<repo>/pulls/<number>/reviews" --paginate \
+  --jq '[.[] | select(.body | test("^🦎") or test("(lizard|pr-issue-review):v1"))
+         | {state, commit_id, submitted_at,
+            metadata: (try (.body
+              | capture("<!-- lizard:v1 verdict=(?<verdict>[^ ]+) tier=(?<tier>[^ ]+) adversary=(?<adversary>[^ ]+) head=(?<head>[^ ]+) diff=(?<diff>[^ ]+) context=(?<context>[^ ]+) -->"))
+              catch null)}]'
+```
 
-   ```bash
-   gh api "repos/<owner>/<repo>/compare/<lastReviewedHead>...<headRefOid>"
-   ```
+`commit_id` is the head SHA the review was submitted against — the exact-head skip
+key. Stamp-as-comments (self-authored PRs) live on the issue-comments endpoint;
+check it too when detecting previous reviews:
 
-   Review the delta's hunks at full depth; re-read full files only where the delta
-   touches them. The full-diff pass is only needed again when the delta itself would
-   classify as T3 on its own.
-3. Apply the scope-ratchet circuit breaker in `scope.md`. If the delta is mostly
-   machinery requested by lizard, first test removing or narrowing that machinery.
-4. If the only result is still-open prior blockers and the delta does not touch their
-   causal path, post nothing on GitHub. Remove the reaction and append an
-   `unchanged-blocked` ledger record. This includes merge-only heads whose feature
-   diff and relevant context are unchanged.
-5. Stamp when every prior blocker is resolved and the delta introduces nothing new.
+```bash
+gh api "repos/<owner>/<repo>/issues/<number>/comments" --paginate \
+  --jq '[.[] | select(.body | test("lizard:v1")) | {body, created_at}]'
+```
+
+Inline threads (for the never-repost-open-threads rule):
+
+```bash
+gh api "repos/<owner>/<repo>/pulls/<number>/comments" --paginate
+```
+
+### In-progress reaction
+
+```bash
+login="$(gh api user --jq .login)"
+gh api "repos/<owner>/<repo>/issues/<number>/reactions" \
+  -H "Accept: application/vnd.github+json" \
+| jq --arg login "$login" \
+    '[.[] | select(.content == "eyes" and .user.login == $login) | {id, created_at}]'
+
+# add yours once the exact-head check says a review may happen (best effort)
+reaction_id="$(gh api --method POST \
+  "repos/<owner>/<repo>/issues/<number>/reactions" \
+  -H "Accept: application/vnd.github+json" \
+  -f content=eyes --jq '.id' 2>/dev/null || true)"
+
+# remove it after posting, or before exiting on a skip or failure; a 404 is fine
+[ -n "${reaction_id:-}" ] && gh api --method DELETE \
+  "repos/<owner>/<repo>/issues/<number>/reactions/$reaction_id" --silent || true
+```
+
+## Ledger lines
+
+After every run in PR mode, append one line to
+`~/.lizard/ledger/<host>/<owner>/<repo>.md` (`LIZARD_HOME` replaces `~/.lizard`):
+
+```text
+2026-07-04 PR#4242 verdict=go tier=standard adversary=none head=9fb2ddf
+2026-07-04 PR#4242 verdict=unchanged-blocked head=9fb2ddf prior=2
+2026-07-04 PR#4242 duplicate-averted head=9fb2ddf
+2026-07-04 PR#4242 late-finding head=9fb2ddf first-reachable=3ac81f0 (round 1) — cell: drawer reopen on reload; the round-1 closure sweep enumerated dismissal but not the reload lifecycle.
+```
+
+`verdict` is `go`, `wait`, `block` or `unchanged-blocked`. Miss records and
+calibration live in `references/loop-mode.md`.

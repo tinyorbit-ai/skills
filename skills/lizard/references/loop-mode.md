@@ -1,8 +1,8 @@
 # Loop Mode — sweep, isolation, ledger
 
 How lizard runs unattended: on a `/loop`, a scheduled routine, or any host's cron.
-Session mode (reviewing one PR in an interactive session) needs none of this except
-the ledger append.
+Session mode (reviewing one PR in an interactive session) needs none of this; its
+ledger line format is in `references/dedup.md`.
 
 ## Sweep
 
@@ -104,27 +104,7 @@ store.
 
 Confidence is earned, not declared. Two mechanisms:
 
-**Review records** — after every posted review, append one line to
-`~/.lizard/ledger/<host>/<owner>/<repo>.md`:
-
-```text
-2026-07-04 PR#4242 verdict=go tier=standard adversary=none head=9fb2ddf
-```
-
-When a changed head has only untouched, still-open prior blockers, post nothing and
-record the silent outcome instead:
-
-```text
-2026-07-04 PR#4242 verdict=unchanged-blocked head=9fb2ddf prior=2
-```
-
-When a re-review blocks on something already present at a head lizard reviewed
-before, record the late finding alongside the review record — this is the reviewer's
-miss, and the pattern is only visible in aggregate (`scope.md`):
-
-```text
-2026-07-04 PR#4242 late-finding head=9fb2ddf first-reachable=3ac81f0 (round 1) — cell: drawer reopen on reload; the round-1 closure sweep enumerated dismissal but not the reload lifecycle.
-```
+**Review records** — the per-run ledger lines (`references/dedup.md`, Ledger lines).
 
 **Miss detection** — once per sweep per repo, check recently merged PRs that lizard
 stamped (`verdict=go` in the ledger, PR now merged):
@@ -178,7 +158,7 @@ deferred. Format for `~/.lizard/blind-spots.md`, one entry per lesson, deduped:
 ```
 
 `blind-spots.md` contains only local lessons not yet published into the skill. When a
-lesson ships in `references/field-lessons.md`, move its full incident record to
+lesson ships in the skill (criteria §8 or a `focus-packs/lessons-*.md` pack), move its full incident record to
 `~/.lizard/archive/blind-spots-<date>.md`; archives preserve provenance but are not
 loaded by reviews. This keeps the portable rule and the unpromoted learning queue from
 diverging or being scanned twice.
