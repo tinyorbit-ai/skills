@@ -138,6 +138,12 @@ the concrete answer twice, never a third time. "I don't know yet" is a complete 
 When two reviewers disagree, carry both verbatim with your read. Examples:
 `references/voice.md`.
 
+### 13. Findings
+
+**Fix a review finding, or refute it in one line if fixing breaks Economy or Scope.**
+A finding is a claim, not an order. The refutation names the rule the fix would break;
+anything else is fixed.
+
 ## When rules collide
 
 Economy is the rule most often used against another one, usually wrongly. Ambition
