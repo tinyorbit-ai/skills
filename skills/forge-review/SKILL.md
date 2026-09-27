@@ -107,6 +107,8 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
   broken. **Escape hatch:** a finding still red after 3 fix attempts stops the
   loop — invoke `forge-debug` for the root cause and surface it to the user.
   Never declare green to satisfy the loop.
+  A finding whose fix would break Economy or Scope is refuted in one line instead
+  (forge-principles rule 13).
 - **Subjective findings → one batch at the end.** Genuine tradeoffs with no right
   answer (and any unreconciled reviewer disagreement) go into a single
   AskUserQuestion batch in the **Decision Brief** shape

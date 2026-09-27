@@ -12,7 +12,7 @@ row, and on a row with no folder.
 | Skill | Status | Description |
 |---|---|---|
 | `forge` | stable | Resumable orchestrator. `scripts/status.mjs --json` computes the stage and next action; routes init → discovery → plan → design (if UI) → harden → lock → build/review/ship one phase per run, or every phase with crack-on. `references/headless.md` holds the no-human rule, the Codex question tool and the `FORGE_RESULT` line every stage ends with. |
-| `forge-principles` | stable | The quality bar: posture plus 12 rules, each led by one bold sentence. `scripts/card.mjs` turns the leads into `references/worker-card.md` (~180 words) that factories inject into every worker; the validator fails on a stale card. Rule 10 is the headless contract. |
+| `forge-principles` | stable | The quality bar: posture plus 13 rules, each led by one bold sentence. `scripts/card.mjs` turns the leads into `references/worker-card.md` (~200 words) that factories inject into every worker; the validator fails on a stale card. Rule 10 is the headless contract. |
 | `forge-init` | stable | Scaffolds `wiki/` (record + `knowledge/` + `.forge/`) and injects the wiki/ADR/branch rules into CLAUDE.md and AGENTS.md. |
 | `forge-discovery` | stable | Idea → `wiki/brief.md` through the base seven + sharpening six questions; runs `forge-scope` brief mode before the brief locks. |
 | `forge-scope` | stable | Ambition and scope, merged from forge-ambition + forge-harden-scope. Brief mode (timid premises, bolder version, small unlocks) and plan mode (EXPAND / HOLD / TRIM). Every expansion names its proof burden and a paired cut or pressure valve; writes the `**Ambition check**` marker. |
