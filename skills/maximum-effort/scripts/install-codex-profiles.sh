@@ -18,5 +18,5 @@ TOML
 }
 
 write me-mechanic gpt-6-luna max "mechanical tier: scouts and mechanics"
-write me-owner gpt-6-sol medium "default tier: the owner for S and M"
-write me-hard gpt-6-sol xhigh "hard tier: the owner for L or risky work, and review"
+write me-owner gpt-6.1-sol medium "default tier: the owner for S and M"
+write me-hard gpt-6.1-sol xhigh "hard tier: the owner for L or risky work, and review"

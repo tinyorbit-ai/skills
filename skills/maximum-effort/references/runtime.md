@@ -11,8 +11,8 @@ same on both tools:
 | Tier | Claude | Codex | Use |
 |---|---|---|---|
 | Mechanical | Sonnet 5 @ xhigh | `gpt-6-luna` @ max | scouts and mechanics |
-| Default | Opus 5.5 @ medium | `gpt-6-sol` @ medium | the owner for S and M |
-| Hard | Opus 5.5 @ xhigh | `gpt-6-sol` @ xhigh | the owner for L or risky work, and independent review |
+| Default | Opus 5.5 @ medium | `gpt-6.1-sol` @ medium | the owner for S and M |
+| Hard | Opus 5.5 @ xhigh | `gpt-6.1-sol` @ xhigh | the owner for L or risky work, and independent review |
 
 ## Claude Code
 
@@ -29,15 +29,15 @@ Claude headroom is `seven_day.used_percentage` in
 
 ## Codex
 
-- By default, a `gpt-6-sol` session owns the task. Codex ignores `model:` and `effort:`
+- By default, a `gpt-6.1-sol` session owns the task. Codex ignores `model:` and `effort:`
   in skill frontmatter.
 - If the session runs on `gpt-6-luna` through automatic routing, create exactly one
-  `gpt-6-sol` owner before source work. Give it the request, brief, repo guidance paths,
+  `gpt-6.1-sol` owner before source work. Give it the request, brief, repo guidance paths,
   and authority to own the whole task. If the user explicitly picked a model or effort,
   keep it and keep the current session as owner.
 - Scout and mechanic: `spawn_agent` with `model: "gpt-6-luna"`,
   `reasoning_effort: "max"` and `fork_turns: "none"`.
-- Independent review: a fresh `gpt-6-sol` at `xhigh`, read-only and findings-only.
+- Independent review: a fresh `gpt-6.1-sol` at `xhigh`, read-only and findings-only.
 - Every spawn prompt carries the leaf boundary from `references/delegation.md`.
   Collect the result before accepting it or recording a takeover.
 
@@ -46,7 +46,7 @@ From a shell (Claude driving Codex, or a script), use the profiles that
 `codex exec -p me-mechanic -s read-only "<scout packet>"`, `-p me-owner`, `-p me-hard`.
 
 Keep at most four scouts in flight. Mechanics may overlap only with disjoint files and
-checks. A `gpt-6-sol` owner created from a weaker session may create these leaf delegates; the
+checks. A `gpt-6.1-sol` owner created from a weaker session may create these leaf delegates; the
 weaker coordinator does no parallel source work.
 
 Codex headroom is the last `rate_limits.primary.used_percent` in today's

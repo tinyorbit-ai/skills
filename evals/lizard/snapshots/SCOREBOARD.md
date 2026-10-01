@@ -93,6 +93,7 @@ errors. Read the per-case row. Effective suite state is 14/15, equal to baseline
 | 2026-09-26 | local-mode-2 | default | 5/15 | 0 | 0 | 33% |
 | 2026-09-26 | local-mode-3 | default | 13/15 | 0 | 0 | 93% |
 | 2026-09-26 | local-mode-4 | default | 14/15 | 0 | 0 | 93% |
+| 2026-10-01 | pin-opus-smoke | default | 15/15 | 0 | 0 | 100% |
 
 `local-mode-1` ran the installed copy by accident (the headless session picked the
 global `~/.claude/skills/lizard` over the scratch project's), so it measured the old

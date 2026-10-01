@@ -55,10 +55,10 @@ gh pr diff <number> --repo <owner>/<repo> > "$run/pr.diff"   # --local: git diff
 instr="<instruction> Diff file: $run/pr.diff"
 
 # host is Claude Code / Claude-based:
-codex exec -s read-only --skip-git-repo-check -C <repo-dir> -m gpt-6-sol "$instr" < /dev/null
+codex exec -s read-only --skip-git-repo-check -C <repo-dir> -m gpt-6.1-sol "$instr" < /dev/null
 
 # host is Codex:
-claude -p "$instr" --permission-mode plan --model opus --add-dir "$run" < /dev/null
+claude -p "$instr" --permission-mode plan --model claude-opus-5-5 --add-dir "$run" < /dev/null
 ```
 
 Give it a generous timeout (up to ~9 minutes). Parse the LAST valid JSON object
