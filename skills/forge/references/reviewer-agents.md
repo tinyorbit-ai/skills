@@ -14,7 +14,7 @@ Claude and review with Codex, drive from Codex and review with Gemini, etc.
 |---|---|---|---|
 | Codex (OpenAI) | `codex` | `codex exec -s read-only --skip-git-repo-check "<prompt>"` | forge's original reviewer |
 | Gemini (Google) | `gemini` | `gemini --approval-mode plan -p "<prompt>"` | Google's CLI agent |
-| Claude (Anthropic) | `claude` | `claude -p --permission-mode plan "<prompt>"` | Different family when Codex or Gemini drives |
+| Claude (Anthropic) | `claude` | `claude -p --permission-mode plan --model claude-opus-5-5 "<prompt>"` | Different family when Codex or Gemini drives |
 
 The reviewer reads; it never writes. Every invocation carries its read-only flag
 (`-s read-only`, `--approval-mode plan`, `--permission-mode plan`). Never drop it to
@@ -83,7 +83,7 @@ codex exec -s read-only --skip-git-repo-check "<envelope text> — the artifact 
 the file $ART; read it before answering."
 ```
 
-(Same shape for `gemini --approval-mode plan -p` / `claude -p --permission-mode plan`;
+(Same shape for `gemini --approval-mode plan -p` / `claude -p --permission-mode plan --model claude-opus-5-5`;
 all three can read a file by path.)
 After the call, **verify: exit code 0 AND non-empty output.** Anything else is a
 *skipped* pass — report it as skipped, never as clean.

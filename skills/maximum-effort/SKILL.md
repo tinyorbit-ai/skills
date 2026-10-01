@@ -1,6 +1,6 @@
 ---
 name: maximum-effort
-description: Frontier-led task runner — an Opus 5.5 or gpt-6-sol owner keeps judgment and final review and hands bounded lookups and exact edits to Sonnet 5 or gpt-6-luna. Invoked by name only. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume .maximum-effort/plan.md.
+description: Frontier-led task runner — an Opus 5.5 or gpt-6.1-sol owner keeps judgment and final review, hands bounded lookups and exact edits to Sonnet 5 or gpt-6-luna. Invoked by name only. Use when asked for "maximum effort", "max effort", "route this to cheap agents", or to resume .maximum-effort/plan.md.
 model: opus
 effort: medium
 ---
@@ -22,7 +22,7 @@ only, never in a file or on GitHub.
 
 ## Charter
 
-The owner is Opus 5.5 on Claude and gpt-6-sol on Codex, at medium effort by default and
+The owner is Opus 5.5 on Claude and gpt-6.1-sol on Codex, at medium effort by default and
 xhigh for L or risky work, unless the user explicitly chose another model or effort. It owns every judgment call and the accepted result. Delegation
 removes menial tokens from its context; it never lowers the quality bar or turns the
 owner into a passive planner.
