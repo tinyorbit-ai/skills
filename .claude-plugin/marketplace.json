@@ -12,6 +12,13 @@
       "version": "0.1.0",
       "source": "./mods/agent-atc",
       "category": "productivity"
+    },
+    {
+      "name": "forge-gate",
+      "description": "Enforces the forge phase gate: shows whether the current phase's Verifiable gate is green on this exact working tree, and blocks a 'phase done' claim until it is. /gate runs it.",
+      "version": "0.1.0",
+      "source": "./mods/forge-gate",
+      "category": "productivity"
     }
   ]
 }

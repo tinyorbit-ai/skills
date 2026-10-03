@@ -95,6 +95,7 @@ and install through this repo's plugin marketplace:
 ```bash
 claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods
 claude plugin install agent-atc@tinyorbit     # /atc: live control pane for subagents
+claude plugin install forge-gate@tinyorbit    # /gate: the forge phase gate, enforced
 ```
 
 ## License

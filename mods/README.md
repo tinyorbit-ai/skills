@@ -18,13 +18,14 @@ claude plugin install agent-atc@tinyorbit
 
 Update: `claude plugin marketplace update tinyorbit && claude plugin update agent-atc@tinyorbit`
 (restart Claude Code to apply). Try a local checkout without installing:
-`claude --plugin-dir ~/code/skills/mods/agent-atc`.
+`claude --plugin-dir "$HOME/code/skills/mods/<name>"` (absolute path; see Gotchas).
 
 ## Index
 
 | Mod | What it does | Notes |
 |---|---|---|
 | `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
+| `forge-gate` | Band above the prompt: the checked-out forge phase and whether its `**Verifiable gate:**` is green on this exact working tree. Sends a "phase done" claim back once while it isn't. `/gate` runs it | Phase = current branch matched against the plan's `**Branch:**`. Gate commands = backticked spans whose first word is a real executable; deploy/release/install/send/rm-style commands and `<placeholders>` are never run. Evidence = Claude's own Bash runs (no pipe or `\|\| true` after) or `/gate`, which asks first. "Green" is pinned to a fingerprint of HEAD + diff + untracked files, kept in `$.store` across sessions. A gate with no commands waits for the person's **Checked**. |
 
 ## Layout
 
@@ -59,7 +60,6 @@ mods/<name>/
   never expanded (`--plugin-dir=~/...`, or a quoted path), Claude Code skips it with no
   error and the mod's commands just aren't there. Use an absolute path. Add
   `--debug-file /tmp/x.log` and grep the log for the mod's name to see whether it loaded.
-
 - **`$` only goes to top-level functions.** A helper that takes `$` must be declared
   at the top of the module. A closure inside `register` that takes `$` fails
   `claude plugin validate`.

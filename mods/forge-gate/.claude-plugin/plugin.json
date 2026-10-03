@@ -1,0 +1,17 @@
+{
+  "name": "forge-gate",
+  "version": "0.1.0",
+  "description": "Enforces the forge phase gate: shows whether the current phase's Verifiable gate is green on this exact working tree, and blocks a 'phase done' claim until it is. /gate runs it.",
+  "author": { "name": "Matteo Hertel" },
+  "repository": "https://github.com/tinyorbit-ai/skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "guardDoneClaims": {
+      "type": "boolean",
+      "title": "Block 'phase done' claims",
+      "description": "When Claude says the phase is done while its gate is not green on the current tree, send it back once with the reason.",
+      "default": true
+    }
+  }
+}
