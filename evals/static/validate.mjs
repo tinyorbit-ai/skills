@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Tier 0 — static validation of SKILL.md files.
-// Scope: the forge suite; pass --all to validate every skill.
+// Tier 0 — static validation of SKILL.md files and mods/.
+// Scope: the forge suite; pass --all to validate every skill. Mods are always checked.
 // Deterministic, no tokens. Run: node evals/static/validate.mjs
 // Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check mandatory.
 
@@ -208,8 +208,54 @@ try {
   rmSync(listFile, { force: true });
 }
 
+// Mods (mods/<name>/): Claude Code plugins of function hooks, shipped through
+// .claude-plugin/marketplace.json, not npx skills. Always in scope: there are few,
+// and the engine's own `claude plugin validate` / `claude plugin test` are the gate.
+const MODS_DIR = join(ROOT, 'mods');
+const marketPath = join(ROOT, '.claude-plugin/marketplace.json');
+const mods = existsSync(MODS_DIR)
+  ? readdirSync(MODS_DIR).filter((d) => existsSync(join(MODS_DIR, d, '.claude-plugin/plugin.json')))
+  : [];
+if (mods.length > 0) {
+  const market = existsSync(marketPath) ? JSON.parse(readFileSync(marketPath, 'utf8')) : { plugins: [] };
+  if (!existsSync(marketPath)) failures.push('mods: .claude-plugin/marketplace.json is missing');
+  const listedMods = new Map((market.plugins ?? []).map((p) => [p.name, p]));
+  for (const name of mods) {
+    const manifest = JSON.parse(readFileSync(join(MODS_DIR, name, '.claude-plugin/plugin.json'), 'utf8'));
+    const entry = listedMods.get(name);
+    if (manifest.name !== name) fail(`mod ${name}`, `plugin.json name "${manifest.name}" must equal the folder name`);
+    if (!entry) fail(`mod ${name}`, 'missing from .claude-plugin/marketplace.json — it will not install');
+    else if (entry.source !== `./mods/${name}`) fail(`mod ${name}`, `marketplace source must be "./mods/${name}"`);
+    else if (entry.version !== manifest.version) fail(`mod ${name}`, `marketplace version ${entry.version} ≠ plugin.json ${manifest.version}`);
+  }
+  for (const name of listedMods.keys()) {
+    if (!mods.includes(name)) fail(`mod ${name}`, 'in marketplace.json but has no folder in mods/');
+  }
+  const claude = (args, label) => {
+    try {
+      execSync(`claude ${args}`, { cwd: ROOT, timeout: 300_000, stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (e) {
+      if (e.code === 'ENOENT' || e.status === 127) {
+        const msg = `${label}: \`claude\` CLI not found — skipped`;
+        if (requireCli) failures.push(msg);
+        else warnings.push(msg);
+        return;
+      }
+      const out = `${e.stdout ?? ''}${e.stderr ?? ''}`.trim().split('\n').slice(-6).join(' | ');
+      failures.push(`${label}: \`claude ${args}\` failed — ${out}`);
+    }
+  };
+  claude('plugin validate .', 'mods: marketplace');
+  for (const name of mods) {
+    claude(`plugin validate mods/${name}`, `mod ${name}`);
+    const hasTests = existsSync(join(MODS_DIR, name, 'tests'));
+    if (hasTests) claude(`plugin test mods/${name}`, `mod ${name} tests`);
+    else warn(`mod ${name}`, 'no tests/ — `claude plugin test` has nothing to run');
+  }
+}
+
 // Report
-console.log(`Checked ${skills.length} skills (${publicSkills.length} public, scope: ${allScope ? 'all' : 'forge suite'}).`);
+console.log(`Checked ${skills.length} skills (${publicSkills.length} public, scope: ${allScope ? 'all' : 'forge suite'}), ${mods.length} mod${mods.length === 1 ? '' : 's'}.`);
 for (const w of warnings) console.log(`  WARN  ${w}`);
 for (const f of failures) console.log(`  FAIL  ${f}`);
 if (failures.length === 0) {

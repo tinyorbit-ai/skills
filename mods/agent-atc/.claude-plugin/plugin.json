@@ -1,0 +1,17 @@
+{
+  "name": "agent-atc",
+  "version": "0.1.0",
+  "description": "Air-traffic control for subagents: a live pane listing every agent, what each one is doing now, and controls to message or stop one. Open it with /atc.",
+  "author": { "name": "Matteo Hertel" },
+  "repository": "https://github.com/tinyorbit-ai/skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Open on first agent",
+      "description": "Open the pane by itself when the first subagent starts (wide terminals only).",
+      "default": true
+    }
+  }
+}

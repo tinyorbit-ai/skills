@@ -43,6 +43,11 @@ Also: name/folder mismatches, the 200-line body ceiling, missing `references/`
 files (including cross-skill `forge/references/...`), CLAUDE.md index drift, and
 the `npx skills add . --list` discovery oracle.
 
+Mods (`mods/<name>/`) are always checked, whatever the scope. Each one must pass
+`claude plugin validate` and `claude plugin test`. Its folder, `plugin.json` name and
+version must match its `.claude-plugin/marketplace.json` entry. A missing `claude`
+CLI skips these with a warning, or fails under `EVALS_REQUIRE_CLI=1`.
+
 ## Tier 1 — trigger routing
 
 ```bash

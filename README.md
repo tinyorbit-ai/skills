@@ -87,6 +87,16 @@ Per-skill notes in [`skills/INDEX.md`](./skills/INDEX.md). The quality bar is
 means in
 [`skills/forge-principles/references/simplicity.md`](./skills/forge-principles/references/simplicity.md).
 
+## Mods
+
+Claude Code mods (plugins of function hooks) live in [`mods/`](./mods/README.md)
+and install through this repo's plugin marketplace:
+
+```bash
+claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods
+claude plugin install agent-atc@tinyorbit     # /atc: live control pane for subagents
+```
+
 ## License
 
 MIT — see [`LICENSE`](./LICENSE).
