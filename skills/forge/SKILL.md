@@ -1,6 +1,6 @@
 ---
 name: forge
-description: Resumable build pipeline for a forge project (wiki/ with brief and plan) — picks up where it left off through setup, discovery, plan and harden, then build, review and ship one phase at a time. Use when asked to "forge this", "forge help", "forge status", "forge crack-on" or "let's build X".
+description: Build pipeline for a forge project (wiki/ brief and plan) — picks up where it left off, from setup to plan and harden, then builds, reviews and ships one phase, or all remaining phases via crack-on. Use when asked to "forge this", "forge help", "forge status", "forge crack-on" or "let's build X".
 ---
 
 # forge
@@ -118,9 +118,7 @@ would re-present the gate. The build loop is now unlocked.
    - gate green and review evidence exists but no build-log entry → go straight to
      **Ship** (step 5).
 2. **Announce it.** Phase number, title, its branch, its verifiable gate. One line.
-3. **Build.** Invoke `forge-build` on the phase branch. With `maximum-effort`
-   installed, one frontier owner keeps judgment while bounded leaves may use smaller
-   models; the lifecycle is unchanged (`references/phase-lanes.md`).
+3. **Build.** Invoke `forge-build` on the phase branch.
 4. **Review.** Invoke `forge-review` on the phase diff. It runs `forge-polish` when
    the phase touched UI and `forge-dx` when the build is developer-facing.
 5. **Ship.** Invoke `forge-ship` (gate green on the rebased tree → build log, wiki and
@@ -169,4 +167,3 @@ End with the crack-on summary block from `references/crack-on.md`.
 - `../forge-principles/references/voice.md` — banned hedges, push-twice rule, calibrated acknowledgment; governs every skill's tone
 - `references/scoring.md` — the 0–10 rate → fix-to-10 → re-rate loop + confidence gates + trend lines
 - `../forge-harden/references/craft-patterns.md` — named thinking moves (inversion, one-way doors, constraint worship, …) the personas apply
-- `references/phase-lanes.md` — frontier-led model allocation inside a Forge phase

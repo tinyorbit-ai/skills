@@ -137,7 +137,7 @@ scaffolding skills) so they don't pollute discovery — these can stay in `skill
 
 Skills are prompts, so `evals/` tests them in three tiers. There is **no CI** —
 the evals are part of *editing skills in this repo*, run by whoever (human or
-agent) is making the change. **Scope: the forge suite plus `maximum-effort`** (`forge` +
+agent) is making the change. **Scope: the forge suite** (`forge` +
 `forge-*`; lizard has its own harness — see **Lizard** below; other non-forge
 skills are excluded until deliberately added — every runner takes `--all` to widen).
 Full docs + add-a-case guide: `evals/README.md`.
@@ -153,7 +153,6 @@ the rubric always meant; the seeded-degraded plan (0–1) fails either way.
 |---|---|---|---|
 | 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
 | 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies |
-| 1b routing | `node evals/routing/run.mjs` | `maximum-effort` sizes work, assigns owner/scout/mechanic, and reserves frontier review for risky, original-design, and L work | pennies |
 | 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens, minutes |
 
 **The loop (mandatory when asked to change a covered skill):**

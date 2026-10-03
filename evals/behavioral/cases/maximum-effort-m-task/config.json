@@ -1,7 +1,0 @@
-{
-  "_comment": "M-sized locked non-risky propagation task proving frontier-led delegation. The Opus owner must inspect the known files, assign exactly one Sonnet mechanical worker with a closed scope and check, collect it, inspect the diff, and run the final suite. No scout, frontier reviewer, second mechanic, or persistent plan is warranted. Live probes prove the new service identifier and unchanged health response shape.",
-  "skills": ["maximum-effort", "forge-principles"],
-  "judgeFiles": ["src/service.js", "test/service.test.js", "test/server.test.js", "examples/client.js", "docs/api.md"],
-  "rubricSources": ["skills/forge-principles/references/simplicity.md"],
-  "timeoutMinutes": 20
-}

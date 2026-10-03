@@ -4,15 +4,14 @@ Skills are prompts, so "does it work" means different things at different layers
 There is deliberately **no CI**: the evals are part of the skill-editing loop in
 this repo, run by whoever (human or agent) is making the change.
 
-**Scope: the forge suite plus `maximum-effort`** — `forge`, `forge-*`, and the
-frontier-led runner. Lizard and future skills are excluded until deliberately added;
+**Scope: the forge suite** — `forge` and `forge-*`. Lizard and future skills are
+excluded until deliberately added;
 `validate.mjs` and `trigger/run.mjs` accept `--all` (or `EVALS_SCOPE=all`) to widen.
 
 | Tier | What it proves | Cost | When |
 |---|---|---|---|
 | **0 static** | frontmatter parses, discovery works, references resolve, index in sync | free, seconds | every change, before pushing |
 | **1 trigger** | user utterances route to the right skill from `description` alone | ~45 haiku calls, pennies | when any `description` changes |
-| **1b routing** | `maximum-effort` sizes tasks, assigns owner/scout/mechanic, and reserves frontier review for risky, original-design, and L work | 25 haiku calls, pennies | when the triage rule changes |
 | **2 behavioral** | the skill, run end-to-end headless, produces its contracted artifacts | real tokens, minutes/case | when a skill's body changes |
 
 ## The edit loop (how these are actually used)
@@ -63,22 +62,6 @@ ambition, plan-time vs runtime personas) are the highest-value cases. Threshold:
 
 **Add a case** whenever a description edit ships or a routing miss happens in real
 use — the miss becomes a case, like a regression test.
-
-## Tier 1b — routing (maximum-effort)
-
-```bash
-node evals/routing/run.mjs              # 25 cases
-node evals/routing/run.mjs --dry-run    # print the assembled prompt, no calls
-node evals/routing/run.mjs --only stripe
-```
-
-Same shape as tier 1, different question: task size, primary leaf lane, and whether an
-independent frontier review earns its tokens. It reads the live `## When not to run`
-and `## Triage` sections of `maximum-effort`, shows Haiku only those rules plus one
-task, and asserts `forge` or `S|M|L`, `owner|scout|mechanic`, and `self|frontier`.
-Passes at ≥ 24/25 with hard constraints: tiny work stays self-reviewed, menial work
-leaves the owner, design and risky work stay owner-led, risky work gets frontier
-review, and Forge continuation never leaks into Maximum Effort.
 
 ## Tier 2 — behavioral
 
@@ -242,14 +225,6 @@ Set `judgeFloor` in `config.json` to override the floor parsed from `rubric.md`.
   items reported-but-untouched (nested file not moved, broken link not silently
   deleted) — plus no collateral damage to healthy articles.
 
-- **`maximum-effort-m-task`** — the frontier-led delegation contract. Product has
-  already locked an exact `orbit-core` → `orbit-api` identifier propagation across
-  source, tests, example, and docs. The Opus owner must inspect the files, give exactly
-  one Sonnet mechanic a closed packet and deterministic check, collect it, inspect the
-  diff, and run the final suite. A scout, frontier reviewer, second mechanic, persistent
-  plan, or uncollected result fails. Live probes prove the new identifier and unchanged
-  health response shape. Judge: correctness, economy of delegation, and brief fidelity.
-
 ### Add a case
 
 ```
@@ -270,24 +245,9 @@ no network.
 
 ## Recorded baselines
 
-- **2026-08-20** · forge ↔ maximum-effort lane wiring. Tier 1 scope widened so
-  `maximum-effort` competes with the forge suite for the first time — it immediately
-  stole `"continue where we left off"` (44/47), which is the collision the change
-  exists to fix; after narrowing the description to "invoked by name, not by
-  inference" plus a forge stand-down clause, **51/51** across repeated runs with
-  `"continue"` and `"build the next phase"` both back on forge. Tier 1b gained 3
-  `forge`-tag cases (the runner now also feeds `## When not to run` and accepts the
-  answer `forge`): 13/15 **failing** before → **17-18/18** after. Two pre-existing
-  sizing misses were fixed in the same pass; measured 10 runs to confirm the M/L cue
-  edit was not the cause of a one-off hard-constraint miss — with the cues
-  18/18/17/18/17 and 0/5 misses, without them 16/15/17/18/16 and 1/5, i.e. router
-  flake, and the cues are net better. **No tier-2 case** for the lane-powered phase
-  loop on purpose: no crack-on baseline exists to protect, and its deterministic
-  checks would measure build variance rather than the wiring. First lane-powered
-  crack-on run is attended; a real miss becomes the permanent case.
-- **Harness note.** Every tier-1/1b case shells out a full
+- **Harness note.** Every tier-1 case shells out a full
   `claude -p` boot — 7.3s wall and 4.3s CPU per case, most of it connecting MCP
-  servers, so a routing run is ~100s and a trigger run ~3min. Raising
+  servers, so a trigger run takes ~3min. Raising
   `EVAL_CONCURRENCY` barely helps (4 → 12 was 99s → 87s) because it is CPU-bound on
   process boot, not network. The intermittent
   `clientlisttools() called but server does not advertise tools capability` "failures"
@@ -296,42 +256,6 @@ no network.
   `--strict-mcp-config --mcp-config '{"mcpServers":{}}'`. That measures 3.8s wall /
   0.9s CPU and removes both the cost and the flake.
 
-- **2026-08-27** · `maximum-effort` frontier-led delegation correction. The prior
-  one-owner baseline passed static validation; provider-backed trigger and routing were
-  unavailable because every call exited with the same provider error, and the ×3
-  behavioral run was inconclusive after every attempt exhausted its 429 retries. The
-  corrected skill passes strict static validation, script syntax, fixture tests, all 17
-  deterministic behavioral assertions against a synthetic completed transcript, and
-  the live trigger suite at **56/56**. A later live routing attempt completed 0/25
-  because all calls exited at the provider, and the ×3 behavioral run again exhausted
-  its 429 retries before task execution. Those two tiers remain inconclusive rather
-  than behavioral failures.
-- **2026-08-24** · `maximum-effort` frontier-owner rewrite. Pre-change static validation
-  passed and routing scored 14/15; the Claude ×3 behavioral baseline was inconclusive
-  because every run hit 429 after all retries. Post-change strict static validation
-  passes. Provider-backed trigger, routing, and behavioral runs remain ungraded for the
-  same subscription 429. An isolated Sol execution completed the M auth task with 10/10
-  tests, a pinned Sol/high review, a valid task ledger row, and live proof of 429,
-  `Retry-After`, IP isolation, and reset. It also added a test-only `createServer` clock
-  option; the new deterministic economy check rejects that surface, turning the
-  forward-test miss into a regression case. Re-run the three provider-backed tiers
-  after Claude resets.
-- **2026-08-20** · tier 1b routing (15 cases, Haiku): 12/15 → 15/15 after two
-  rule sharpenings (a new test is M; un-recallable side effects and a refactor on a
-  trust boundary are risky). Both hard constraints clean.
-- **2026-08-20** · tier 2 `maximum-effort-m-task` ×3, first baseline: **FAIL**, and
-  the autopsy reshaped both the skill and the check. Re-graded offline with the
-  corrected check, runs 1–2 clear all 19 deterministic checks (run 1 ran every lane
-  through the Codex pool — a legitimate pool pick at Claude 7-day 30% vs Codex 3%;
-  run 2 was the contract to the letter on the Claude pool); run 3 backgrounded its
-  Codex scouts and ended the headless turn with nothing done — now forbidden by the
-  skill. Judge medians plan_quality 7 · **economy_of_means 5 ✗** · brief_fidelity 8:
-  both real runs shipped a factory module with options for a 12-line per-IP window.
-  The plan step now carries the default-deny (no file for one caller, no option for
-  a fixed value, one seam test over five module tests). A second ×3 run against the
-  fixed skill was started and stopped before any run completed (5-hour window at
-  92%) — **not yet green**; re-run with
-  `node evals/behavioral/run.mjs maximum-effort-m-task --runs 3 --no-cache`.
 - **2026-07-11** · tier 1 (forge-only scope, 41 cases): 40/41 (98%) on Haiku —
   the miss was a deliberately soft utterance since reworded ("what are we
   building again?" → "help me pin down exactly what we're building", verified
