@@ -29,15 +29,6 @@ order, run the normal loop — pick the phase, announce it in one line, `forge-b
 `forge-review`, `forge-ship` — then immediately take the next one. No "stop and
 report" between phases; the report is the end summary.
 
-## Frontier-led allocation
-
-When `maximum-effort` is installed, each remaining phase uses the frontier-led policy
-in `references/phase-lanes.md` — the same contract as a single-phase `/forge` run, not
-a crack-on special case. A frontier phase owner keeps judgment and integration while
-smaller models may receive bounded factual or mechanical leaves. Every stop condition
-in this file still applies because the owner returns `BLOCKED(reason)` to the main
-thread. The end summary is unchanged.
-
 ## Un-runnable gates — skip, never fail
 
 A gate is **un-runnable** when clearing it needs a human or a surface this run

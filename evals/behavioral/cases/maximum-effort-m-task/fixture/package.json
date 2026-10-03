@@ -1,6 +1,0 @@
-{
-  "name": "maximum-effort-fixture",
-  "private": true,
-  "type": "module",
-  "scripts": { "test": "node --test" }
-}

@@ -1,5 +1,5 @@
 {
-  "_comment": "Trigger routing cases — forge suite plus explicit maximum-effort invocations. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs catch descriptions that steal or lose routing. Maximum-effort is explicit-only by description: ordinary work without a Maximum Effort or cheap-agent request must not trigger it. Generic session phrases (keep going, review this, remember this, retro) are expected to route to none so forge does not fire outside forge work; code-review is the harness built-in and counts as not-forge.",
+  "_comment": "Trigger routing cases — forge suite. `expect` lists every acceptable answer; 'none' means no skill should trigger. Near-miss sibling pairs catch descriptions that steal or lose routing. Maximum-effort is explicit-only by description: ordinary work without a Maximum Effort or cheap-agent request must not trigger it. Generic session phrases (keep going, review this, remember this, retro) are expected to route to none so forge does not fire outside forge work; code-review is the harness built-in and counts as not-forge.",
   "cases": [
     {
       "utterance": "I have an idea for a tool that renames my screenshots — help me shape it",
@@ -263,51 +263,9 @@
       ]
     },
     {
-      "utterance": "max effort this",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
-      "utterance": "pick up the half-done maximum-effort plan",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
       "utterance": "ship all the remaining phases",
       "expect": [
         "forge"
-      ]
-    },
-    {
-      "utterance": "route this to cheap agents",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
-      "utterance": "maximum effort this auth refactor",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
-      "utterance": "use max effort to add the rate limiter and its tests",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
-      "utterance": "maximum effort: keep Sol on the decisions and use smaller models for the mechanical work",
-      "expect": [
-        "maximum-effort"
-      ]
-    },
-    {
-      "utterance": "continue the unfinished .maximum-effort plan",
-      "expect": [
-        "maximum-effort"
       ]
     },
     {
