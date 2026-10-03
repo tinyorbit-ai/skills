@@ -15,9 +15,9 @@ Phase 5 · App icon     ◐ written checks, not checked           [ Checked ]
 - **Which commands:** the gate's backticked spans whose first word is a real
   executable. Deploy, release, install, send and rm-style commands are never run, and
   nor are spans with `<placeholders>`.
-- **Green:** every gate command passed on this exact working tree. That means HEAD,
-  the diff and untracked files are all unchanged since the run. One edit makes it stale.
-  A pass is remembered across sessions.
+- **Green:** every gate command passed on exactly the files you have now. It
+  compares file contents (a git tree id), so committing doesn't make a pass stale, but
+  any edit does. A pass is remembered across sessions.
 - **Evidence:**
   - Claude's own Bash runs of a gate command count, unless something after the
     command could hide its exit code (a pipe, `|| true`, `;`).

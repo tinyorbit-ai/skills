@@ -131,16 +131,19 @@ const locate = async ($: EngineInterface): Promise<GatePhase | null> => {
 
 // ---------- The working tree ----------
 
-const TREE_SCRIPT =
-  'git rev-parse HEAD 2>/dev/null; git diff HEAD --no-ext-diff 2>/dev/null; ' +
-  'git ls-files -o --exclude-standard -z 2>/dev/null | xargs -0 shasum 2>/dev/null'
+// The git tree id of every working file, untracked ones included, built in a
+// throwaway index so the real one is untouched. Content, not commits: the same
+// files give the same id before and after a commit, and any edit changes it.
+const TREE_SCRIPT = [
+  'idx=$(mktemp) || exit 1',
+  'cp "$(git rev-parse --git-path index)" "$idx" 2>/dev/null || rm -f "$idx"',
+  'GIT_INDEX_FILE="$idx" git add -A >/dev/null 2>&1; GIT_INDEX_FILE="$idx" git write-tree',
+  'rm -f "$idx"',
+].join('\n')
 
-// What a gate result is valid for: HEAD, every change against it, and every
-// untracked file's content. Any edit after a run changes it.
 const treeId = async ($: EngineInterface, root: string): Promise<string> => {
   const { stdout } = await $.process.run(['/bin/sh', '-c', TREE_SCRIPT], { cwd: root })
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stdout))
-  return [...new Uint8Array(digest)].slice(0, 10).map(byte => byte.toString(16).padStart(2, '0')).join('')
+  return stdout.trim()
 }
 
 const storeKey = (phase: GatePhase): string => `gate:${phase.root}:${phase.n}`

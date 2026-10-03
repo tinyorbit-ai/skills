@@ -23,7 +23,7 @@ export type GateRun = {
   at: number
   ms?: number
   tail: string
-  /** Fingerprint of HEAD, the diff against it and untracked files. */
+  /** The git tree id of all working files (untracked included) when it ran. */
   tree: string
   by: 'claude' | 'person'
 }

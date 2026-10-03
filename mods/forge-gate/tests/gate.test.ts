@@ -57,7 +57,7 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
     const [bin, flag, script, , token] = e.argv
     if (bin === 'git' && flag === 'rev-parse') return out('/repo\n')
     if (bin === 'git' && flag === 'branch') return out(`${world.branch}\n`)
-    if (bin === '/bin/sh' && script?.startsWith('git rev-parse HEAD')) return out(world.tree)
+    if (bin === '/bin/sh' && script?.includes('write-tree')) return out(`${world.tree}\n`)
     if (bin === '/bin/sh' && script?.startsWith('command -v')) return out('', token === 'dedupe' ? 0 : 1)
     if (bin === '/bin/sh' && script !== undefined) {
       world.ran.push(script)
@@ -210,10 +210,7 @@ test('a commandless gate waits for the person to check it', async ($, on) => {
 
 test('a pass from an earlier session counts on the same tree', async ($, on) => {
   mock.clock(on, { now: 5_000_000 })
-  // The fingerprint the mod takes of a tree whose git output reads "A".
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('A'))
-  const treeA = [...new Uint8Array(digest)].slice(0, 10).map(byte => byte.toString(16).padStart(2, '0')).join('')
-  const run = (command: string) => ({ command, isOk: true, exitCode: 0, at: 4_000_000, tail: '', tree: treeA, by: 'claude' })
+  const run = (command: string) => ({ command, isOk: true, exitCode: 0, at: 4_000_000, tail: '', tree: 'A', by: 'claude' })
   mock.store(on, {
     'gate:/repo:2': {
       runs: { 'dedupe ./fixtures/dupes': run('dedupe ./fixtures/dupes'), 'dedupe ./fixtures/clean': run('dedupe ./fixtures/clean') },
