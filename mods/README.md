@@ -55,6 +55,11 @@ mods/<name>/
 
 ## Gotchas (each one hit while building agent-atc)
 
+- **A bad `--plugin-dir` path fails silently.** If the folder is missing, or the `~` was
+  never expanded (`--plugin-dir=~/...`, or a quoted path), Claude Code skips it with no
+  error and the mod's commands just aren't there. Use an absolute path. Add
+  `--debug-file /tmp/x.log` and grep the log for the mod's name to see whether it loaded.
+
 - **`$` only goes to top-level functions.** A helper that takes `$` must be declared
   at the top of the module. A closure inside `register` that takes `$` fails
   `claude plugin validate`.
