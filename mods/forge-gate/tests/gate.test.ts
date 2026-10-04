@@ -18,6 +18,11 @@ const PLAN = `# Plan
 **Work:**
 - the dedupe command
 
+## Phase 4 — Dependency check
+**Branch:** \`phase/4-deps\`
+**Verifiable gate:** \`go list -deps ./... | grep -i bubbletea\` prints nothing.
+**Design:** none
+
 ## Phase 3 — Icon
 **Branch:** \`phase/3-icon\`
 **Verifiable gate:** open the app on the phone and the icon shows the orbit mark at every size.
@@ -35,6 +40,8 @@ type World = {
   isTreeBroken?: boolean
   // Something edits the files while a Bash command runs.
   duringRun?: () => void
+  // The plan as it reads now, when a test edits it.
+  plan?: string
 }
 
 const BAND = {
@@ -72,8 +79,8 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
     }
     return out('', 127)
   })
-  on('fs.read', () => ({ value: PLAN }))
-  on('fs.stat', () => ({ value: { kind: 'file', size: PLAN.length, mtimeMs: 1, isLink: false } }))
+  on('fs.read', () => ({ value: world.plan ?? PLAN }))
+  on('fs.stat', () => ({ value: { kind: 'file', size: (world.plan ?? PLAN).length, mtimeMs: (world.plan ?? PLAN).length, isLink: false } }))
   on('session.cwd', () => ({ value: '/repo' }))
   on('command.register', () => ({ value: { command: 'gate' } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -425,7 +432,73 @@ test('a question is not a done claim', async ($, on) => {
   machine(on, world)
   await $.session.start(SESSION)
 
-  for (const question of ['Should I hand off to forge-review now?', 'The gate passes locally. Is this ready for review, or do you want the flag too?']) {
+  for (const question of ['Should I hand off to forge-review now?', 'Which fixture should I use before the gate passes?']) {
     expect((await $.classic.Stop({ stop_hook_active: false, last_assistant_message: question })).block).toBeUndefined()
   }
+  // A claim followed by a question still reports done.
+  const claim = await $.classic.Stop({ stop_hook_active: false, last_assistant_message: 'Phase 2 is done. Want me to ship it?' })
+  expect(claim.block).toContain('you reported phase 2 as done')
+})
+
+test('a gate command with its own pipe counts only when run whole', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/4-deps', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
+
+  await $.tool.call({ tool: 'Bash', command: 'go list -deps ./...' })
+  await $.turn.complete(turnEnd)
+  expect(await band.find({ text: /1 of 1 not run on this tree/ })).toBeDefined()
+
+  await $.tool.call({ tool: 'Bash', command: 'go list -deps ./... | grep -i bubbletea' })
+  expect(await band.find({ text: /✓ gate green/ })).toBeDefined()
+})
+
+test('a gate skipped by an earlier failure is not marked failed', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: { 'false': { exitCode: 1, stdout: '' } }, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
+
+  await $.tool.call({ tool: 'Bash', command: 'false && dedupe ./fixtures/dupes' })
+  await $.turn.complete(turnEnd)
+  expect(await band.find({ text: /gate red/ })).toBeUndefined()
+  expect(await band.find({ text: /2 of 2 not run on this tree/ })).toBeDefined()
+})
+
+test('a failed rerun replaces an older pass even when the fingerprint fails', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  await $.tool.call(DUPES)
+  await $.tool.call(CLEAN)
+
+  world.isTreeBroken = true
+  world.results = { 'dedupe ./fixtures/dupes': { exitCode: 1, stdout: 'boom' } }
+  await $.tool.call(DUPES)
+  world.isTreeBroken = false
+  const claim = finalMessage({ skill: 'forge-build' })
+  expect((await $.classic.Stop({ stop_hook_active: false, last_assistant_message: claim })).block).toContain('is green, but it is not green')
+})
+
+test('editing a manual gate voids an earlier Checked', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/3-icon', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
+  await band.press({ key: 'mark-checked' })
+  expect(await band.find({ text: /✓ checked by you/ })).toBeDefined()
+
+  // wiki/ is outside the fingerprint, so the gate text itself carries the change.
+  world.plan = PLAN.replace('at every size', 'at every size, in light and dark')
+  await $.turn.complete(turnEnd)
+  expect(await band.find({ text: /◐ written checks, not checked/ })).toBeDefined()
 })

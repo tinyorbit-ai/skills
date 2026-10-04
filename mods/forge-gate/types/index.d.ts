@@ -32,6 +32,8 @@ export type GateRun = {
 export type GateCheck = {
   at: number
   tree: string
+  /** The gate text it was checked against; editing the gate voids it. */
+  gate: string
 }
 
 declare module 'claude-code' {

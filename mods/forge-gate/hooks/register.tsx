@@ -112,7 +112,8 @@ const rootOf = async ($: EngineInterface, dir: string): Promise<string | null> =
   if (known !== undefined) return known
   const top = await $.process.run(['git', 'rev-parse', '--show-toplevel'], { cwd: dir })
   const root = top.exitCode === 0 ? top.stdout.trim() : null
-  roots.set(dir, root)
+  // "No repo" isn't cached: `git init` can come later in the session.
+  if (root !== null) roots.set(dir, root)
   return root
 }
 
@@ -240,7 +241,8 @@ const refresh = async ($: EngineInterface): Promise<GatePhase | null> => {
 
 const verdictOf = (phase: GatePhase, runs: Runs, checked: GateCheck | null, tree: string): Verdict => {
   if (phase.commands.length === 0) {
-    return checked !== null && tree !== '' && checked.tree === tree ? { kind: 'checked' } : { kind: 'manual' }
+    const isCurrent = checked !== null && tree !== '' && checked.tree === tree && checked.gate === phase.gate
+    return isCurrent ? { kind: 'checked' } : { kind: 'manual' }
   }
   const current = phase.commands
     .map(command => runs[command])
@@ -292,32 +294,38 @@ const REDIRECT = /\s+(?:\d?>>?|&>>?|\d?<)\s*(?:&\d|[^\s|;&]+)/g
 const commandOf = (segment: string): string =>
   squash(segment.replace(REDIRECT, '')).replace(/^(?:[A-Za-z_]\w*=\S*\s+)*(?:timeout\s+\S+\s+)?/, '')
 
-type GateHit = { command: string; isLast: boolean }
+// A failure is pinned on a gate command only when it is `isAlone`: last in the call,
+// with nothing but `cd` before it, so nothing else can have failed first.
+type GateHit = { command: string; isAlone: boolean }
+
+const partsOf = (bash: string): string[] => bash.trim().split(OPERATOR).map((part, k) => (k % 2 === 0 ? commandOf(part) : part.trim()))
 
 // The gate commands a Bash call really ran in the repo root, and whose exit code
-// the call's own status speaks for. Each must be a whole segment; only `&&` or `;`
-// may come before it (after `||`, `|` or `&` it may not run, or not decide the
-// status), and only `&&` after it. `base` is the shell's directory, '' when
-// unknown: then only an explicit `cd <root> &&` places the command.
+// the call's own status speaks for. A gate command (which may hold its own pipe)
+// must match whole segments; only `&&` or `;` may come before it (after `||`, `|` or
+// `&` it may not run, or not decide the status), and only `&&` after it. `base` is
+// the shell's directory, '' when unknown: then only an explicit `cd <root> &&` places it.
 const gateRunsIn = (bash: string, base: string, root: string, commands: readonly string[]): GateHit[] => {
-  const parts = bash.trim().split(OPERATOR)
+  const parts = partsOf(bash)
+  const wanted = commands.map(command => ({ command, parts: partsOf(command) }))
   const hits: GateHit[] = []
   let dir = base
+  let hasRunOther = false
   for (let i = 0; i < parts.length; i += 2) {
-    const before = i === 0 ? '' : (parts[i - 1] ?? '').trim()
+    const before = i === 0 ? '' : (parts[i - 1] ?? '')
     if (before !== '' && before !== '&&' && before !== ';') break
-    const segment = (parts[i] ?? '').trim()
-    const words = segment.split(/\s+/)
+    const words = (parts[i] ?? '').split(/\s+/)
     if (words[0] === 'cd') {
       dir = resolveDir(dir, unquote(words[1] ?? ''))
       continue
     }
-    const command = commandOf(segment)
-    const match = commands.find(wanted => squash(wanted) === command)
-    if (match === undefined || dir !== root) continue
-    const after = parts.slice(i + 1).filter((_, k) => k % 2 === 0).map(op => op.trim())
-    if (after.some(op => op !== '&&')) continue
-    hits.push({ command: match, isLast: after.length === 0 })
+    const match = wanted.find(gate => gate.parts.every((part, k) => parts[i + k] === part))
+    if (match !== undefined && dir === root) {
+      const end = i + match.parts.length
+      const after = parts.slice(end).filter((_, k) => k % 2 === 0)
+      if (after.every(op => op === '&&')) hits.push({ command: match.command, isAlone: after.length === 0 && !hasRunOther })
+    }
+    hasRunOther = true
   }
   return hits
 }
@@ -390,7 +398,7 @@ const runGate = async ($: EngineInterface): Promise<string> => {
   } finally {
     await update($, runningAtom, () => false)
   }
-  if (before !== '') await recordRuns($, phase.root, done)
+  await recordRuns($, phase.root, done)
   const tree = await treeId($, phase.root)
   await update($, treeAtom, () => tree)
   const [runs, checked] = await Promise.all([read($, runsAtom), read($, checkedAtom)])
@@ -408,8 +416,8 @@ const markChecked = async ($: EngineInterface): Promise<void> => {
   if (phase === null) return
   const [tree, at] = await Promise.all([treeId($, phase.root), $.clock.now()])
   await update($, treeAtom, () => tree)
-  await update($, checkedAtom, () => ({ at, tree }))
-  await $.store.set(checkedKey(phase.root, phase.n), { at, tree })
+  await update($, checkedAtom, () => ({ at, tree, gate: phase.gate }))
+  await $.store.set(checkedKey(phase.root, phase.n), { at, tree, gate: phase.gate })
 }
 
 // ---------- Hooks ----------
@@ -426,7 +434,12 @@ const DONE_CLAIMS = [
   /\ball\s+(checks|tests|gates?)\s+(pass|passed|passing|are\s+green|green)\b/i,
 ]
 
-const claimsDone = (text: string): boolean => DONE_CLAIMS.some(pattern => pattern.test(text))
+// A claim stated as a sentence, not asked: "Is this ready for review?" waits for the
+// person, while "Phase 2 is done. Want me to ship it?" still reports done.
+const claimsDone = (text: string): boolean =>
+  text
+    .split(/(?<=[.!?])\s+|\n+/)
+    .some(sentence => !sentence.trim().endsWith('?') && DONE_CLAIMS.some(pattern => pattern.test(sentence)))
 
 type ForgeResult = { skill?: unknown; status?: unknown; phase?: unknown; gate?: unknown }
 
@@ -517,12 +530,13 @@ export const register: Register = (on, options) => {
     const output = ran.deny === undefined && ran.isError !== true ? ran.result : undefined
     // Bash moves a long command to the background on a timeout or Ctrl+B: no exit code yet.
     const isUnfinished = output !== undefined && (output.backgroundTaskId !== undefined || output.interrupted)
-    if (before !== '' && ran.deny === undefined && !isUnfinished) {
+    // Recorded even when the fingerprint failed: a run on an unknown tree ('') is
+    // never green, and it replaces any older pass for the same command.
+    if (ran.deny === undefined && !isUnfinished) {
       const isOk = ran.isError !== true
       const at = await $.clock.now()
-      // A failed chain only says something about its last command.
       const runs = hits
-        .filter(hit => isOk || hit.isLast)
+        .filter(hit => isOk || hit.isAlone)
         .map(hit => ({ command: hit.command, isOk, at, tail: tailOf(ran.text ?? ''), tree: before, by: 'claude' as const }))
       await recordRuns($, root, runs)
     }
@@ -546,9 +560,7 @@ export const register: Register = (on, options) => {
       const reason = await claimReason($, e.cwd || cwd, forgeResult)
       return reason === undefined ? result : { ...result, block: reason }
     }
-    // A message that ends on a question is waiting for the person, not reporting done.
-    const lastLine = text.trim().split('\n').filter(line => line.trim() !== '').pop() ?? ''
-    if (!claimsDone(text) || /\?\s*$/.test(lastLine)) return result
+    if (!claimsDone(text)) return result
     const phase = await refresh($)
     if (phase === null) return result
     const [runs, checked, tree] = await Promise.all([read($, runsAtom), read($, checkedAtom), read($, treeAtom)])
