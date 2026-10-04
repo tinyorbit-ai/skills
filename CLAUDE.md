@@ -3,6 +3,8 @@
 This repo is Matt's personal **agent skills marketplace**. Every skill lives here as a
 self-contained folder and is distributed to any machine/agent via the
 [`skills` CLI](https://skills.sh) (`vercel-labs/skills`, run as `npx skills`).
+It also hosts **mods** (Claude Code plugins of function hooks) in `mods/`, shipped
+through a Claude Code plugin marketplace instead — see **Mods** below.
 
 > CLAUDE.md is the shared source of truth. `AGENTS.md` is Codex's entry point and
 > requires this file in full so both agents use the same workflows and index.
@@ -34,6 +36,8 @@ skills/
 │   └── assets/                # Optional. Files used in skill output (templates, etc.)
 └── .experimental/             # Experimental skills — hidden from default discovery
     └── <skill-name>/SKILL.md
+mods/<mod-name>/                # Claude Code mods (plugins of function hooks)
+.claude-plugin/marketplace.json # The `tinyorbit` plugin marketplace listing every mod
 ```
 
 The CLI discovers skills in `skills/`, `skills/.curated/`, `skills/.experimental/`,
@@ -133,6 +137,21 @@ Two independent mechanisms — use **both** for true WIP:
 Also use `metadata.internal: true` for repo-tooling skills (linting/validating/
 scaffolding skills) so they don't pollute discovery — these can stay in `skills/.system/`.
 
+## Mods
+
+Mods hook into Claude Code itself (tool calls, subagent spawns, turns) and draw live
+panes. They live in `mods/<name>/` and ship via the `tinyorbit` plugin marketplace,
+not `npx skills`:
+`claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods`,
+then `claude plugin install <name>@tinyorbit`. A push reaches installs only with a
+`version` bump in both `plugin.json` and the marketplace entry.
+
+- **Load the `plugin-authoring` skill before writing or changing a mod.** It writes
+  this build's API types, which are the only reference; the API moves between releases.
+- **Installed mods load in every session** on the machine, so a mod must stay quiet
+  where it doesn't apply (agent-atc with no subagents, forge-gate off a phase branch).
+- Layout, dev loop, the mods index and the traps already hit: **[`mods/README.md`](mods/README.md)**.
+
 ## Evals — the edit loop for every skill change
 
 Skills are prompts, so `evals/` tests them in three tiers. There is **no CI** —
@@ -151,7 +170,7 @@ the rubric always meant; the seeded-degraded plan (0–1) fails either way.
 
 | Tier | Command | Proves | Cost |
 |---|---|---|---|
-| 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap | free, seconds |
+| 0 static | `node evals/static/validate.mjs` | frontmatter parses, `npx skills` discovery, references resolve, index sync, the `": "` description trap; every mod validates, passes its tests and matches the marketplace | free, seconds |
 | 1 trigger | `node evals/trigger/run.mjs` | utterances route to the right skill from live `description`s alone (Haiku router, near-miss sibling cases) | pennies |
 | 2 behavioral | `node evals/behavioral/run.mjs <case> --runs 3` | the skill run headless end-to-end produces its contracted artifacts (deterministic checks + LLM-judge rubric) | real tokens, minutes |
 

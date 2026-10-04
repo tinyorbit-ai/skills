@@ -1,0 +1,19 @@
+{
+  "name": "forge-gate",
+  "version": "0.1.0",
+  "description": "Enforces the forge phase gate: shows whether the current phase's Verifiable gate is green on exactly the files you have, and sends back a forge stage whose FORGE_RESULT claims \"gate\":\"green\" when it isn't. /gate runs it.",
+  "author": {
+    "name": "Matteo Hertel"
+  },
+  "repository": "https://github.com/tinyorbit-ai/skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "guardDoneClaims": {
+      "type": "boolean",
+      "title": "Guard green claims",
+      "description": "Send a forge stage back when its FORGE_RESULT claims \"gate\":\"green\", or Claude says the phase is done, while the gate is not green on the current files. Off turns both guards off.",
+      "default": true
+    }
+  }
+}
