@@ -164,6 +164,9 @@ const look = (agent: AtcAgent, at: number): { glyph: string; color: string; word
   if (agent.status === 'waiting') {
     return { glyph: '◐', color: 'cyan', word: `waiting on its shell ${ago(at - agent.lastAt)}` }
   }
+  if (agent.status === 'idle') {
+    return { glyph: '○', color: 'cyan', word: `idle ${ago(at - agent.lastAt)}` }
+  }
   if (isLive(agent.status)) {
     const idle = at - agent.lastAt
     return idle > QUIET_MS

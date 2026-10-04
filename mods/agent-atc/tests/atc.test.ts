@@ -1,4 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
+import type { AgentInfo } from 'claude-code'
 
 const PANE = {
   component: 'Pane',
@@ -89,7 +90,7 @@ test('the message box and Stop reach the picked agent', async ($, on) => {
 test('finished, killed, quiet and earlier agents read right', async ($, on) => {
   const clock = mock.clock(on, { now: 0 })
   const status: (string | undefined)[] = []
-  let listed = [{ id: 'agent-3', description: 'research', type: 'Explore', status: 'running' }]
+  let listed: AgentInfo[] = [{ id: 'agent-3', description: 'research', type: 'Explore', status: 'running' }]
   on('agent.spawn', ($, e) =>
     e.description === 'research'
       ? { model: 'claude-haiku-4-5', agentId: 'agent-3' }

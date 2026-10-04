@@ -40,7 +40,7 @@ mods/<name>/
 ├── hooks/register.tsx           # export const register: Register = (on, options) => { ... }
 ├── types/index.d.ts             # the $.state contract (interface PluginState)
 ├── tests/*.test.ts              # run by `claude plugin test`
-└── tsconfig.json                # one line the engine writes; extends .claude-plugin/types/
+└── tsconfig.json                # extends .claude-plugin/types/, minus the MCP tool types
 ```
 
 `.claude-plugin/types/` is written by the engine on every load and git-ignores itself.
@@ -53,8 +53,8 @@ mods/<name>/
 3. **Gate:** `node evals/static/validate.mjs`. For every mod it runs
    `claude plugin validate` and `claude plugin test`. It also checks the marketplace,
    folders and versions agree.
-4. **Type-check:** `bunx -p typescript tsc -p mods/<name>`. Run it after one load has
-   laid the types.
+4. **Type-check:** `bunx -p typescript@5.9 tsc -p mods/<name>`. Run it after one load has
+   laid the types. TypeScript 5.6 gives up on the test kit's types.
 5. **Release:** bump `version` in both `plugin.json` and the marketplace entry.
    The validator fails when they differ. Add or adjust the index row above. Push.
 
@@ -90,6 +90,11 @@ mods/<name>/
   (`GIT_INDEX_FILE=$tmp git add -A && git write-tree`). It stays the same across a
   commit, changes on any edit, and never touches the real index. A HEAD + diff hash
   goes stale on every commit.
+- **Leave the MCP tool types out of the type check.** The engine also lays a type for
+  every MCP tool connected on the machine (about 700 here). A `$.tool.call` against that
+  union is "excessively deep" for the compiler, so the check would pass or fail
+  depending on whose machine it is. Each mod's `tsconfig.json` sets
+  `"types": ["claude-code", "claude-code-tools"]`. Remove that only for a mod that calls MCP tools.
 - **Panes dock only in the fullscreen layout.** tmux uses the main screen by default.
   `CLAUDE_CODE_NO_FLICKER=1` gives the fullscreen layout, where a pane sits beside the
   transcript. `tmux capture-pane -e -p` captures a session with its colors for docs.
