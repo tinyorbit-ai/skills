@@ -71,6 +71,7 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('turn.complete', ($, e) => ({ text: e.answer }))
   on('classic.Stop', () => ({}))
+  on('classic.SubagentStop', () => ({}))
   // What the engine draws above the prompt when no plugin adds anything.
   on('ui.render', () => ({ type: 'Box', props: {}, children: [] }))
   on('ui.toast', ($, e) => {
@@ -235,4 +236,80 @@ test('outside a phase branch the mod stays out of the way', async ($, on) => {
   const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
   expect(await band.find({ text: /Phase/ })).toBeUndefined()
   expect((await $.classic.Stop({ stop_hook_active: false, last_assistant_message: 'Phase 2 is done.' })).block).toBeUndefined()
+})
+
+// A forge stage's final message, ending with its result line.
+const finalMessage = (fields: Record<string, unknown>) =>
+  `Phase 2 built and reviewed.\nFORGE_RESULT ${JSON.stringify({ skill: 'forge-review', status: 'done', phase: 2, gate: 'green', notes: '', ...fields })}`
+
+test("a FORGE_RESULT green claim is checked against what actually ran", async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const stop = (text: string) => $.classic.Stop({ stop_hook_active: false, last_assistant_message: text })
+
+  const first = await stop(finalMessage({}))
+  expect(first.block).toContain("forge-review's FORGE_RESULT says phase 2's gate is green, but it is not green on the current files.")
+  expect(first.block).toContain('`dedupe ./fixtures/dupes` has not run.')
+  expect(first.block).toContain('set "gate" to "red"')
+
+  // An honest line passes, whatever the prose above it says.
+  expect((await stop(finalMessage({ gate: 'red' }))).block).toBeUndefined()
+  expect((await stop(finalMessage({ gate: 'deferred' }))).block).toBeUndefined()
+  expect((await stop(finalMessage({ status: 'blocked' }))).block).toBeUndefined()
+
+  await $.tool.call(DUPES)
+  await $.tool.call(CLEAN)
+  expect((await stop(finalMessage({}))).block).toBeUndefined()
+})
+
+test("forge-ship's claim is checked by phase number after it lands on main", async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  await $.tool.call(DUPES)
+  await $.tool.call(CLEAN)
+
+  // The squash merge puts the same files on main, so the branch no longer names a phase.
+  world.branch = 'main'
+  await $.turn.complete(turnEnd)
+  const shipped = finalMessage({ skill: 'forge-ship', notes: 'abc1234' })
+  expect((await $.classic.Stop({ stop_hook_active: false, last_assistant_message: shipped })).block).toBeUndefined()
+
+  world.tree = 'B'
+  const changed = await $.classic.Stop({ stop_hook_active: false, last_assistant_message: shipped })
+  expect(changed.block).toContain("forge-ship's FORGE_RESULT says phase 2's gate is green")
+  expect(changed.block).toContain('has not run since the last change.')
+})
+
+test('a forge stage run as a subagent is checked too', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+
+  const ended = await $.classic.SubagentStop({
+    stop_hook_active: false,
+    agent_id: 'agent-build',
+    agent_transcript_path: '/tmp/agent-build.jsonl',
+    agent_type: 'general-purpose',
+    last_assistant_message: finalMessage({ skill: 'forge-build' }),
+  })
+  expect(ended.block).toContain("forge-build's FORGE_RESULT says phase 2's gate is green")
+})
+
+test('a broken result line falls back to the phrase guard', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/2-dedupe', tree: 'A', results: {}, ran: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+
+  const broken = await $.classic.Stop({ stop_hook_active: false, last_assistant_message: 'Phase 2 is done.\nFORGE_RESULT {"gate": green' })
+  expect(broken.block).toContain('you reported phase 2 as done')
 })

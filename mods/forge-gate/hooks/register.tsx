@@ -99,11 +99,11 @@ const isRunnable = async ($: EngineInterface, root: string, command: string): Pr
 let cwd = ''
 let pinned: number | null = null
 
-// The phase whose branch is checked out (or the one /gate pinned), or null
-// outside a forge repo.
-const locate = async ($: EngineInterface): Promise<GatePhase | null> => {
-  if (cwd === '') return null
-  const top = await $.process.run(['git', 'rev-parse', '--show-toplevel'], { cwd })
+// The phase numbered `number`, else the one whose branch is checked out in `dir`;
+// null outside a forge repo.
+const locate = async ($: EngineInterface, dir: string, number: number | null): Promise<GatePhase | null> => {
+  if (dir === '') return null
+  const top = await $.process.run(['git', 'rev-parse', '--show-toplevel'], { cwd: dir })
   if (top.exitCode !== 0) return null
   const root = top.stdout.trim()
   let plan: string
@@ -114,8 +114,8 @@ const locate = async ($: EngineInterface): Promise<GatePhase | null> => {
   }
   const phases = parsePhases(plan)
   let found: ParsedPhase | undefined
-  if (pinned !== null) {
-    found = phases.find(phase => phase.n === pinned)
+  if (number !== null) {
+    found = phases.find(phase => phase.n === number)
   } else {
     const head = await $.process.run(['git', 'branch', '--show-current'], { cwd: root })
     const branch = head.stdout.trim()
@@ -154,7 +154,7 @@ const save = async ($: EngineInterface, phase: GatePhase): Promise<void> => {
 }
 
 const refresh = async ($: EngineInterface): Promise<GatePhase | null> => {
-  const phase = await locate($)
+  const phase = await locate($, cwd, pinned)
   const before = await read($, phaseAtom)
   if (JSON.stringify(before) !== JSON.stringify(phase)) {
     const stored = (phase === null ? undefined : ((await $.store.get(storeKey(phase))) as Stored | undefined)) ?? {}
@@ -330,6 +330,45 @@ const DONE_CLAIMS = [
 
 const claimsDone = (text: string): boolean => DONE_CLAIMS.some(pattern => pattern.test(text))
 
+type ForgeResult = { skill?: unknown; status?: unknown; phase?: unknown; gate?: unknown }
+
+// The FORGE_RESULT line every forge stage ends with (forge/references/headless.md).
+// When a message has several, the last one counts.
+const forgeResultIn = (text: string): ForgeResult | undefined => {
+  const lines = [...text.matchAll(/^FORGE_RESULT[ \t]+(\{.*\})[ \t]*$/gm)]
+  const json = lines[lines.length - 1]?.[1]
+  if (json === undefined) return undefined
+  try {
+    const parsed: unknown = JSON.parse(json)
+    return typeof parsed === 'object' && parsed !== null ? (parsed as ForgeResult) : undefined
+  } catch {
+    return undefined
+  }
+}
+
+// Checks a result line's "gate":"green" against what actually ran on the current
+// files. The phase is the one the line names, so forge-ship's claim is still checked
+// after it lands on the base branch. Undefined when there is nothing to hold: no
+// green claim, no such phase, or a gate that no command proves.
+const claimReason = async ($: EngineInterface, dir: string, result: ForgeResult): Promise<string | undefined> => {
+  if (result.status !== 'done' || result.gate !== 'green') return undefined
+  const current = await read($, phaseAtom)
+  const n = typeof result.phase === 'number' ? result.phase : (current?.n ?? null)
+  if (n === null) return undefined
+  const phase = await locate($, dir, n)
+  if (phase === null || phase.commands.length === 0) return undefined
+  const isCurrent = current !== null && current.root === phase.root && current.n === phase.n
+  const runs = isCurrent ? await read($, runsAtom) : (((await $.store.get(storeKey(phase))) as Stored | undefined)?.runs ?? {})
+  const tree = await treeId($, phase.root)
+  if (verdictOf(phase, runs, null, tree).kind === 'green') return undefined
+  const whose = typeof result.skill === 'string' ? `${result.skill}'s` : 'your'
+  return [
+    `forge-gate: ${whose} FORGE_RESULT says phase ${n}'s gate is green, but it is not green on the current files.`,
+    report(phase, runs, null, tree),
+    'Run the gate commands and show their output, then end with the result line again. If it will not go green, set "gate" to "red" (or "deferred" when it cannot run here) and say why in "notes".',
+  ].join('\n')
+}
+
 const EDIT_TOOLS = new Set(['Edit', 'Write', 'MultiEdit', 'NotebookEdit'])
 
 export const register: Register = (on, options) => {
@@ -387,7 +426,14 @@ export const register: Register = (on, options) => {
   on('classic.Stop', async ($, e, next) => {
     const result = await next(e)
     if (!isGuarding || result.block !== undefined || e.stop_hook_active) return result
-    if (!claimsDone(e.last_assistant_message ?? '')) return result
+    const text = e.last_assistant_message ?? ''
+    // A forge stage's result line is the exact claim: check it, and skip the phrases.
+    const forgeResult = forgeResultIn(text)
+    if (forgeResult !== undefined) {
+      const reason = await claimReason($, e.cwd || cwd, forgeResult)
+      return reason === undefined ? result : { ...result, block: reason }
+    }
+    if (!claimsDone(text)) return result
     const phase = await refresh($)
     if (phase === null) return result
     const [runs, checked, tree] = await Promise.all([read($, runsAtom), read($, checkedAtom), read($, treeAtom)])
@@ -402,6 +448,16 @@ export const register: Register = (on, options) => {
       ...result,
       block: `forge-gate: you reported phase ${phase.n} as done, but its Verifiable gate is not green on the current working tree.\n${report(phase, runs, checked, tree)}\n${ask}`,
     }
+  })
+
+  // A forge stage run as a subagent ends with its result line too.
+  on('classic.SubagentStop', async ($, e, next) => {
+    const result = await next(e)
+    if (!isGuarding || result.block !== undefined || e.stop_hook_active) return result
+    const forgeResult = forgeResultIn(e.last_assistant_message ?? '')
+    if (forgeResult === undefined) return result
+    const reason = await claimReason($, e.cwd || cwd, forgeResult)
+    return reason === undefined ? result : { ...result, block: reason }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {

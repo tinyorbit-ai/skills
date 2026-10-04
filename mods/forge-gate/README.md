@@ -23,9 +23,18 @@ Phase 5 · App icon     ◐ written checks, not checked           [ Checked ]
     command could hide its exit code (a pipe, `|| true`, `;`).
   - `/gate` (or **Run gate**) also counts. It lists the commands and asks before it
     runs anything.
-- **The guard:** when Claude says the phase is done (or the gate passes, or it's
-  ready for review or ship) while the gate isn't green, it's sent back once with
-  what's missing. A turn that stops to ask a question is never sent back.
+- **The guard, for forge stages:** every forge stage ends with a result line,
+  `FORGE_RESULT {"skill":…,"phase":3,"gate":"green",…}`. When that line says
+  `"gate":"green"`, it's checked against what actually ran on the current files. If it
+  isn't true, the stage is sent back once with what's missing, told to run the gate or
+  to change `"gate"` to `"red"` or `"deferred"`. The phase is the one the line names,
+  so forge-ship's line is still checked after it lands on main. It works in the main
+  session and in subagents. An honest `red`, `deferred` or `blocked` line always
+  passes.
+- **The guard, everywhere else:** with no result line, it watches for phrases. When
+  Claude says the phase is done, ready for review or ship, or that the gate passes, while
+  it isn't green, it's sent back once. A turn that stops to ask a question is never
+  sent back.
 - **Written checks:** prose the commands can't prove is shown with every report. A
   gate with no commands at all waits for you to press **Checked**.
 
