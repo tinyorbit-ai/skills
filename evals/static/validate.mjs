@@ -2,7 +2,8 @@
 // Tier 0 — static validation of SKILL.md files and mods/.
 // Scope: the forge suite; pass --all to validate every skill. Mods are always checked.
 // Deterministic, no tokens. Run: node evals/static/validate.mjs
-// Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check mandatory.
+// Exit 1 on any failure. Set EVALS_REQUIRE_CLI=1 to make the `npx skills` discovery check
+// and the `claude plugin` checks on mods mandatory.
 
 import { readFileSync, readdirSync, existsSync, statSync, rmSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -216,12 +217,23 @@ const marketPath = join(ROOT, '.claude-plugin/marketplace.json');
 const mods = existsSync(MODS_DIR)
   ? readdirSync(MODS_DIR).filter((d) => existsSync(join(MODS_DIR, d, '.claude-plugin/plugin.json')))
   : [];
-if (mods.length > 0) {
-  const market = existsSync(marketPath) ? JSON.parse(readFileSync(marketPath, 'utf8')) : { plugins: [] };
+const readJson = (path, label) => {
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    fail(label, `${path.replace(ROOT + '/', '')} is not valid JSON: ${e.message}`);
+    return null;
+  }
+};
+// Runs while a marketplace exists too, so removing the last mod folder but not its
+// entry still fails.
+if (mods.length > 0 || existsSync(marketPath)) {
+  const market = existsSync(marketPath) ? readJson(marketPath, 'mods') ?? { plugins: [] } : { plugins: [] };
   if (!existsSync(marketPath)) failures.push('mods: .claude-plugin/marketplace.json is missing');
   const listedMods = new Map((market.plugins ?? []).map((p) => [p.name, p]));
   for (const name of mods) {
-    const manifest = JSON.parse(readFileSync(join(MODS_DIR, name, '.claude-plugin/plugin.json'), 'utf8'));
+    const manifest = readJson(join(MODS_DIR, name, '.claude-plugin/plugin.json'), `mod ${name}`);
+    if (manifest === null) continue;
     const entry = listedMods.get(name);
     if (manifest.name !== name) fail(`mod ${name}`, `plugin.json name "${manifest.name}" must equal the folder name`);
     if (!entry) fail(`mod ${name}`, 'missing from .claude-plugin/marketplace.json — it will not install');

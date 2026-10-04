@@ -19,6 +19,8 @@ export type AtcAgent = {
   type: string
   model?: string
   name?: string
+  /** What TaskStop takes for a teammate, whose loop id it refuses. */
+  teammateId?: string
   parentId?: string
   /** The engine's task status (`running`, `completed`, `failed`, `killed`, ...). */
   status: string

@@ -143,13 +143,11 @@ Mods hook into Claude Code itself (tool calls, subagent spawns, turns) and draw 
 panes. They live in `mods/<name>/` and ship via the `tinyorbit` plugin marketplace,
 not `npx skills`:
 `claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods`,
-then `claude plugin install <name>@tinyorbit`. Push = published here too.
+then `claude plugin install <name>@tinyorbit`. A push reaches installs only with a
+`version` bump in both `plugin.json` and the marketplace entry.
 
 - **Load the `plugin-authoring` skill before writing or changing a mod.** It writes
   this build's API types, which are the only reference; the API moves between releases.
-- **Gate:** tier 0 (`node evals/static/validate.mjs`) runs `claude plugin validate`
-  and `claude plugin test` on every mod and checks marketplace ↔ folder ↔ version sync.
-- **Release:** bump `version` in both `plugin.json` and the marketplace entry.
 - **Installed mods load in every session** on the machine, so a mod must stay quiet
   where it doesn't apply (agent-atc with no subagents, forge-gate off a phase branch).
 - Layout, dev loop, the mods index and the traps already hit: **[`mods/README.md`](mods/README.md)**.

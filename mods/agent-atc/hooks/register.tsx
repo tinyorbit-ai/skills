@@ -9,8 +9,8 @@ const POLL_MS = 3_000
 // A running agent with no tool call for this long is drawn as quiet: stuck on
 // a permission prompt, a long command, or thinking hard.
 const QUIET_MS = 90_000
-const STEPS_KEPT = 40
-const STEPS_SHOWN = 12
+// Only the last few are drawn; every subagent tool call copies what is kept.
+const STEPS_KEPT = 12
 const AGENTS_KEPT = 60
 
 type Agents = Record<string, AtcAgent>
@@ -25,6 +25,8 @@ const main = atom({ plugin: 'agent-atc', key: 'main' } as const, { lastAt: 0, ca
 // running, pending, or waiting on a background shell of its own.
 const ENDED = new Set(['completed', 'failed', 'killed', 'stopped', 'cancelled', 'canceled', 'error'])
 const isLive = (status: string): boolean => !ENDED.has(status)
+// Live and doing something: an idle teammate is waiting for a message, not running.
+const isBusy = (status: string): boolean => isLive(status) && status !== 'idle'
 
 const oneLine = (text: string, max = 80): string => {
   const line = text.replace(/\s+/g, ' ').trim()
@@ -119,13 +121,29 @@ const reconciled = (all: Agents, listed: readonly AgentInfo[], at: number): Agen
   const next = { ...all }
   for (const info of listed) {
     const agent = next[info.id]
+    // Past the cap, an ended agent the map dropped stays dropped, or every poll would
+    // re-add it as new and push out another.
+    if (agent === undefined && !isLive(info.status) && Object.keys(next).length >= AGENTS_KEPT) continue
     if (agent === undefined) {
       next[info.id] = {
         ...blank(info.id, at),
         label: oneLine(info.description, 60) || info.id.slice(0, 8),
         type: info.type,
         name: info.name,
+        teammateId: info.teammateId,
         parentId: info.parentId,
+        status: info.status,
+      }
+      hasMoved = true
+    } else if (agent.type === 'agent' && info.type !== 'agent') {
+      // First seen through a tool call, before the list: fill in what it really is.
+      next[info.id] = {
+        ...agent,
+        label: oneLine(info.description, 60) || agent.label,
+        type: info.type,
+        name: agent.name ?? info.name,
+        teammateId: agent.teammateId ?? info.teammateId,
+        parentId: agent.parentId ?? info.parentId,
         status: info.status,
       }
       hasMoved = true
@@ -162,7 +180,7 @@ const treeOrder = (list: readonly AtcAgent[]): Row[] => {
 
 const look = (agent: AtcAgent, at: number): { glyph: string; color: string; word: string } => {
   if (agent.status === 'waiting') {
-    return { glyph: '◐', color: 'cyan', word: `waiting on its shell ${ago(at - agent.lastAt)}` }
+    return { glyph: '◐', color: 'cyan', word: `waiting ${ago(at - agent.lastAt)}` }
   }
   if (agent.status === 'idle') {
     return { glyph: '○', color: 'cyan', word: `idle ${ago(at - agent.lastAt)}` }
@@ -186,7 +204,7 @@ const stepLine = (step: AtcStep): string => `${step.tool} ${step.detail}`.trim()
 let shownStatus: string | undefined
 
 const showStatus = ($: EngineInterface, all: Agents): void => {
-  const live = Object.values(all).filter(agent => isLive(agent.status)).length
+  const live = Object.values(all).filter(agent => isBusy(agent.status)).length
   const text = live > 0 ? `${live} running · /atc` : undefined
   if (text !== shownStatus) {
     shownStatus = text
@@ -203,7 +221,7 @@ const sync = async ($: EngineInterface): Promise<void> => {
   const latest = merged ?? all
   showStatus($, latest)
   // Redraws the pane while something runs, so ages and quiet marks move.
-  if (Object.values(latest).some(agent => isLive(agent.status))) {
+  if (Object.values(latest).some(agent => isBusy(agent.status))) {
     await update($, now, () => at)
   }
 }
@@ -239,6 +257,7 @@ export const register: Register = (on, options) => {
 
   on('command.run', { command: 'atc' }, async ($, e) => {
     if (e.args.trim() === 'close') {
+      isDismissed = true
       await $.ui.close({ id: PANE })
       return { text: 'Agent control closed.' }
     }
@@ -272,6 +291,7 @@ export const register: Register = (on, options) => {
           type: e.subagentType,
           model: ran.model,
           name: e.name,
+          teammateId: ran.teammateId,
           parentId: e.parentAgentId,
           status: 'running',
           startedAt: Math.min(agent.startedAt, at),
@@ -370,9 +390,9 @@ export const register: Register = (on, options) => {
     ])
     const width = Math.max(30, e.props.bodyColumns)
     const rows = treeOrder(Object.values(all))
-    const live = rows.filter(row => isLive(row.agent.status)).length
+    const live = rows.filter(row => isBusy(row.agent.status)).length
     const done = rows.filter(row => row.agent.status === 'completed').length
-    const other = rows.length - live - done
+    const other = rows.filter(row => !isLive(row.agent.status) && row.agent.status !== 'completed').length
     const focusId = picked ?? e.props.view.agentId ?? null
     const focus = focusId === null ? undefined : all[focusId]
 
@@ -390,7 +410,7 @@ export const register: Register = (on, options) => {
     const stop = (agent: AtcAgent) => async () => {
       const ran = await $.tool.call({
         tool: 'TaskStop',
-        task_id: agent.id,
+        task_id: agent.teammateId ?? agent.id,
         consent: `The user pressed "Stop" on agent ${agent.label} in the agent control pane.`,
       })
       if (ran.deny !== undefined) $.ui.toast(`Not stopped: ${ran.deny}`)
@@ -465,7 +485,7 @@ export const register: Register = (on, options) => {
                 {focus.label}
               </Text>
             )}
-            {focus.steps.slice(-STEPS_SHOWN).map(step => (
+            {focus.steps.map(step => (
               <Box key={`step-${step.id}`} flexDirection="row">
                 <Text dimColor>{clockTime(step.at)} </Text>
                 <Text color={step.state === 'err' || step.state === 'deny' ? 'red' : undefined}>

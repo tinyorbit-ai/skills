@@ -20,16 +20,16 @@ claude plugin install forge-gate@tinyorbit
 An installed mod loads in every Claude Code session on that machine, terminal and
 desktop alike. `claude plugin disable <name>@tinyorbit` turns one off without removing it.
 
-Update: `claude plugin marketplace update tinyorbit && claude plugin update agent-atc@tinyorbit`
-(restart Claude Code to apply). Try a local checkout without installing:
+Update: `claude plugin marketplace update tinyorbit && claude plugin update <name>@tinyorbit`
+(restart Claude Code to apply). An install only picks up a change when `version` was bumped. Try a local checkout without installing:
 `claude --plugin-dir "$HOME/code/skills/mods/<name>"` (absolute path; see Gotchas).
 
 ## Index
 
 | Mod | What it does | Notes |
 |---|---|---|
-| `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count; an agent `waiting` on its own background shell counts as running. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
-| `forge-gate` | Band above the prompt: the checked-out forge phase and whether its `**Verifiable gate:**` is green on this exact working tree. Checks every forge stage's `FORGE_RESULT … "gate":"green"` line against what actually ran (main session and subagents, phase found by number). With no result line it guards "phase done" phrases instead. `/gate` runs it | Phase = current branch matched against the plan's `**Branch:**`. Gate commands = backticked spans whose first word is a real executable; deploy/release/install/send/rm-style commands and `<placeholders>` are never run. Evidence = Claude's own Bash runs (no pipe or `\|\| true` after) or `/gate`, which asks first. "Green" is pinned to the git tree id of the working files (a throwaway index, so commits don't change it but any edit does), kept in `$.store` across sessions. A gate with no commands waits for the person's **Checked**. |
+| `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count: an agent `waiting` (on background work, a plan approval or a child) counts, an `idle` teammate doesn't. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
+| `forge-gate` | Band above the prompt: the checked-out forge phase and whether its `**Verifiable gate:**` is green on this exact working tree. Checks every forge stage's `FORGE_RESULT … "gate":"green"` line against what actually ran (main session and subagents, phase found by number). With no result line it guards "phase done" phrases instead. `/gate` runs it | Phase = current branch matched against the plan's `**Branch:**`. Gate commands = backticked spans whose first word is a real executable; deploy/release/install/send/rm-style commands and `<placeholders>` are never run. Evidence = a Bash run where the gate command is a whole segment run in the repo root, with only `&&`/`;` before it and only `&&` after (a subagent's run needs an explicit `cd <root> &&`), finished in the foreground; or `/gate`, which asks first. Each run is pinned to the git tree id of the files before it ran (a throwaway index, `wiki/` left out), so commits don't change it but any edit does. Runs are kept per repo and command in `$.store`, whichever branch is out. A gate with no commands waits for the person's **Checked**. |
 
 ## Layout
 
@@ -49,7 +49,8 @@ mods/<name>/
 
 1. **Load the `plugin-authoring` skill first.** It writes this build's API types.
    The types are the reference. The API is early access and moves between releases.
-2. **Dev loop:** `claude --plugin-dir mods/<name>`. It reloads the mod on save.
+2. **Dev loop:** `claude --plugin-dir "$PWD/mods/<name>"` (an absolute path). It reloads the
+   mod on save.
 3. **Gate:** `node evals/static/validate.mjs`. For every mod it runs
    `claude plugin validate` and `claude plugin test`. It also checks the marketplace,
    folders and versions agree.
@@ -95,6 +96,8 @@ mods/<name>/
   union is "excessively deep" for the compiler, so the check would pass or fail
   depending on whose machine it is. Each mod's `tsconfig.json` sets
   `"types": ["claude-code", "claude-code-tools"]`. Remove that only for a mod that calls MCP tools.
+- **`npx skills` reads the marketplace too.** It installs any `mods/<name>/skills/*/SKILL.md`
+  as a skill to every agent, outside tier 0's checks. Keep skills in `skills/`.
 - **Panes dock only in the fullscreen layout.** tmux uses the main screen by default.
   `CLAUDE_CODE_NO_FLICKER=1` gives the fullscreen layout, where a pane sits beside the
   transcript. `tmux capture-pane -e -p` captures a session with its colors for docs.

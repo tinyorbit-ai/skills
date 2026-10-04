@@ -49,7 +49,8 @@ test('a spawned agent and its tool calls show in the pane', async ($, on) => {
 
     await ui.press({ key: 'pick-agent-1' })
     expect(await ui.find({ text: /general-purpose · opus-5-5 · started .* · 1 calls/ })).toBeDefined()
-    expect(await ui.find({ text: /✓ / })).toBeDefined()
+    const trail = await ui.findAll({ type: 'Text', text: /^Bash bun test billing$/ })
+    expect(trail).toHaveLength(1)
 
     await ui.press({ key: 'back' })
     expect(await ui.find({ text: /1 calls/ })).toBeUndefined()
@@ -141,10 +142,15 @@ test('finished, killed, quiet and earlier agents read right', async ($, on) => {
   expect(status[status.length - 1]).toBe('1 running · /atc')
 })
 
-test('an agent waiting on its own shell still counts as running', async ($, on) => {
+test('a waiting agent counts as running and an idle teammate does not', async ($, on) => {
   const clock = mock.clock(on, { now: 0 })
   const status: (string | undefined)[] = []
-  on('agent.list', () => ({ value: [{ id: 'agent-7', description: 'long build', type: 'general-purpose', status: 'waiting' }] }))
+  on('agent.list', () => ({
+    value: [
+      { id: 'agent-7', description: 'long build', type: 'general-purpose', status: 'waiting' },
+      { id: 'agent-8', description: 'pair', type: 'teammate', status: 'idle', teammateId: 'pair@team', name: 'pair' },
+    ],
+  }))
   on('command.register', () => ({ value: { command: 'atc' } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
   on('ui.status', ($, e) => {
@@ -156,7 +162,8 @@ test('an agent waiting on its own shell still counts as running', async ($, on) 
   await clock.advance(3_000)
 
   const ui = await $.ui.mount({ plugin: 'agent-atc', surface: 'terminal', ...PANE })
-  expect(await ui.find({ text: /waiting on its shell/ })).toBeDefined()
+  expect(await ui.find({ text: /waiting \d+s/ })).toBeDefined()
+  expect(await ui.find({ text: /idle \d+s/ })).toBeDefined()
   expect(await ui.find({ text: /1 running · 0 done/ })).toBeDefined()
   expect(status[status.length - 1]).toBe('1 running · /atc')
 })

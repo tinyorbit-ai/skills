@@ -10,7 +10,6 @@ const treeAtom = atom({ plugin: 'forge-gate', key: 'tree' } as const, '')
 const runningAtom = atom({ plugin: 'forge-gate', key: 'isRunning' } as const, false)
 
 type Runs = Record<string, GateRun>
-type Stored = { runs?: Runs; checked?: GateCheck | null }
 type ParsedPhase = { n: number; title: string; branch: string; gate: string; candidates: string[]; hasProse: boolean }
 type Verdict =
   | { kind: 'green' }
@@ -99,19 +98,47 @@ const isRunnable = async ($: EngineInterface, root: string, command: string): Pr
 let cwd = ''
 let pinned: number | null = null
 
-// The phase numbered `number`, else the one whose branch is checked out in `dir`;
-// null outside a forge repo.
-const locate = async ($: EngineInterface, dir: string, number: number | null): Promise<GatePhase | null> => {
+// The directory the main loop's Bash runs in now; it can move during a session.
+const sessionDir = async ($: EngineInterface): Promise<string> => {
+  const dir = await $.session.cwd().catch(() => cwd)
+  return dir === '' ? cwd : dir
+}
+
+const roots = new Map<string, string | null>()
+
+const rootOf = async ($: EngineInterface, dir: string): Promise<string | null> => {
   if (dir === '') return null
+  const known = roots.get(dir)
+  if (known !== undefined) return known
   const top = await $.process.run(['git', 'rev-parse', '--show-toplevel'], { cwd: dir })
-  if (top.exitCode !== 0) return null
-  const root = top.stdout.trim()
-  let plan: string
+  const root = top.exitCode === 0 ? top.stdout.trim() : null
+  roots.set(dir, root)
+  return root
+}
+
+const readPlan = async ($: EngineInterface, root: string): Promise<string | null> => {
   try {
-    plan = String(await $.fs.read(`${root}/wiki/plan.md`))
+    return String(await $.fs.read(`${root}/wiki/plan.md`))
   } catch {
     return null
   }
+}
+
+const runnableOf = async ($: EngineInterface, root: string, candidates: readonly string[]): Promise<string[]> => {
+  const commands: string[] = []
+  for (const command of candidates) {
+    if (!commands.includes(command) && (await isRunnable($, root, command))) commands.push(command)
+  }
+  return commands
+}
+
+// The phase numbered `number`, else the one whose branch is checked out in `dir`;
+// null outside a forge repo.
+const locate = async ($: EngineInterface, dir: string, number: number | null): Promise<GatePhase | null> => {
+  const root = await rootOf($, dir)
+  if (root === null) return null
+  const plan = await readPlan($, root)
+  if (plan === null) return null
   const phases = parsePhases(plan)
   let found: ParsedPhase | undefined
   if (number !== null) {
@@ -122,11 +149,27 @@ const locate = async ($: EngineInterface, dir: string, number: number | null): P
     found = branch === '' ? undefined : phases.find(phase => phase.branch === branch)
   }
   if (found === undefined) return null
-  const commands: string[] = []
-  for (const command of found.candidates) {
-    if (await isRunnable($, root, command)) commands.push(command)
-  }
+  const commands = await runnableOf($, root, found.candidates)
   return { n: found.n, title: found.title, branch: found.branch, gate: found.gate, commands, hasProse: found.hasProse, root }
+}
+
+let planCache: { root: string; mtimeMs: number; commands: string[] } | null = null
+
+// Every runnable gate command in the repo's plan, whichever branch is out: a run
+// counts before the branch matches (forge-build switches to its branch mid-turn,
+// Arnold works on its own branches).
+const planCommands = async ($: EngineInterface, root: string): Promise<string[]> => {
+  let mtimeMs: number
+  try {
+    mtimeMs = (await $.fs.stat(`${root}/wiki/plan.md`)).mtimeMs
+  } catch {
+    return []
+  }
+  if (planCache !== null && planCache.root === root && planCache.mtimeMs === mtimeMs) return planCache.commands
+  const plan = (await readPlan($, root)) ?? ''
+  const commands = await runnableOf($, root, parsePhases(plan).flatMap(phase => phase.candidates))
+  planCache = { root, mtimeMs, commands }
+  return commands
 }
 
 // ---------- The working tree ----------
@@ -134,44 +177,63 @@ const locate = async ($: EngineInterface, dir: string, number: number | null): P
 // The git tree id of every working file, untracked ones included, built in a
 // throwaway index so the real one is untouched. Content, not commits: the same
 // files give the same id before and after a commit, and any edit changes it.
+// wiki/ is left out: forge writes its build log and learnings after the gate runs.
 const TREE_SCRIPT = [
   'idx=$(mktemp) || exit 1',
   'cp "$(git rev-parse --git-path index)" "$idx" 2>/dev/null || rm -f "$idx"',
-  'GIT_INDEX_FILE="$idx" git add -A >/dev/null 2>&1; GIT_INDEX_FILE="$idx" git write-tree',
+  'GIT_INDEX_FILE="$idx" git add -A >/dev/null 2>&1 &&',
+  'GIT_INDEX_FILE="$idx" git rm -r -q --cached --ignore-unmatch -- wiki >/dev/null 2>&1 &&',
+  'GIT_INDEX_FILE="$idx" git write-tree',
+  'status=$?',
   'rm -f "$idx"',
+  'exit $status',
 ].join('\n')
 
+// '' when git fails: an unknown tree is never green.
 const treeId = async ($: EngineInterface, root: string): Promise<string> => {
-  const { stdout } = await $.process.run(['/bin/sh', '-c', TREE_SCRIPT], { cwd: root })
-  return stdout.trim()
+  const out = await $.process.run(['/bin/sh', '-c', TREE_SCRIPT], { cwd: root })
+  return out.exitCode === 0 ? out.stdout.trim() : ''
 }
 
-const storeKey = (phase: GatePhase): string => `gate:${phase.root}:${phase.n}`
+// Runs are kept per repo and command, so they don't depend on which phase is out.
+const runsKey = (root: string): string => `gate-runs:${root}`
+const checkedKey = (root: string, n: number): string => `gate-checked:${root}:${n}`
 
-const save = async ($: EngineInterface, phase: GatePhase): Promise<void> => {
-  const [runs, checked] = await Promise.all([read($, runsAtom), read($, checkedAtom)])
-  await $.store.set(storeKey(phase), { runs, checked })
+// The repo whose runs the state holds.
+let loadedRoot = ''
+
+const adopt = async ($: EngineInterface, root: string): Promise<void> => {
+  if (root === loadedRoot) return
+  loadedRoot = root
+  const runs = ((await $.store.get(runsKey(root))) as Runs | undefined) ?? {}
+  await update($, runsAtom, () => runs)
+}
+
+const runsFor = async ($: EngineInterface, root: string): Promise<Runs> =>
+  root === loadedRoot ? read($, runsAtom) : (((await $.store.get(runsKey(root))) as Runs | undefined) ?? {})
+
+const recordRuns = async ($: EngineInterface, root: string, runs: readonly GateRun[]): Promise<void> => {
+  await adopt($, root)
+  await update($, runsAtom, all => ({ ...all, ...Object.fromEntries(runs.map(run => [run.command, run])) }))
+  await $.store.set(runsKey(root), await read($, runsAtom))
 }
 
 const refresh = async ($: EngineInterface): Promise<GatePhase | null> => {
-  const phase = await locate($, cwd, pinned)
+  const dir = await sessionDir($)
+  const root = await rootOf($, dir)
+  if (root !== null) await adopt($, root)
+  const phase = root === null ? null : await locate($, dir, pinned)
   const before = await read($, phaseAtom)
   if (JSON.stringify(before) !== JSON.stringify(phase)) {
-    const stored = (phase === null ? undefined : ((await $.store.get(storeKey(phase))) as Stored | undefined)) ?? {}
+    const checked = phase === null ? null : (((await $.store.get(checkedKey(phase.root, phase.n))) as GateCheck | undefined) ?? null)
     await update($, phaseAtom, () => phase)
-    await update($, runsAtom, () => stored.runs ?? {})
-    await update($, checkedAtom, () => stored.checked ?? null)
+    await update($, checkedAtom, () => checked)
   }
-  if (phase !== null) {
-    const tree = await treeId($, phase.root)
+  if (root !== null) {
+    const tree = await treeId($, root)
     await update($, treeAtom, () => tree)
   }
   return phase
-}
-
-const record = async ($: EngineInterface, phase: GatePhase, runs: readonly GateRun[]): Promise<void> => {
-  await update($, runsAtom, all => ({ ...all, ...Object.fromEntries(runs.map(run => [run.command, run])) }))
-  await save($, phase)
 }
 
 // ---------- Verdicts ----------
@@ -208,20 +270,56 @@ const ago = (ms: number): string => {
 
 const squash = (text: string): string => text.replace(/\s+/g, ' ').trim()
 
-// The gate command a Bash call ran, when its exit code speaks for that command:
-// nothing after it may pipe, mask or replace the status.
-const gateIn = (bash: string, commands: readonly string[]): string | undefined => {
-  const line = squash(bash)
-  for (const command of commands) {
-    const wanted = squash(command)
-    const at = line.indexOf(wanted)
-    if (at < 0) continue
-    const after = line.slice(at + wanted.length).trim()
-    if (after === '' || /^((2>&1|[12]?>\s*\S+)\s*)+$/.test(after) || (after.startsWith('&&') && !/\|\||;/.test(after))) {
-      return command
-    }
+const unquote = (word: string): string => word.replace(/^(['"])(.*)\1$/, '$2')
+
+const resolveDir = (dir: string, path: string): string => {
+  if (path.startsWith('/')) return path.replace(/\/+$/, '') || '/'
+  if (dir === '' || path === '' || path.startsWith('~') || path === '-') return ''
+  const parts = dir.split('/')
+  for (const part of path.split('/')) {
+    if (part === '..') parts.pop()
+    else if (part !== '.' && part !== '') parts.push(part)
   }
-  return undefined
+  return parts.join('/') || '/'
+}
+
+// Shell operators between commands. `2>&1` and `&>` are redirects, not operators.
+const OPERATOR = /(\s*(?:&&|\|\||;|\||(?<![<>&])&(?![&>])|\n)\s*)/
+const REDIRECT = /\s+(?:\d?>>?|&>>?|\d?<)\s*(?:&\d|[^\s|;&]+)/g
+
+// A segment as the command it runs: redirects, leading env assignments and a
+// `timeout <n>` wrapper removed.
+const commandOf = (segment: string): string =>
+  squash(segment.replace(REDIRECT, '')).replace(/^(?:[A-Za-z_]\w*=\S*\s+)*(?:timeout\s+\S+\s+)?/, '')
+
+type GateHit = { command: string; isLast: boolean }
+
+// The gate commands a Bash call really ran in the repo root, and whose exit code
+// the call's own status speaks for. Each must be a whole segment; only `&&` or `;`
+// may come before it (after `||`, `|` or `&` it may not run, or not decide the
+// status), and only `&&` after it. `base` is the shell's directory, '' when
+// unknown: then only an explicit `cd <root> &&` places the command.
+const gateRunsIn = (bash: string, base: string, root: string, commands: readonly string[]): GateHit[] => {
+  const parts = bash.trim().split(OPERATOR)
+  const hits: GateHit[] = []
+  let dir = base
+  for (let i = 0; i < parts.length; i += 2) {
+    const before = i === 0 ? '' : (parts[i - 1] ?? '').trim()
+    if (before !== '' && before !== '&&' && before !== ';') break
+    const segment = (parts[i] ?? '').trim()
+    const words = segment.split(/\s+/)
+    if (words[0] === 'cd') {
+      dir = resolveDir(dir, unquote(words[1] ?? ''))
+      continue
+    }
+    const command = commandOf(segment)
+    const match = commands.find(wanted => squash(wanted) === command)
+    if (match === undefined || dir !== root) continue
+    const after = parts.slice(i + 1).filter((_, k) => k % 2 === 0).map(op => op.trim())
+    if (after.some(op => op !== '&&')) continue
+    hits.push({ command: match, isLast: after.length === 0 })
+  }
+  return hits
 }
 
 const VERDICT_WORD: Record<Verdict['kind'], string> = {
@@ -273,27 +371,27 @@ const runGate = async ($: EngineInterface): Promise<string> => {
     approved.add(key)
   }
 
+  // Pinned to the files the commands saw: an edit made while they run is not credited.
+  const before = await treeId($, phase.root)
   await update($, runningAtom, () => true)
-  const done: Omit<GateRun, 'tree'>[] = []
+  const done: GateRun[] = []
   try {
     for (const command of phase.commands) {
       const started = await $.clock.now()
       try {
         const out = await $.process.run(['/bin/sh', '-c', command], { cwd: phase.root, timeoutMs: RUN_TIMEOUT_MS })
         const at = await $.clock.now()
-        done.push({ command, isOk: out.exitCode === 0, exitCode: out.exitCode, at, ms: at - started, tail: tailOf(`${out.stdout}\n${out.stderr}`), by: 'person' })
+        done.push({ command, isOk: out.exitCode === 0, exitCode: out.exitCode, at, ms: at - started, tail: tailOf(`${out.stdout}\n${out.stderr}`), tree: before, by: 'person' })
       } catch (error) {
         const at = await $.clock.now()
-        done.push({ command, isOk: false, at, ms: at - started, tail: String(error), by: 'person' })
+        done.push({ command, isOk: false, at, ms: at - started, tail: String(error), tree: before, by: 'person' })
       }
     }
   } finally {
     await update($, runningAtom, () => false)
   }
-  // Fingerprinted after the whole run, so files the gate itself writes do not
-  // make its own results stale.
+  if (before !== '') await recordRuns($, phase.root, done)
   const tree = await treeId($, phase.root)
-  await record($, phase, done.map(run => ({ ...run, tree })))
   await update($, treeAtom, () => tree)
   const [runs, checked] = await Promise.all([read($, runsAtom), read($, checkedAtom)])
   return report(phase, runs, checked, tree)
@@ -311,7 +409,7 @@ const markChecked = async ($: EngineInterface): Promise<void> => {
   const [tree, at] = await Promise.all([treeId($, phase.root), $.clock.now()])
   await update($, treeAtom, () => tree)
   await update($, checkedAtom, () => ({ at, tree }))
-  await save($, phase)
+  await $.store.set(checkedKey(phase.root, phase.n), { at, tree })
 }
 
 // ---------- Hooks ----------
@@ -357,15 +455,14 @@ const claimReason = async ($: EngineInterface, dir: string, result: ForgeResult)
   if (n === null) return undefined
   const phase = await locate($, dir, n)
   if (phase === null || phase.commands.length === 0) return undefined
-  const isCurrent = current !== null && current.root === phase.root && current.n === phase.n
-  const runs = isCurrent ? await read($, runsAtom) : (((await $.store.get(storeKey(phase))) as Stored | undefined)?.runs ?? {})
+  const runs = await runsFor($, phase.root)
   const tree = await treeId($, phase.root)
   if (verdictOf(phase, runs, null, tree).kind === 'green') return undefined
   const whose = typeof result.skill === 'string' ? `${result.skill}'s` : 'your'
   return [
     `forge-gate: ${whose} FORGE_RESULT says phase ${n}'s gate is green, but it is not green on the current files.`,
     report(phase, runs, null, tree),
-    'Run the gate commands and show their output, then end with the result line again. If it will not go green, set "gate" to "red" (or "deferred" when it cannot run here) and say why in "notes".',
+    'Run each gate command exactly as written, from the repo root, with nothing piped after it (no `| tail`), so its exit code counts. Then end with the result line again. If it will not go green, set "gate" to "red" (or "deferred" when it cannot run here) and say why in "notes".',
   ].join('\n')
 }
 
@@ -398,23 +495,39 @@ export const register: Register = (on, options) => {
   })
 
   on('tool.call', async ($, e, next) => {
-    const ran = await next(e)
-    const phase = await read($, phaseAtom)
-    if (phase === null) return ran
-
-    if (e.tool === 'Bash' && e.run_in_background !== true) {
-      const command = gateIn(e.command, phase.commands)
-      if (command !== undefined) {
-        const [tree, at] = await Promise.all([treeId($, phase.root), $.clock.now()])
-        const isOk = ran.deny === undefined && ran.isError !== true
-        await record($, phase, [{ command, isOk, at, tail: tailOf(ran.text ?? ''), tree, by: 'claude' }])
-        await update($, treeAtom, () => tree)
-        return ran
-      }
-      if (ran.isReadOnly !== true) await update($, treeAtom, () => '')
-    } else if (EDIT_TOOLS.has(String(e.tool))) {
-      await update($, treeAtom, () => '')
+    if (e.tool !== 'Bash') {
+      const ran = await next(e)
+      if (EDIT_TOOLS.has(String(e.tool))) await update($, treeAtom, () => '')
+      return ran
     }
+
+    // A subagent's shell directory is unknown, so only an explicit `cd <root> &&` counts.
+    const base = e.agentId === undefined ? await sessionDir($) : ''
+    const root = await rootOf($, base === '' ? await sessionDir($) : base)
+    const hits = root === null || e.run_in_background === true ? [] : gateRunsIn(e.command, base, root, await planCommands($, root))
+    if (root === null || hits.length === 0) {
+      const ran = await next(e)
+      if (ran.isReadOnly !== true) await update($, treeAtom, () => '')
+      return ran
+    }
+
+    // Pinned to the files the command saw: an edit made while it runs is not credited.
+    const before = await treeId($, root)
+    const ran = await next(e)
+    const output = ran.deny === undefined && ran.isError !== true ? ran.result : undefined
+    // Bash moves a long command to the background on a timeout or Ctrl+B: no exit code yet.
+    const isUnfinished = output !== undefined && (output.backgroundTaskId !== undefined || output.interrupted)
+    if (before !== '' && ran.deny === undefined && !isUnfinished) {
+      const isOk = ran.isError !== true
+      const at = await $.clock.now()
+      // A failed chain only says something about its last command.
+      const runs = hits
+        .filter(hit => isOk || hit.isLast)
+        .map(hit => ({ command: hit.command, isOk, at, tail: tailOf(ran.text ?? ''), tree: before, by: 'claude' as const }))
+      await recordRuns($, root, runs)
+    }
+    const tree = await treeId($, root)
+    await update($, treeAtom, () => tree)
     return ran
   })
 
@@ -433,7 +546,9 @@ export const register: Register = (on, options) => {
       const reason = await claimReason($, e.cwd || cwd, forgeResult)
       return reason === undefined ? result : { ...result, block: reason }
     }
-    if (!claimsDone(text)) return result
+    // A message that ends on a question is waiting for the person, not reporting done.
+    const lastLine = text.trim().split('\n').filter(line => line.trim() !== '').pop() ?? ''
+    if (!claimsDone(text) || /\?\s*$/.test(lastLine)) return result
     const phase = await refresh($)
     if (phase === null) return result
     const [runs, checked, tree] = await Promise.all([read($, runsAtom), read($, checkedAtom), read($, treeAtom)])
@@ -443,7 +558,7 @@ export const register: Register = (on, options) => {
     const ask =
       verdict.kind === 'manual'
         ? 'Its checks need a person: ask them to check it and press Checked in the gate band. Do not call the phase done before that.'
-        : 'Run the gate commands and show their output, fix what fails, or say plainly that the phase is not done yet.'
+        : 'Run each gate command exactly as written, from the repo root, with nothing piped after it (no `| tail`), so its exit code counts. Fix what fails, or say plainly that the phase is not done yet.'
     return {
       ...result,
       block: `forge-gate: you reported phase ${phase.n} as done, but its Verifiable gate is not green on the current working tree.\n${report(phase, runs, checked, tree)}\n${ask}`,

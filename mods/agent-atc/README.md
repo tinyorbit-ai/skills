@@ -23,9 +23,9 @@ general-purpose · opus-5-5 · started 14:32:01 · 18 calls · 41k tok
 - `/atc` opens the pane and gives it the keyboard. Esc hands the keyboard back. `/atc close` closes it.
 - `1`–`9` picks an agent. Its trail, model, call count and tokens show below the list.
 - **Message** sends text to the picked agent. A finished agent is resumed with it, so you can ask a follow-up.
-- **Stop** stops a running background agent (`TaskStop`).
+- **Stop** stops a running background agent or teammate (`TaskStop`, with the teammate's own id).
 - **Quiet** means running with no tool call for 90s. It is usually stuck on a permission prompt or a long command.
-- The status line shows `agent-atc: N running` whenever any are running. A `waiting` agent (blocked on its own background shell) counts as running.
+- The status line shows `agent-atc: N running` whenever any are running. A `waiting` agent (on its own background work, a plan approval or a child agent) counts as running; an `idle` teammate doesn't.
 
 Setting `autoOpen` (default on) opens the pane by itself when the first subagent
 starts. This only happens on terminals 144+ columns wide. Closing it yourself keeps it

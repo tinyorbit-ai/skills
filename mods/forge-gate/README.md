@@ -16,11 +16,22 @@ Phase 5 · App icon     ◐ written checks, not checked           [ Checked ]
   executable. Deploy, release, install, send and rm-style commands are never run, and
   nor are spans with `<placeholders>`.
 - **Green:** every gate command passed on exactly the files you have now. It
-  compares file contents (a git tree id), so committing doesn't make a pass stale, but
-  any edit does. A pass is remembered across sessions.
+  compares file contents (a git tree id, taken before the command ran), so committing
+  doesn't make a pass stale, but any edit does. `wiki/` is left out, because forge
+  writes its build log and learnings after the gate runs. A pass is remembered across
+  sessions.
 - **Evidence:**
-  - Claude's own Bash runs of a gate command count, unless something after the
-    command could hide its exit code (a pipe, `|| true`, `;`).
+  - A Claude Bash run counts when the gate command is a whole piece of the command,
+    run in the repo root, finished in the foreground. Only `&&` or `;` may come
+    before it, and only `&&` after it. So `true || bun test`, `echo bun test`,
+    `cd sub && bun test`, `bun test | tail` and a run moved to the background don't
+    count.
+  - A chain like `bun run gate && tsc --noEmit` counts every gate command in it. If
+    the chain fails, only its last command is marked failed.
+  - A subagent's run counts only with an explicit `cd <repo root> &&` in front, since
+    its shell directory isn't known.
+  - Runs are kept per repo and command, whichever branch is out. So a run made right
+    after `git switch -c phase/3-…` counts.
   - `/gate` (or **Run gate**) also counts. It lists the commands and asks before it
     runs anything.
 - **The guard, for forge stages:** every forge stage ends with a result line,
@@ -62,11 +73,15 @@ Inside the normal loop the mod mostly confirms what the skills already do. Its v
 is the visible state, catching a skipped or stale run, and remembering a pass across
 sessions.
 
-Limits: exit codes only, so a gate's quoted expected output isn't checked. Gates with
-only manual checks can't be verified. A branch that doesn't match the plan needs
-`/gate <n>`.
+Limits:
+- Exit codes only, so a gate's quoted expected output isn't checked.
+- Gates with only manual checks can't be verified.
+- A gate that writes files outside `.gitignore` changes the tree it ran on, so it
+  never reads green. Ignore its outputs.
+- A subagent in its own worktree isn't tracked unless it `cd`s to this repo's root.
+- The band follows the branch. Off a phase branch, `/gate <n>` pins a phase.
 
-Setting `guardDoneClaims` (default on) turns the guard off. The band and `/gate` keep
-working.
+Turn the `guardDoneClaims` setting off to disable both guards (result lines and
+phrases). The band and `/gate` keep working.
 
 Install: see [`../README.md`](../README.md).
