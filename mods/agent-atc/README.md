@@ -25,7 +25,7 @@ general-purpose · opus-5-5 · started 14:32:01 · 18 calls · 41k tok
 - **Message** sends text to the picked agent. A finished agent is resumed with it, so you can ask a follow-up.
 - **Stop** stops a running background agent (`TaskStop`).
 - **Quiet** means running with no tool call for 90s. It is usually stuck on a permission prompt or a long command.
-- The status line shows `agents: N running` whenever any are running.
+- The status line shows `agent-atc: N running` whenever any are running. A `waiting` agent (blocked on its own background shell) counts as running.
 
 Setting `autoOpen` (default on) opens the pane by itself when the first subagent
 starts. This only happens on terminals 144+ columns wide. Closing it yourself keeps it

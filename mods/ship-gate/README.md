@@ -26,7 +26,7 @@ Do that, then try again. If the person wants it through as it is, they type /shi
   get in the way, and any real change after the check does.
 - **`/ship`** shows what a push and a PR would face right now. **`/ship allow`** lets
   the next held one through within 10 minutes. It only works when you type it.
-- **Status line:** `ship: checks ✓ · lizard 🦎` on any branch other than the default.
+- **Status line:** `ship-gate: checks ✓ · lizard 🦎` on any branch other than the default.
 
 Settings: `holdMainPush` and `requireLizard` (both on by default), and `extraCheck`.
 

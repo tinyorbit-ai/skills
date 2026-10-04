@@ -108,7 +108,7 @@ test('finished, killed, quiet and earlier agents read right', async ($, on) => {
   await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
   await $.agent.spawn({ ...SPAWN, description: 'research', subagentType: 'Explore' })
   await $.agent.spawn({ ...SPAWN, tool_use_id: 'toolu_slow', description: 'slow migration' })
-  expect(status[status.length - 1]).toBe('agents: 2 running · /atc')
+  expect(status[status.length - 1]).toBe('2 running · /atc')
 
   await clock.advance(5_000)
   await $.turn.complete({
@@ -137,5 +137,25 @@ test('finished, killed, quiet and earlier agents read right', async ($, on) => {
   await ui.press({ key: 'pick-agent-3' })
   expect(await ui.find({ text: /Answer: Found 3 webhook handlers\. Details follow\./ })).toBeDefined()
   expect(await ui.find({ key: 'stop' })).toBeUndefined()
-  expect(status[status.length - 1]).toBe('agents: 1 running · /atc')
+  expect(status[status.length - 1]).toBe('1 running · /atc')
+})
+
+test('an agent waiting on its own shell still counts as running', async ($, on) => {
+  const clock = mock.clock(on, { now: 0 })
+  const status: (string | undefined)[] = []
+  on('agent.list', () => ({ value: [{ id: 'agent-7', description: 'long build', type: 'general-purpose', status: 'waiting' }] }))
+  on('command.register', () => ({ value: { command: 'atc' } }))
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('ui.status', ($, e) => {
+    status.push(e.text)
+    return { value: undefined }
+  })
+
+  await $.session.start({ cwd: '/repo', surface: 'terminal', isInteractive: true })
+  await clock.advance(3_000)
+
+  const ui = await $.ui.mount({ plugin: 'agent-atc', surface: 'terminal', ...PANE })
+  expect(await ui.find({ text: /waiting on its shell/ })).toBeDefined()
+  expect(await ui.find({ text: /1 running · 0 done/ })).toBeDefined()
+  expect(status[status.length - 1]).toBe('1 running · /atc')
 })

@@ -21,8 +21,10 @@ const selected = atom({ plugin: 'agent-atc', key: 'selected' } as const, null)
 const now = atom({ plugin: 'agent-atc', key: 'now' } as const, 0)
 const main = atom({ plugin: 'agent-atc', key: 'main' } as const, { lastAt: 0, calls: 0 })
 
-const LIVE = new Set(['running', 'pending', 'starting'])
-const isLive = (status: string): boolean => LIVE.has(status)
+// The task statuses that mean an agent has stopped for good. Any other one is live:
+// running, pending, or waiting on a background shell of its own.
+const ENDED = new Set(['completed', 'failed', 'killed', 'stopped', 'cancelled', 'canceled', 'error'])
+const isLive = (status: string): boolean => !ENDED.has(status)
 
 const oneLine = (text: string, max = 80): string => {
   const line = text.replace(/\s+/g, ' ').trim()
@@ -159,6 +161,9 @@ const treeOrder = (list: readonly AtcAgent[]): Row[] => {
 }
 
 const look = (agent: AtcAgent, at: number): { glyph: string; color: string; word: string } => {
+  if (agent.status === 'waiting') {
+    return { glyph: '◐', color: 'cyan', word: `waiting on its shell ${ago(at - agent.lastAt)}` }
+  }
   if (isLive(agent.status)) {
     const idle = at - agent.lastAt
     return idle > QUIET_MS
@@ -179,7 +184,7 @@ let shownStatus: string | undefined
 
 const showStatus = ($: EngineInterface, all: Agents): void => {
   const live = Object.values(all).filter(agent => isLive(agent.status)).length
-  const text = live > 0 ? `agents: ${live} running · /atc` : undefined
+  const text = live > 0 ? `${live} running · /atc` : undefined
   if (text !== shownStatus) {
     shownStatus = text
     $.ui.status(text)

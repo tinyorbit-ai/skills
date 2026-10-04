@@ -224,7 +224,7 @@ const statusFor = async ($: EngineInterface, root: string): Promise<string | und
   const lizard = lizardOn(evidence, trees.all)
   const checkMark = checks.state === 'green' ? '✓' : checks.state === 'red' ? '✗' : '–'
   const lizardMark = lizard === 'APPROVE' ? '🦎' : lizard === undefined ? '–' : '✗'
-  return `ship: checks ${checkMark} · lizard ${lizardMark}`
+  return `checks ${checkMark} · lizard ${lizardMark}`
 }
 
 const showStatus = async ($: EngineInterface): Promise<void> => {
