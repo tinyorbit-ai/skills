@@ -19,13 +19,6 @@
       "version": "0.1.0",
       "source": "./mods/forge-gate",
       "category": "productivity"
-    },
-    {
-      "name": "ship-gate",
-      "description": "Holds git push until a check has passed on exactly the content being pushed, and gh pr create until lizard --local approved it too. Pushes to main are held. /ship shows where you stand; /ship allow lets one through.",
-      "version": "0.1.0",
-      "source": "./mods/ship-gate",
-      "category": "productivity"
     }
   ]
 }
