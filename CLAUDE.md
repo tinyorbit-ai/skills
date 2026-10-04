@@ -150,6 +150,8 @@ then `claude plugin install <name>@tinyorbit`. Push = published here too.
 - **Gate:** tier 0 (`node evals/static/validate.mjs`) runs `claude plugin validate`
   and `claude plugin test` on every mod and checks marketplace ↔ folder ↔ version sync.
 - **Release:** bump `version` in both `plugin.json` and the marketplace entry.
+- **Installed mods load in every session** on the machine, so a mod must stay quiet
+  where it doesn't apply (agent-atc with no subagents, forge-gate off a phase branch).
 - Layout, dev loop, the mods index and the traps already hit: **[`mods/README.md`](mods/README.md)**.
 
 ## Evals — the edit loop for every skill change

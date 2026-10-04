@@ -14,7 +14,11 @@ That matters for code that runs unsandboxed on every tool call.
 ```bash
 claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods   # once per machine
 claude plugin install agent-atc@tinyorbit
+claude plugin install forge-gate@tinyorbit
 ```
+
+An installed mod loads in every Claude Code session on that machine, terminal and
+desktop alike. `claude plugin disable <name>@tinyorbit` turns one off without removing it.
 
 Update: `claude plugin marketplace update tinyorbit && claude plugin update agent-atc@tinyorbit`
 (restart Claude Code to apply). Try a local checkout without installing:
@@ -24,7 +28,7 @@ Update: `claude plugin marketplace update tinyorbit && claude plugin update agen
 
 | Mod | What it does | Notes |
 |---|---|---|
-| `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
+| `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count; an agent `waiting` on its own background shell counts as running. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
 | `forge-gate` | Band above the prompt: the checked-out forge phase and whether its `**Verifiable gate:**` is green on this exact working tree. Checks every forge stage's `FORGE_RESULT … "gate":"green"` line against what actually ran (main session and subagents, phase found by number). With no result line it guards "phase done" phrases instead. `/gate` runs it | Phase = current branch matched against the plan's `**Branch:**`. Gate commands = backticked spans whose first word is a real executable; deploy/release/install/send/rm-style commands and `<placeholders>` are never run. Evidence = Claude's own Bash runs (no pipe or `\|\| true` after) or `/gate`, which asks first. "Green" is pinned to the git tree id of the working files (a throwaway index, so commits don't change it but any edit does), kept in `$.store` across sessions. A gate with no commands waits for the person's **Checked**. |
 
 ## Layout
@@ -54,7 +58,7 @@ mods/<name>/
 5. **Release:** bump `version` in both `plugin.json` and the marketplace entry.
    The validator fails when they differ. Add or adjust the index row above. Push.
 
-## Gotchas (each one hit while building agent-atc)
+## Gotchas (each one hit while building these mods)
 
 - **A bad `--plugin-dir` path fails silently.** If the folder is missing, or the `~` was
   never expanded (`--plugin-dir=~/...`, or a quoted path), Claude Code skips it with no
@@ -73,3 +77,19 @@ mods/<name>/
   seats from 144 columns. A slash command the person runs opens it at any width.
 - **Command output is read by the model.** A command's `{ text }` lands in the
   transcript. Keep it to one line.
+- **`$.ui.ask` is an `AskUserQuestion` tool call.** A test answers it with
+  `on('tool.call', { tool: 'AskUserQuestion' }, …)`. It rejects when the person
+  dismisses it and under `claude -p`, so catch it.
+- **The test kit can't stand in for `session.append`.** A test hook must call `next`,
+  and nothing sits beneath it. Cover that path with a headless run instead.
+- **Claude Code prefixes a status line with the plugin's name** (`⚠ agent-atc: …`).
+  Don't repeat the name in the text.
+- **Agents have a `waiting` status** while they block on their own background shell.
+  Treat every status outside a known end set (completed, failed, killed, stopped) as live.
+- **Fingerprint files with a git tree id, not HEAD.** Build it in a throwaway index
+  (`GIT_INDEX_FILE=$tmp git add -A && git write-tree`). It stays the same across a
+  commit, changes on any edit, and never touches the real index. A HEAD + diff hash
+  goes stale on every commit.
+- **Panes dock only in the fullscreen layout.** tmux uses the main screen by default.
+  `CLAUDE_CODE_NO_FLICKER=1` gives the fullscreen layout, where a pane sits beside the
+  transcript. `tmux capture-pane -e -p` captures a session with its colors for docs.

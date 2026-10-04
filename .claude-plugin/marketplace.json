@@ -15,7 +15,7 @@
     },
     {
       "name": "forge-gate",
-      "description": "Enforces the forge phase gate: shows whether the current phase's Verifiable gate is green on this exact working tree, and blocks a 'phase done' claim until it is. /gate runs it.",
+      "description": "Enforces the forge phase gate: shows whether the current phase's Verifiable gate is green on exactly the files you have, and sends back a forge stage whose FORGE_RESULT claims \"gate\":\"green\" when it isn't. /gate runs it.",
       "version": "0.1.0",
       "source": "./mods/forge-gate",
       "category": "productivity"

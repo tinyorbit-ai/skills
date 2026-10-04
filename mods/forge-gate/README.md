@@ -37,6 +37,34 @@ Phase 5 · App icon     ◐ written checks, not checked           [ Checked ]
   sent back.
 - **Written checks:** prose the commands can't prove is shown with every report. A
   gate with no commands at all waits for you to press **Checked**.
+- **Run gate** (the band's button, or `/gate`) runs the phase's gate commands now, on
+  the files as they are, and shows the result in the band. It's your own way to check
+  without asking Claude, e.g. before trusting a "done". Most of the time you never
+  press it: Claude's runs update the band by themselves.
+
+Commands: `/gate` runs the gate (it asks first), `/gate status` reports without
+running, `/gate <n>` pins phase n when you're off its branch, `/gate auto` unpins.
+
+## How it fits the forge loop
+
+- **forge-plan** writes each phase's `**Verifiable gate:**`. The mod only reads it.
+- **forge-build** must run the gate once before handing off. Its result line and its
+  "handing to review" claim are checked.
+- **forge-review** reruns the gate during runtime verification and its fix loop. Each
+  run updates the band.
+- **forge-ship** rebases first, which changes the files, so the old pass goes stale.
+  Ship reruns the gate as its own rules require, then lands. Its result line is
+  checked by phase number after the merge.
+- **crack-on and Arnold workers** run unattended. The guard is what checks each "green"
+  there.
+
+Inside the normal loop the mod mostly confirms what the skills already do. Its value
+is the visible state, catching a skipped or stale run, and remembering a pass across
+sessions.
+
+Limits: exit codes only, so a gate's quoted expected output isn't checked. Gates with
+only manual checks can't be verified. A branch that doesn't match the plan needs
+`/gate <n>`.
 
 Setting `guardDoneClaims` (default on) turns the guard off. The band and `/gate` keep
 working.
