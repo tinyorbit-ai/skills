@@ -36,10 +36,12 @@ haiku read the last turn just now · 1.4k tok
 - **Needs you:** every question Claude asked that you haven't answered. A question dialog
   you closed lands here too. `answer` puts the question in your prompt box. `done` drops it.
   A question you answer in your next message clears itself.
-- **Answers:** each question you asked, with the reply's answer in one line.
+- **Answers:** each question you asked, with the reply's answer in one line. One the reply
+  skipped shows as `Not answered yet.` and is checked again each turn until it is answered.
 - **Resources:** every pull request, issue, file, local URL, deploy and published page the
   session handed you. Kept for the whole session, no repeats. A terminal opens them on a
-  click. The desktop app opens `https` links, and copies anything else on a press.
+  click. The desktop app opens `https` links, and copies anything else on a press. A link
+  the reader labelled in its own words shows its host beside it.
 - **Running:** background shells the main loop started and that have not ended.
 - **Heads-up:** what the last reply says was not done, not verified, or needs watching.
 - **Next:** the one next step the last reply proposed.
@@ -59,7 +61,7 @@ A few things need no model: a closed question dialog, a background shell, and th
 - The reader sees the **final reply** of a turn, not the text between tool calls.
 - If the read fails, the HUD says so and keeps the URLs it can find in the reply itself.
 - A `-p` run or an SDK worker draws nowhere, so nothing is read there and it costs nothing.
-- The HUD lives for the session. `/clear` empties it. A resumed session starts empty.
+- The HUD lives in the session's state. `/clear` empties it.
 
 The banner at the top of the pane is a terminal-only strip of colour. A light sweeps
 across it while Claude works or the turn is being read.

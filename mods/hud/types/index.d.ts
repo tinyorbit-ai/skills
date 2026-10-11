@@ -16,6 +16,8 @@ export type HudAnswer = {
   question: string
   answer: string
   at: number
+  /** No reply has answered it yet: the reader is asked about it again each turn. */
+  isOpen?: true
 }
 
 export type HudLinkKind = 'pr' | 'issue' | 'file' | 'local' | 'deploy' | 'artifact' | 'link'

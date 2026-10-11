@@ -173,6 +173,37 @@ test('answer puts the question in the prompt box, and done or the next turn clos
   expect(await ui.find({ text: 'Nothing needs you' })).toBeDefined()
 })
 
+test('a question of yours that got no answer waits until a later reply answers it', async ($, on) => {
+  const clock = mock.clock(on, { now: 2_500_000 })
+  const w = world(
+    reading({ answers: [{ id: '', q: 'Does it scale?', a: 'Not answered yet.' }, { id: '', q: 'Is it fast?', a: 'Yes, under 10ms.' }] }),
+    // Named again and still unanswered: nothing changes.
+    reading({ answers: [{ id: 'a2500001-0', q: 'Does it scale?', a: 'Not answered yet.' }] }),
+    reading({ answers: [{ id: 'a2500001-0', q: 'Does it scale?', a: 'Yes, to about 10k rows.' }] }),
+  )
+  machine(on, w)
+
+  await $.prompt.submit(typed('Does it scale? Is it fast?'))
+  await $.turn.complete(ended('It is fast: under 10ms.'))
+  await clock.advance(5)
+  const ui = await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
+  expect((await ui.find({ type: 'Text', text: /^Not answered yet\.$/ }))?.props['color']).toBe('warning')
+
+  await $.turn.complete(ended('Still thinking about scale.', 'turn-2'))
+  await clock.advance(5)
+  expect(JSON.parse(w.read[1]?.prompt ?? '{}').unanswered).toEqual([{ id: 'a2500001-0', q: 'Does it scale?' }])
+  expect(await ui.findAll({ type: 'Text', text: /^Does it scale\?$/ })).toHaveLength(1)
+  expect(await ui.find({ type: 'Text', text: /^Not answered yet\.$/ })).toBeDefined()
+
+  await $.turn.complete(ended('It scales to about 10k rows.', 'turn-3'))
+  await clock.advance(5)
+  expect(JSON.parse(w.read[2]?.prompt ?? '{}').unanswered).toEqual([{ id: 'a2500001-0', q: 'Does it scale?' }])
+  expect(await ui.find({ text: 'Not answered yet.' })).toBeUndefined()
+  expect(await ui.findAll({ type: 'Text', text: /^Does it scale\?$/ })).toHaveLength(1)
+  expect(await ui.find({ type: 'Text', text: /^Yes, to about 10k rows\.$/ })).toBeDefined()
+  expect(await ui.find({ type: 'Text', text: /^Yes, under 10ms\.$/ })).toBeDefined()
+})
+
 test('a question dialog the person closed waits in the HUD, and an answered one does not', async ($, on) => {
   mock.clock(on, { now: 3_000_000 })
   const w = world(reading({}))
