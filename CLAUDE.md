@@ -149,7 +149,7 @@ then `claude plugin install <name>@tinyorbit`. A push reaches installs only with
 - **Load the `plugin-authoring` skill before writing or changing a mod.** It writes
   this build's API types, which are the only reference; the API moves between releases.
 - **Installed mods load in every session** on the machine, so a mod must stay quiet
-  where it doesn't apply (agent-atc with no subagents, forge-gate off a phase branch).
+  where it doesn't apply (agent-atc with no subagents, forge-gate off a phase branch, hud with nothing to show).
 - Layout, dev loop, the mods index and the traps already hit: **[`mods/README.md`](mods/README.md)**.
 
 ## Evals — the edit loop for every skill change
