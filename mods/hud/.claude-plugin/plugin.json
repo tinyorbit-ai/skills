@@ -24,6 +24,12 @@
       "title": "Band above the prompt",
       "description": "Show the short HUD band above the prompt. Off leaves the /hud pane only.",
       "default": true
+    },
+    "motion": {
+      "type": "string",
+      "title": "Banner motion",
+      "description": "When the pane's banner moves: always, working (only while Claude works or a turn is read) or off.",
+      "default": "always"
     }
   }
 }

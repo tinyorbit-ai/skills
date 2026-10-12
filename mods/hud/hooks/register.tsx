@@ -275,20 +275,25 @@ const hasAnything = (all: HudBoard, running: readonly HudJob[]): boolean =>
   all.next !== null ||
   running.length > 0
 
-// The banner: a strip of cells. At rest it is a quiet gradient. While Claude works
-// or the turn is read, the colours run along it and a light passes over, and they
-// ease back after. Module state, since a frame is repainted by blit and owes
-// nothing to a redraw.
-const STOPS = [0xd97757, 0xc2578f, 0x6b5bd6, 0x2aa7b8]
-// The running colours, a ring: the last one meets the first.
+// The banner: a strip of cells whose colours drift along it under a slow light.
+// While Claude works or the turn is read they turn to the full ring, run faster
+// and brighter, and the mark beside the title spins; they ease back after.
+// Module state, since a frame is repainted by blit and owes nothing to a redraw.
+// Both sets of colours are rings: the last one meets the first.
+const CALM = [0xd97757, 0xc2578f, 0x6b5bd6, 0x2aa7b8, 0x6b5bd6, 0xc2578f]
 const RING = [0xd97757, 0xdb9a3a, 0x4fae74, 0x2aa7b8, 0x4c7fe0, 0x6b5bd6, 0xc2578f]
 const SPIN = '▖▘▝▗'
+const BLINK = '▚▞'
+// How far the colours move in a frame at rest, against 1 while working.
+const CALM_PACE = 0.3
+/** `always`: the banner moves whenever the pane is up; `working`: only while something is under way; `off`: never. */
+type Motion = 'always' | 'working' | 'off'
 // The share of the way to full colour, or back to rest, that one frame covers.
 const EASE = 0.14
 const DEFAULT_COLOR = 0x01000000
 const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
 
-const banner = { columns: 0, phase: 0, heat: 0, isLive: false, label: '' }
+const banner = { columns: 0, frame: 0, phase: 0, heat: 0, isLive: false, label: '', motion: 'always' as Motion }
 let sweeping: Timer | undefined
 
 const mix = (from: number, to: number, share: number): number => {
@@ -300,16 +305,10 @@ const mix = (from: number, to: number, share: number): number => {
   return channel(16) | channel(8) | channel(0)
 }
 
-const hue = (share: number): number => {
-  const scaled = Math.min(0.9999, Math.max(0, share)) * (STOPS.length - 1)
+const around = (colors: readonly number[], share: number): number => {
+  const scaled = (share - Math.floor(share)) * colors.length
   const i = Math.floor(scaled)
-  return mix(STOPS[i] ?? 0, STOPS[i + 1] ?? 0, scaled - i)
-}
-
-const ring = (share: number): number => {
-  const scaled = (share - Math.floor(share)) * RING.length
-  const i = Math.floor(scaled)
-  return mix(RING[i] ?? 0, RING[(i + 1) % RING.length] ?? 0, scaled - i)
+  return mix(colors[i] ?? 0, colors[(i + 1) % colors.length] ?? 0, scaled - i)
 }
 
 // Row-major cells as the Raster takes them: little-endian u32 triplets, base64.
@@ -337,21 +336,24 @@ const packed = (words: readonly number[]): string => {
 // Two rows: the title on the colours, and under it a half-block row where the
 // same colours run the other way.
 const bannerCells = (): string => {
-  const { columns, phase, heat, label } = banner
-  const title = ` ${heat > 0 ? SPIN[Math.floor(phase / 2) % SPIN.length] : '▚'} HUD`
+  const { columns, frame, phase, heat, label, motion } = banner
+  const isDrifting = motion === 'always'
+  const mark = heat > 0 ? SPIN[Math.floor(frame / 2) % SPIN.length] : BLINK[isDrifting ? Math.floor(frame / 14) % BLINK.length : 0]
+  const title = ` ${mark} HUD`
   const right = label === '' ? '' : `${label} `
   const span = Math.max(24, columns * 1.6)
   const head = ((phase * 2.5) % (columns + 36)) - 18
+  const light = (isDrifting ? 0.22 : 0) * (1 - heat) + 0.5 * heat
+  const at = (x: number): number => mix(around(CALM, x / span), around(RING, x / span), heat)
   const top: number[] = []
   const under: number[] = []
   for (let x = 0; x < columns; x += 1) {
-    const rest = hue(columns <= 1 ? 0 : x / (columns - 1))
     const glow = Math.max(0, 1 - Math.abs(x - head) / 9)
-    const color = mix(mix(rest, ring((x + phase * 1.4) / span), heat), 0xffffff, glow * glow * 0.5 * heat)
+    const color = mix(at(x + phase * 1.4), 0xffffff, glow * glow * light)
     const fromRight = x - (columns - right.length)
     const glyph = x < title.length ? title[x] : fromRight >= 0 ? right[fromRight] : ' '
     top.push((glyph ?? ' ').charCodeAt(0), 0xffffff, color)
-    under.push(0x2580, mix(mix(rest, ring((x - phase * 1.4) / span), heat), 0x000000, 0.6 - 0.25 * heat), DEFAULT_COLOR)
+    under.push(0x2580, mix(at(x - phase * 1.4), 0x000000, 0.6 - 0.25 * heat), DEFAULT_COLOR)
   }
   return packed([...top, ...under])
 }
@@ -361,19 +363,24 @@ const stopSweep = (): void => {
   sweeping = undefined
 }
 
-// One frame, painted without a redraw. The colours ease in while something is
-// under way and ease out after; the frames end once the banner is at rest or gone.
+const isMoving = (): boolean =>
+  banner.motion === 'always' || (banner.motion === 'working' && (banner.isLive || banner.heat > 0))
+
+// One frame, painted without a redraw. The colours ease to the full ring while
+// something is under way and ease back after; the frames end once the pane is
+// gone, or at rest when the banner only moves for work.
 const sweepFrame = async ($: EngineInterface): Promise<void> => {
   if (banner.columns === 0) {
     stopSweep()
     return
   }
-  banner.phase += 1
+  banner.frame += 1
   banner.heat += ((banner.isLive ? 1 : 0) - banner.heat) * EASE
-  if (!banner.isLive && banner.heat < 0.02) {
-    banner.heat = 0
-    stopSweep()
-  }
+  if (!banner.isLive && banner.heat < 0.02) banner.heat = 0
+  banner.phase += CALM_PACE + (1 - CALM_PACE) * banner.heat
+  if (!isMoving()) stopSweep()
+  // At rest every other frame is enough.
+  else if (banner.heat === 0 && banner.frame % 2 === 1) return
   const painted = await $.ui.blit({ requestId: PANE, key: BANNER, cells: bannerCells(), columns: banner.columns, rows: 2 })
   if ('deny' in painted) stopSweep()
 }
@@ -388,8 +395,8 @@ const startSweep = ($: EngineInterface): void => {
 const setLive = async ($: EngineInterface, isLive: boolean, label: string): Promise<void> => {
   banner.isLive = isLive
   banner.label = label
-  // Still warm: the frames carry the new label and cool the colours down.
-  if (isLive || banner.heat > 0) {
+  // Moving: the next frame carries the new label.
+  if (isMoving()) {
     startSweep($)
     return
   }
@@ -501,6 +508,7 @@ export const register: Register = (on, options) => {
   const model = typeof options['model'] === 'string' && options['model'].trim() !== '' ? options['model'].trim() : 'haiku'
   const isAutoOpen = options['autoOpen'] !== false
   const isBandOn = options['band'] !== false
+  banner.motion = options['motion'] === 'working' || options['motion'] === 'off' ? options['motion'] : 'always'
   let isDismissed = false
   let hasAutoOpened = false
   // Set from any terminal drawing: whether a pane would dock as a sidebar. On the
@@ -789,7 +797,7 @@ export const register: Register = (on, options) => {
       banner.columns = Math.min(512, width)
       banner.isLive = isLive
       banner.label = isReading ? 'reading' : current.isWorking ? 'working' : restLabel(all)
-      if (isLive || banner.heat > 0) startSweep($)
+      if (isMoving()) startSweep($)
     }
 
     const answer = (ask: HudAsk) => async () => {

@@ -65,9 +65,10 @@ A few things need no model: a closed question dialog, a background shell, and th
 - A `-p` run or an SDK worker draws nowhere, so nothing is read there and it costs nothing.
 - The HUD lives in the session's state. `/clear` empties it.
 
-The banner at the top of the pane is a terminal-only strip of colour. While Claude works
-or the turn is being read, the colours run along it, a light passes over and the mark
-beside the title spins. It eases back to a still gradient after.
+The banner at the top of the pane is a terminal-only strip of colour. Its colours drift
+slowly under a soft light. While Claude works or the turn is being read they run faster
+and brighter through the full ring, and the mark beside the title spins. `motion` turns
+the drift down.
 
 ## Settings
 
@@ -76,5 +77,6 @@ beside the title spins. It eases back to a still gradient after.
 | `model` | `haiku` | The model that reads each turn: an alias or a full model id. |
 | `autoOpen` | on | Opens the pane by itself the first time the HUD has something to show. Wide terminals only (144+ columns). Closing it yourself keeps it closed until `/hud`. |
 | `band` | on | The short band above the prompt. Off leaves the pane only. |
+| `motion` | `always` | When the banner moves. `working`: only while Claude works or a turn is read. `off`: never. |
 
 Install: see [`../README.md`](../README.md).

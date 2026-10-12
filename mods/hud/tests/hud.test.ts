@@ -396,13 +396,44 @@ test('a did-you-know stays up after its turn, and the heads-ups do not', async (
   expect(await band.find({ text: /Did you know\? Hooks on turn\.complete hold the turn open\./ })).toBeDefined()
 })
 
-test('the banner runs while a turn works, then eases back to rest', async ($, on) => {
+// The banner's top row as text: every cell is three little-endian u32s, the first its glyph.
+const titleOf = (cells: string, columns: number): string => {
+  const bytes = Uint8Array.from(atob(cells), char => char.charCodeAt(0))
+  const words = new Uint32Array(bytes.buffer)
+  return Array.from({ length: columns }, (_, x) => String.fromCodePoint(words[x * 3] ?? 32)).join('')
+}
+
+test('the banner drifts at rest and runs while a turn works', async ($, on) => {
   const clock = mock.clock(on, { now: 9_500_000 })
   const w = world(FIRST)
   machine(on, w)
 
-  const ui = await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
-  const rest = (await ui.find({ type: 'Raster' }))?.props['cells']
+  await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
+  expect(w.blits).toHaveLength(0)
+  await clock.advance(1_800)
+  const calm = w.blits.length
+  expect(calm).toBeGreaterThan(5)
+  expect(new Set(w.blits).size).toBeGreaterThan(calm / 2)
+  expect(titleOf(w.blits.at(-1) ?? '', 48)).toMatch(/^ [▚▞] HUD +$/)
+
+  await $.turn.start({ text: 'go', turnId: 'turn-1' })
+  await clock.advance(900)
+  // Working, every frame is painted: twice the pace of the drift.
+  expect(w.blits.length - calm).toBeGreaterThan(8)
+  expect(titleOf(w.blits.at(-1) ?? '', 48)).toMatch(/^ [▖▘▝▗] HUD +working $/)
+
+  await $.turn.complete({ ...ended('Half a thought'), isAborted: true, reason: 'aborted' })
+  await clock.advance(6_000)
+  expect(titleOf(w.blits.at(-1) ?? '', 48)).toMatch(/^ [▚▞] HUD +$/)
+})
+
+test('motion: working moves the banner only for work', { options: { motion: 'working' } }, async ($, on) => {
+  const clock = mock.clock(on, { now: 9_600_000 })
+  const w = world(FIRST)
+  machine(on, w)
+
+  await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
+  await clock.advance(2_000)
   expect(w.blits).toHaveLength(0)
 
   await $.turn.start({ text: 'go', turnId: 'turn-1' })
@@ -413,8 +444,19 @@ test('the banner runs while a turn works, then eases back to rest', async ($, on
 
   await $.turn.complete({ ...ended('Half a thought'), isAborted: true, reason: 'aborted' })
   await clock.advance(6_000)
-  expect(w.blits.at(-1)).toBe(rest)
+  expect(titleOf(w.blits.at(-1) ?? '', 48)).toBe(` ▚ HUD${' '.repeat(42)}`)
   const settled = w.blits.length
   await clock.advance(2_000)
   expect(w.blits).toHaveLength(settled)
+})
+
+test('motion: off keeps the banner still and only changes its label', { options: { motion: 'off' } }, async ($, on) => {
+  const clock = mock.clock(on, { now: 9_700_000 })
+  const w = world(FIRST)
+  machine(on, w)
+
+  await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
+  await $.turn.start({ text: 'go', turnId: 'turn-1' })
+  await clock.advance(2_000)
+  expect(w.blits.map(cells => titleOf(cells, 48).trim().replace(/ +/g, ' '))).toEqual(['▚ HUD working'])
 })
