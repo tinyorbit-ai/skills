@@ -44,6 +44,8 @@ haiku read the last turn just now · 1.4k tok
   the reader labelled in its own words shows its host beside it.
 - **Running:** background shells the main loop started and that have not ended.
 - **Heads-up:** what the last reply says was not done, not verified, or needs watching.
+  Under those, `Did you know?` lines: things a reply revealed about the work that are not
+  obvious, such as how a part really behaves or a handy command. The last three stay up.
 - **Next:** the one next step the last reply proposed.
 
 `/hud` opens the pane and gives it the keyboard. Esc hands the keyboard back.
@@ -63,8 +65,9 @@ A few things need no model: a closed question dialog, a background shell, and th
 - A `-p` run or an SDK worker draws nowhere, so nothing is read there and it costs nothing.
 - The HUD lives in the session's state. `/clear` empties it.
 
-The banner at the top of the pane is a terminal-only strip of colour. A light sweeps
-across it while Claude works or the turn is being read.
+The banner at the top of the pane is a terminal-only strip of colour. While Claude works
+or the turn is being read, the colours run along it, a light passes over and the mark
+beside the title spins. It eases back to a still gradient after.
 
 ## Settings
 

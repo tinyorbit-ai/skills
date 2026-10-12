@@ -37,11 +37,13 @@ type World = {
   filled: string[]
   opened: string[]
   copied: string[]
+  // The banner frames painted, as cells.
+  blits: string[]
   // Where the session draws; empty for a -p run or an SDK worker.
   surfaces: ('terminal' | 'desktop')[]
 }
 
-const world = (...replies: ModelCompleteResult[]): World => ({ replies, read: [], filled: [], opened: [], copied: [], surfaces: ['terminal'] })
+const world = (...replies: ModelCompleteResult[]): World => ({ replies, read: [], filled: [], opened: [], copied: [], blits: [], surfaces: ['terminal'] })
 
 const reading = (found: Record<string, unknown>): ModelCompleteResult => ({
   isAnswered: true,
@@ -70,7 +72,10 @@ const machine = (on: On, w: World): void => {
     return { value: { isPlaced: true } }
   })
   on('session.surfaces', () => ({ value: w.surfaces }))
-  on('ui.blit', () => ({ value: {} }))
+  on('ui.blit', ($, e) => {
+    if ('cells' in e) w.blits.push(e.cells)
+    return { value: {} }
+  })
   on('ui.copy', ($, e) => {
     w.copied.push(e.text)
     return { value: { isCopied: true } }
@@ -95,6 +100,7 @@ const FIRST = reading({
     { kind: 'link', label: 'bad', href: 'javascript:alert(1)' },
   ],
   notes: ['Not checked in the desktop app yet.'],
+  tips: ['A pane opened unasked only seats on a wide terminal.'],
   next: 'Install the mod and open the desktop app.',
 })
 
@@ -122,6 +128,7 @@ test('a finished turn fills the pane on every surface', async ($, on) => {
     expect(await ui.find({ type: 'Text', text: /^Should I bump forge-gate so both bands stack\?$/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /^Yes\. The band and the pane both draw there\.$/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /^Not checked in the desktop app yet\.$/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /^Did you know\? A pane opened unasked only seats on a wide terminal\.$/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /^Install the mod and open the desktop app\.$/ })).toBeDefined()
 
     // A terminal opens a file; the other surfaces are sent https links only, so the
@@ -361,4 +368,53 @@ test('/hud opens the pane, and the reader model is a setting', { options: { mode
   const ui = await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
   expect(await ui.find({ text: 'Nothing needs you' })).toBeDefined()
   expect(await ui.findAll({ type: 'Link' })).toHaveLength(0)
+})
+
+test('a did-you-know stays up after its turn, and the heads-ups do not', async ($, on) => {
+  const clock = mock.clock(on, { now: 9_000_000 })
+  const w = world(
+    FIRST,
+    reading({ tips: ['Hooks on turn.complete hold the turn open.', 'A pane opened unasked only seats on a wide terminal.'] }),
+  )
+  machine(on, w)
+
+  await $.turn.complete(ended('Done, with one thing unchecked.'))
+  await clock.advance(5)
+  await $.turn.complete(ended('The read now runs on a timer.', 'turn-2'))
+  await clock.advance(5)
+
+  const ui = await $.ui.mount({ plugin: 'hud', surface: 'desktop', ...PANE })
+  expect(await ui.find({ text: 'Not checked in the desktop app yet.' })).toBeUndefined()
+  const tips = await ui.findAll({ type: 'Text', text: /^Did you know\? ./ })
+  expect(tips.map(tip => tip.text)).toEqual([
+    'Did you know? Hooks on turn.complete hold the turn open.',
+    'Did you know? A pane opened unasked only seats on a wide terminal.',
+  ])
+
+  // With no heads-up to show, the band carries the newest one.
+  const band = await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...BAND })
+  expect(await band.find({ text: /Did you know\? Hooks on turn\.complete hold the turn open\./ })).toBeDefined()
+})
+
+test('the banner runs while a turn works, then eases back to rest', async ($, on) => {
+  const clock = mock.clock(on, { now: 9_500_000 })
+  const w = world(FIRST)
+  machine(on, w)
+
+  const ui = await $.ui.mount({ plugin: 'hud', surface: 'terminal', ...PANE })
+  const rest = (await ui.find({ type: 'Raster' }))?.props['cells']
+  expect(w.blits).toHaveLength(0)
+
+  await $.turn.start({ text: 'go', turnId: 'turn-1' })
+  await clock.advance(900)
+  const frames = w.blits.length
+  expect(frames).toBeGreaterThan(5)
+  expect(new Set(w.blits).size).toBe(frames)
+
+  await $.turn.complete({ ...ended('Half a thought'), isAborted: true, reason: 'aborted' })
+  await clock.advance(6_000)
+  expect(w.blits.at(-1)).toBe(rest)
+  const settled = w.blits.length
+  await clock.advance(2_000)
+  expect(w.blits).toHaveLength(settled)
 })

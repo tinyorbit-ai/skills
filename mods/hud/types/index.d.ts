@@ -45,6 +45,8 @@ export type HudBoard = {
   links: HudLink[]
   /** Heads-ups of the last turn read: not done, not verified, to watch. */
   notes: string[]
+  /** "Did you know" facts about the work, newest first; they outlive their turn. */
+  tips: string[]
   next: string | null
 }
 
