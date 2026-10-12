@@ -15,6 +15,7 @@ That matters for code that runs unsandboxed on every tool call.
 claude plugin marketplace add tinyorbit-ai/skills --sparse .claude-plugin mods   # once per machine
 claude plugin install agent-atc@tinyorbit
 claude plugin install forge-gate@tinyorbit
+claude plugin install hud@tinyorbit
 ```
 
 An installed mod loads in every Claude Code session on that machine, terminal and
@@ -30,6 +31,7 @@ Update: `claude plugin marketplace update tinyorbit && claude plugin update <nam
 |---|---|---|
 | `agent-atc` | `/atc` pane: every subagent as a tree, what each is doing now, a live tool trail, a message box and Stop | Status line shows the running count: an agent `waiting` (on background work, a plan approval or a child) counts, an `idle` teammate doesn't. Auto-opens on the first spawn on wide terminals (`autoOpen` setting). Stop is `TaskStop` via `$.tool.call`; it works on background agents. "Quiet" = running with no tool call for 90s. |
 | `forge-gate` | Band above the prompt: the checked-out forge phase and whether its `**Verifiable gate:**` is green on this exact working tree. Checks every forge stage's `FORGE_RESULT … "gate":"green"` line against what actually ran (main session and subagents, phase found by number). With no result line it guards "phase done" phrases instead. `/gate` runs it | Phase = current branch matched against the plan's `**Branch:**`. Gate commands = backticked spans whose first word is a real executable; deploy/release/install/send/rm-style commands and `<placeholders>` are never run. Evidence = a Bash run where the gate command is a whole segment run in the repo root, with only `&&`/`;` before it and only `&&` after (a subagent's run needs an explicit `cd <root> &&`), finished in the foreground; or `/gate`, which asks first. Each run is pinned to the git tree id of the files before it ran (a throwaway index, `wiki/` left out), so commits don't change it but any edit does. Runs are kept per repo and command in `$.store`, whichever branch is out. A gate with no commands waits for the person's **Checked**. |
+| `hud` | `/hud` pane and a band above the prompt: the questions Claude asked that you haven't answered, one-line answers to the questions you asked, every link and file it handed you, running background shells, heads-ups and the next step | A small model (`haiku`, the `model` setting) reads each finished main-loop turn after it ends: what you wrote and the final reply, about 1–3k tokens. Nothing is read where the session draws nowhere (`-p`, SDK workers). A closed `AskUserQuestion` dialog, a background `Bash` and the URL `gh pr create` prints are caught without the model. Auto-opens on wide terminals (`autoOpen`). On the desktop app only `https` links open; the rest copy on a press. The banner is a `Raster`, terminal only, repainted with `$.ui.blit`. |
 
 ## Layout
 
@@ -98,6 +100,15 @@ mods/<name>/
   `"types": ["claude-code", "claude-code-tools"]`. Remove that only for a mod that calls MCP tools.
 - **`npx skills` reads the marketplace too.** It installs any `mods/<name>/skills/*/SKILL.md`
   as a skill to every agent, outside tier 0's checks. Keep skills in `skills/`.
+- **`prompt.fill` is an event, not an engine call.** A test answers it with the result
+  itself (`{ isFilled: true, text, cursor }`), not `{ value }`.
+- **Remote surfaces are sent `https` links only** (and `http://localhost`). A `file://` or
+  plain `http` `Link` draws as text on the desktop app, and the kit says so. Give those a
+  Button that copies the address instead.
+- **A found Link's `text` is its `href` then its label.** Assert on `children` or `props.href`.
+- **Work that should not hold the turn open goes on a timer.** `turn.complete` waits for
+  its hooks. Start the slow part with `$.clock.after(1, …)` and return; a test then moves
+  the mocked clock to run it.
 - **Panes dock only in the fullscreen layout.** tmux uses the main screen by default.
   `CLAUDE_CODE_NO_FLICKER=1` gives the fullscreen layout, where a pane sits beside the
   transcript. `tmux capture-pane -e -p` captures a session with its colors for docs.

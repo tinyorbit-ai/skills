@@ -1,0 +1,35 @@
+{
+  "name": "hud",
+  "version": "0.1.0",
+  "description": "A heads-up display for the session: the questions Claude asked that you haven't answered, one-line answers to the questions you asked, every link and file it handed you, what is still running, heads-ups and the next step. A small model reads each finished turn. /hud opens the pane.",
+  "author": { "name": "Matteo Hertel" },
+  "repository": "https://github.com/tinyorbit-ai/skills",
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "model": {
+      "type": "string",
+      "title": "Reader model",
+      "description": "The model that reads each finished turn to fill the HUD: an alias (haiku) or a full model id.",
+      "default": "haiku"
+    },
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Open on first item",
+      "description": "Open the pane by itself when the HUD first has something to show (wide terminals only).",
+      "default": true
+    },
+    "band": {
+      "type": "boolean",
+      "title": "Band above the prompt",
+      "description": "Show the short HUD band above the prompt. Off leaves the /hud pane only.",
+      "default": true
+    },
+    "motion": {
+      "type": "string",
+      "title": "Banner motion",
+      "description": "When the pane's banner moves: always, working (only while Claude works or a turn is read) or off.",
+      "default": "always"
+    }
+  }
+}

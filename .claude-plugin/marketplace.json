@@ -19,6 +19,13 @@
       "version": "0.1.0",
       "source": "./mods/forge-gate",
       "category": "productivity"
+    },
+    {
+      "name": "hud",
+      "description": "A heads-up display for the session: the questions Claude asked that you haven't answered, one-line answers to the questions you asked, every link and file it handed you, what is still running, heads-ups and the next step. A small model reads each finished turn. /hud opens the pane.",
+      "version": "0.1.0",
+      "source": "./mods/hud",
+      "category": "productivity"
     }
   ]
 }
