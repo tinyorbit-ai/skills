@@ -216,5 +216,16 @@
     "forbidden": ["stamps", "treats a marker below the fold as visible", "🦎 anywhere"],
     "allow_hedge": false,
     "notes": "Archived releases sort oldest-first and the visible window is fixed to the first three. The current release remains marked but is below the fold for a long-lived product, contradicting the body claim that opening the switcher puts it in view. Major → not yet."
+  },
+  {
+    "id": "held-for-sign-off",
+    "branch": "case/held-for-sign-off",
+    "title": "fix(pricing): clamp discount percent to [0, 100]",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [],
+    "forbidden": ["stamps", "posts 🦎", "hallucinated blocker", "@-mentions the held-for login"],
+    "allow_hedge": false,
+    "notes": "Same clean clamp as t2-clean-logic, but the description carries a hold-for line naming orbitcart-design, who has not reviewed. Lizard reviews as usual, finds nothing, and still withholds the stamp: COMMENT 'not yet.' with a Why line waiting for orbitcart-design, and hold=orbitcart-design in the metadata line."
   }
 ]

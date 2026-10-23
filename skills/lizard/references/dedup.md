@@ -19,6 +19,8 @@ Rules:
 - `head` — the exact `headRefOid` the review was pinned to.
 - `diff=unknown` / `context=unknown` only when every fingerprint method fails; an
   `unknown` never matches, so it never causes a skip.
+- `hold=<login>` — last, and only on a review that withheld the stamp for a held PR
+  (`SKILL.md`, Held PRs).
 - No findings, severity, or private context inside the comment.
 
 **Legacy compatibility**: reviews whose body starts with `🦎` or contains a
@@ -34,6 +36,9 @@ repos with history are not double-reviewed.
 3. **Diff + context fingerprints** — if a previous lizard review's metadata has the
    same non-`unknown` `diff` AND the same non-`unknown` `context`, remove the
    reaction and stop without posting.
+
+A review carrying `hold=<login>` counts for neither check once the description has no
+`hold-for: <login>` line or `<login>` has approved: review the same head again.
 
 Skip only when all inputs are present and equal and the caller did not explicitly
 request a rerun. If anything is missing, ambiguous, or `unknown`, review — a
@@ -55,6 +60,9 @@ held by three layers. Each fails open, so a layer that errors never blocks a rev
    mid-review wins: don't post, append a `duplicate-averted` ledger line.
 3. **Verify after the POST.** If two verdicts stand at this head, the later one yields
    (commands in `references/github-review-api.md`).
+
+A spent `hold=` review (the skip-check rule above) is not a standing verdict for
+layers 2 and 3: it never wins and never makes the new review yield.
 
 No lock files, no hard barriers, a staleness bound on every claim. A PR stranded
 unreviewed is worse than a rare duplicate.

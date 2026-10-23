@@ -1,0 +1,5 @@
+{
+  "event": "COMMENT",
+  "body": "not yet.\n\nWhy:\n- Waiting for `orbitcart-design` to approve.\n\n<details>\n<summary>🔍 lizard receipts — what was checked</summary>\n\n| | |\n|---|---|\n| depth | T2 standard — full criteria, single brain, refutation run |\n| criteria | correctness ✓ · performance ✓ · security ✓ · tests ✓ · economy ✓ |\n| hold | description holds for `orbitcart-design`, who has not approved |\n\n</details>\n\n<!-- lizard:v1 verdict=wait tier=standard adversary=none head=9fb2ddf1 diff=patch-id:abc123 context=sha256:def456 hold=orbitcart-design -->\n",
+  "comments": []
+}
