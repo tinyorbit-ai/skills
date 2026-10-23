@@ -26,7 +26,7 @@ META_TIER=""
 META_DIFF=""
 META_CTX=""
 
-META_RE='^[[:space:]]*<!-- lizard:v1 verdict=(go|wait|block) tier=(quick|standard|deep) adversary=(codex|claude|none) head=[^ ]+ diff=[^ ]+ context=[^ ]+ -->[[:space:]]*$'
+META_RE='^[[:space:]]*<!-- lizard:v1 verdict=(go|wait|block) tier=(quick|standard|deep) adversary=(codex|claude|none) head=[^ ]+ diff=[^ ]+ context=[^ ]+( hold=[^ ]+)? -->[[:space:]]*$'
 
 emit() {
   # emit <ok|FAIL|warn> <check> <detail...>
