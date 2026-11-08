@@ -18,6 +18,8 @@ a pull request instead of a local squash.
 - A phase lands as **exactly one squashed commit** on the base branch.
 - It lands **only after its verifiable gate (from `wiki/plan.md`) is green**.
 - Each landed phase appends **one** `wiki/build-log.md` entry.
+- With a project, the plan, build log and improvements are in `wiki/projects/<slug>/`
+  and the branch is `phase/<slug>-<n>-<name>` (`../forge/references/projects.md`).
 
 ## Process
 
@@ -66,7 +68,8 @@ If the gate is a manual check, perform it and record the observed result verbati
 Everything the phase changes in the repo goes into the phase branch now, so the
 landing is one commit and base is never edited afterwards.
 
-1. **Build-log entry.** Prepend to `wiki/build-log.md` (newest on top):
+1. **Build-log entry.** Prepend to the project's `build-log.md` (`wiki/build-log.md`
+   for the root project; newest on top):
 
    ```markdown
    ## Phase N — <title>

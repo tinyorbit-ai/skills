@@ -71,7 +71,8 @@ For each changed surface, decide:
 - If an ADR was the source of the change, link the doc page to the ADR.
 - If a learning was the source ("we changed the flag name because of a
   past bug"), link the learning.
-- Update `wiki/index.md` if any new docs file was added.
+- Update `wiki/index.md` if any new docs file was added. With a project, read its
+  plan and build log from `wiki/projects/<slug>/` (`../forge/references/projects.md`).
 
 ### 5. Report
 

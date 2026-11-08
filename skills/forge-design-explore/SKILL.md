@@ -33,7 +33,9 @@ relevant phase, any `DESIGN.md` or design ADRs (see `forge-design-system`),
 and the taste profile at `wiki/.forge/taste.md` if it exists — bias the
 variant set toward the user's approved record, avoid resurrecting rejected
 shapes, and **flag** conflicts out loud ("your record leans dense; this
-brief asks for airy") rather than silently obeying either side.
+brief asks for airy") rather than silently obeying either side. With a project, the
+brief and plan are in `wiki/projects/<slug>/` (`../forge/references/projects.md`);
+`DESIGN.md`, taste and ADRs stay shared.
 
 ### 2. Generate 3–4 variants
 
@@ -69,8 +71,9 @@ For each variant, produce:
 ### 3. Present the variants
 
 **Default — an HTML file with a feedback system.** Write the variants to
-`wiki/.forge/explore-<surface>.html` and open it (generate-and-open contract in
-`references/design-feedback-board.md`): it must render the variants, take feedback
+`wiki/.forge/explore-<surface>.html` (a project's go to
+`wiki/projects/<slug>/design/explore-<surface>.html`) and open it (generate-and-open
+contract in `references/design-feedback-board.md`): it must render the variants, take feedback
 per variant, and copy it back out — the exact layout is up to you (a ready
 template exists if you want it). Lead with your recommendation and *why* —
 anti-sycophantic; take a position. The user reacts per variant and pastes their

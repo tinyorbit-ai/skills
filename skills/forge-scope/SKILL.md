@@ -27,7 +27,9 @@ ask once in a live session; run from `forge-harden` or with no one to ask, use H
 `wiki/brief.md` (especially "How it should feel", "The hard/interesting part",
 "Smallest useful version", "Three-year fit"), plus `wiki/plan.md` and
 `wiki/architecture.md` in plan mode. If the brief has an `**Ambition check (...):**`
-marker, build on it rather than re-litigating it.
+marker, build on it rather than re-litigating it. With a project, the brief, plan and
+improvements are in `wiki/projects/<slug>/` (`../forge/references/projects.md`);
+ADRs and architecture stay at `wiki/`.
 
 ## Process
 

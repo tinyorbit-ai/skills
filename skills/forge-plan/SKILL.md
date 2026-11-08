@@ -11,6 +11,9 @@ each on its own branch, with every real decision locked and recorded as an ADR.
 ## Process
 
 Prereq: `wiki/brief.md` exists and is filled. If not, run `forge-discovery` first.
+With a project, the brief and plan are in `wiki/projects/<slug>/`, and each phase's
+branch is `phase/<slug>-<n>-<name>`; the root project keeps `phase/<n>-<name>`
+(`../forge/references/projects.md`). ADRs and architecture stay at `wiki/`.
 
 ### 1. Read the brief and the ground
 

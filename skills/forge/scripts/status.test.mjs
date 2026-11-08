@@ -62,3 +62,58 @@ test('unlocked explore marker blocks the build loop', () => {
   const p = plan('## Review\n**Lock status:** locked\n').replace('**Design:** none', '**Design:** explore');
   assert.equal(status(project({ 'brief.md': '# Brief', 'plan.md': p })).stage, 'design');
 });
+
+// Projects (references/projects.md): wiki/projects/<slug>/ holds a project's record.
+function withProjects(projects, rootFiles = {}) {
+  const dir = project(rootFiles);
+  for (const [slug, files] of Object.entries(projects)) {
+    mkdirSync(join(dir, 'wiki', 'projects', slug), { recursive: true });
+    for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, 'wiki', 'projects', slug, name), body);
+  }
+  return dir;
+}
+
+const locked = plan('## Review\n**Lock status:** locked\n').replaceAll('phase/', 'phase/a-');
+const twoProjects = () => withProjects({
+  a: { 'brief.md': '# Brief', 'plan.md': locked, 'build-log.md': '## Phase 1 — Thin slice\n' },
+  b: { 'brief.md': '# Brief' },
+});
+
+test('--project reads that folder', () => {
+  const dir = twoProjects();
+  const a = status(dir, 'a');
+  assert.equal(a.project, 'a');
+  assert.equal(a.stage, 'build');
+  assert.equal(a.phase, 2);
+  assert.equal(a.phases[1].branch, 'phase/a-2-second');
+  assert.equal(status(dir, 'b').stage, 'planning');
+  assert.equal(status(dir, 'new-one').stage, 'discovery');
+});
+
+test('two projects and no root brief means choose', () => {
+  const s = status(twoProjects());
+  assert.equal(s.stage, 'choose');
+  assert.deepEqual(s.projects, ['a', 'b']);
+});
+
+test('the only project folder is picked without an argument', () => {
+  const s = status(withProjects({ b: { 'brief.md': '# Brief' } }));
+  assert.equal(s.project, 'b');
+  assert.equal(s.stage, 'planning');
+});
+
+test('a real root brief stays the default when there are several projects', () => {
+  const s = status(withProjects({ a: {}, b: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
+  assert.equal(s.project, undefined);
+  assert.equal(s.next, 'forge-harden');
+});
+
+test('a root-only repo reports no project key', () => {
+  const s = status(project({ 'brief.md': '# Brief', 'plan.md': plan() }));
+  assert.equal('project' in s, false);
+  assert.equal('projects' in s, false);
+});
+
+test('a slug that is not a slug is refused', () => {
+  assert.throws(() => status(twoProjects(), '../a'), /not a project slug/);
+});

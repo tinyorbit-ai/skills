@@ -6,7 +6,9 @@ description: Builds the next phase of a locked forge plan (wiki/plan.md) on its 
 # forge-build
 
 Builds one phase of `wiki/plan.md`. Staff-engineer mode: the best version of *this
-phase*, not the fastest, not beyond its boundary.
+phase*, not the fastest, not beyond its boundary. With a project, its plan,
+build-log and improvements are in `wiki/projects/<slug>/`
+(`../forge/references/projects.md`); learnings, ADRs and architecture stay at `wiki/`.
 
 ## Before building
 
@@ -34,6 +36,8 @@ Create or switch to the phase branch off the base branch (base recorded in
 ```
 git switch -c phase/<n>-<slug>      # or: git switch phase/<n>-<slug> if it exists
 ```
+
+Use the phase's `**Branch:**` line as written; a project's is `phase/<slug>-<n>-<name>`.
 
 Never build on the base branch. Commit freely on the phase branch — small, coherent
 commits as the work progresses (this is encouraged, not optional).

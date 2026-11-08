@@ -9,6 +9,17 @@ Sets up a project so every later decision and incident is captured, and so build
 follows the phase/branch discipline. Run once per repo. Idempotent — safe to re-run;
 it never clobbers existing content.
 
+## Headless mode
+
+With `--headless`, or when no one can answer (`../forge/references/headless.md`), run
+`node scripts/init.mjs --headless` from the repo and stop there. It does steps 1–4 from
+`references/templates.md` with no questions: the missing wiki files, then the rules
+block in both `AGENTS.md` and `CLAUDE.md` (a fresh `CLAUDE.md` is `@AGENTS.md` plus the
+block). It offers no discovery, prints what it wrote, and ends with the `FORGE_RESULT`
+line; a second run changes nothing. Not a git repo, or a rules marker without its pair:
+it ends `blocked`. An interactive run may use the same script for steps 2–3.
+`--new <slug>` adds a project folder instead (`../forge/references/projects.md`).
+
 ## What it does
 
 ### 1. Detect state

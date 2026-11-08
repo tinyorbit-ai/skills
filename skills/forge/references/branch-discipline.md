@@ -15,6 +15,9 @@ The non-negotiable execution contract. `forge-plan` writes plans that obey it;
    git switch -c phase/<n>-<slug>
    ```
    `<slug>` is a short kebab summary of the phase (e.g. `phase/2-retrieval`).
+   A project in `wiki/projects/<project>/` puts its slug first,
+   `phase/<project>-<n>-<slug>`, so two projects in one repo never collide; the
+   root project keeps `phase/<n>-<slug>` (`projects.md`).
 
 3. **Commit freely inside the phase branch.** As many commits as the work needs.
    This branch is your scratch space. (Aligns with the user's rule: commit freely
@@ -45,7 +48,7 @@ The non-negotiable execution contract. `forge-plan` writes plans that obey it;
    green before merge.
 
 7. **Every merged phase gets one build-log entry.** `forge-ship` appends to
-   `wiki/build-log.md`: the phase, its branch, what was done, the *why* of any
+   `wiki/build-log.md` (a project's own `build-log.md`): the phase, its branch, what was done, the *why* of any
    notable decision, and the exact gate that was met before merge.
 
 ## Why squash-per-phase

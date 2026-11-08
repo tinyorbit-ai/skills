@@ -37,6 +37,8 @@ wiki/
 ├── improvements.md     Running, honest "what I'd do with more time" + deliberate scope cuts.
 ├── .forge/             Machine-ish state — config.yaml (reviewer), taste.md (design-taste
 │                       record), specimen.html (forge-design-system preview).
+├── projects/<slug>/    One more project's own brief, plan, build-log, retro, improvements
+│                       and design/. The root files above are the default project.
 │
 │   ── Knowledge base ──
 └── knowledge/
@@ -46,6 +48,11 @@ wiki/
         ├── _index.md       Every article in the topic + a one-line summary. (forge-wiki MAINTAIN)
         └── <article>.md    A living article (see "Knowledge articles" below).
 ```
+
+Several projects can share one repo: each gets `wiki/projects/<slug>/`, listed in
+`index.md` under `## Projects`, while ADRs, notes, knowledge, `architecture.md` and
+`learnings.md` stay shared at the root. Every forge skill takes the project; which one,
+and its branch names, are in `projects.md`.
 
 ## Linking — Obsidian-style, both layers
 

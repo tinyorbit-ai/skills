@@ -1,0 +1,83 @@
+// Run: node --test skills/forge-init/scripts/init.test.mjs
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { init, injectRules, addProjectToIndex } from './init.mjs';
+
+function repo(files = {}) {
+  const dir = mkdtempSync(join(tmpdir(), 'forge-init-'));
+  execFileSync('git', ['init', '-q', '-b', 'main', dir]);
+  for (const [name, body] of Object.entries(files)) writeFileSync(join(dir, name), body);
+  return dir;
+}
+const read = (dir, rel) => readFileSync(join(dir, rel), 'utf8');
+const snapshot = (dir) => execFileSync('sh', ['-c', `cd "${dir}" && find . -path ./.git -prune -o -type f -print | sort | xargs cat`], { encoding: 'utf8' });
+
+test('an empty repo gets the scaffold and the rules in both agent files', () => {
+  const dir = repo();
+  const r = init(dir);
+  assert.equal(r.status, 'done');
+  assert.ok(existsSync(join(dir, 'wiki/knowledge/INDEX.md')));
+  assert.match(read(dir, 'wiki/plan.md'), /\*\*Base branch:\*\* `main`/);
+  assert.match(read(dir, 'AGENTS.md'), /^<!-- BEGIN:forge-wiki-rules -->/);
+  assert.match(read(dir, 'CLAUDE.md'), /^@AGENTS\.md\n\n<!-- BEGIN:forge-wiki-rules -->/);
+  assert.match(read(dir, 'AGENTS.md'), /wiki\/projects\/<slug>\//);
+});
+
+test('a second run changes nothing', () => {
+  const dir = repo();
+  init(dir);
+  const before = snapshot(dir);
+  const r = init(dir);
+  assert.equal(snapshot(dir), before);
+  assert.match(r.notes, /nothing to change/);
+});
+
+test('existing agent files keep their text; an old block is replaced in place', () => {
+  const dir = repo({ 'AGENTS.md': '# Mine\n', 'CLAUDE.md': 'top\n<!-- BEGIN:forge-wiki-rules -->\nold\n<!-- END:forge-wiki-rules -->\nbottom\n' });
+  const r = init(dir);
+  assert.equal(r.agents['AGENTS.md'], 'updated');
+  assert.match(read(dir, 'AGENTS.md'), /^# Mine\n\n<!-- BEGIN:forge-wiki-rules -->/);
+  const claude = read(dir, 'CLAUDE.md');
+  assert.match(claude, /^top\n<!-- BEGIN/);
+  assert.match(claude, /END:forge-wiki-rules -->\nbottom\n$/);
+  assert.doesNotMatch(claude, /\nold\n/);
+});
+
+test('one marker without the other leaves the file alone and blocks', () => {
+  const dir = repo({ 'AGENTS.md': 'x\n<!-- BEGIN:forge-wiki-rules -->\n' });
+  const r = init(dir);
+  assert.equal(r.status, 'blocked');
+  assert.equal(read(dir, 'AGENTS.md'), 'x\n<!-- BEGIN:forge-wiki-rules -->\n');
+  assert.equal(injectRules('a <!-- END:forge-wiki-rules --> <!-- BEGIN:forge-wiki-rules -->', 'B'), null);
+});
+
+test('not a git repo blocks', () => {
+  assert.equal(init(mkdtempSync(join(tmpdir(), 'forge-init-'))).status, 'blocked');
+});
+
+test('--new adds a project folder and an index line, and leaves the root plan alone', () => {
+  const dir = repo();
+  init(dir);
+  writeFileSync(join(dir, 'wiki/plan.md'), '# Plan\nreal\n');
+  init(dir, { slug: 'checkout' });
+  assert.equal(read(dir, 'wiki/plan.md'), '# Plan\nreal\n');
+  const plan = read(dir, 'wiki/projects/checkout/plan.md');
+  assert.match(plan, /phase\/checkout-<n>-<name>/);
+  assert.match(plan, /\[\[projects\/checkout\/build-log\]\]/);
+  assert.ok(existsSync(join(dir, 'wiki/projects/checkout/design/.gitkeep')));
+  const index = read(dir, 'wiki/index.md');
+  assert.match(index, /## Projects\n[\s\S]*\[\[projects\/checkout\/brief\]\][\s\S]*## Knowledge base/);
+  const before = snapshot(dir);
+  init(dir, { slug: 'checkout' });
+  assert.equal(snapshot(dir), before);
+});
+
+test('a second project joins the same Projects list', () => {
+  const index = addProjectToIndex(addProjectToIndex('# I\n\n## Knowledge base\n', 'a'), 'b');
+  assert.equal((index.match(/^## Projects$/gm) ?? []).length, 1);
+  assert.match(index, /\*\*a\*\*[^\n]*\n- \*\*b\*\*/);
+});
