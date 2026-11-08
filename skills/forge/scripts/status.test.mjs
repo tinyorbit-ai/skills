@@ -4,8 +4,11 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { status } from './status.mjs';
+
+const script = join(dirname(fileURLToPath(import.meta.url)), 'status.mjs');
 
 function project(files) {
   const dir = mkdtempSync(join(tmpdir(), 'forge-status-'));
@@ -103,16 +106,35 @@ test('the only project folder is picked without an argument', () => {
   assert.equal(s.stage, 'planning');
 });
 
-test('a real root brief stays the default when there are several projects', () => {
+test('a real root plan next to project folders is a choice, not a default', () => {
   const s = status(withProjects({ a: {}, b: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
-  assert.equal(s.project, undefined);
-  assert.equal(s.next, 'forge-harden');
+  assert.equal(s.stage, 'choose');
+  assert.deepEqual(s.projects, ['root', 'a', 'b']);
+  const one = status(withProjects({ checkout: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
+  assert.deepEqual(one.projects, ['root', 'checkout']);
 });
 
-test('a real root plan stays the default next to one project folder', () => {
-  const s = status(withProjects({ checkout: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
-  assert.equal(s.project, undefined);
+test('a worker on its own branch is asked which project, never handed the root plan', () => {
+  const dir = withProjects({ checkout: { 'brief.md': '# Brief' } }, { 'brief.md': '# Brief', 'plan.md': plan() });
+  execFileSync('git', ['init', '-q', '-b', 'arnold/ACME-42', dir]);
+  const out = JSON.parse(execFileSync('node', [script, '--dir', dir, '--json'], { encoding: 'utf8' }));
+  assert.equal(out.stage, 'choose');
+  assert.equal(out.branch, 'arnold/ACME-42');
+  assert.deepEqual(out.projects, ['root', 'checkout']);
+});
+
+test('--project root names the root files; the root plan\'s own branch picks it too', () => {
+  const dir = withProjects({ checkout: { 'brief.md': '# Brief' } }, { 'brief.md': '# Brief', 'plan.md': plan() });
+  const s = status(dir, 'root');
+  assert.equal('project' in s, false);
   assert.equal(s.next, 'forge-harden');
+  execFileSync('git', ['init', '-q', '-b', 'phase/2-second', dir]);
+  assert.equal(status(dir).next, 'forge-harden');
+});
+
+test('a root-only repo reads the same with --project root', () => {
+  const dir = project({ 'brief.md': '# Brief', 'plan.md': plan() });
+  assert.deepEqual(status(dir, 'root'), status(dir));
 });
 
 test('the checked-out phase branch picks its project', () => {

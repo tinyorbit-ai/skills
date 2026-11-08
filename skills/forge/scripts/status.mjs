@@ -2,10 +2,10 @@
 // forge status without an LLM: reads wiki/ and git, prints where the project is and the
 // single next action, using the same ladder as forge/SKILL.md Step 1.
 //
-//   node status.mjs [--dir <repo>] [--project <slug>] [--json]
+//   node status.mjs [--dir <repo>] [--project <slug>|root] [--json]
 //
-// A project's record lives in wiki/projects/<slug>/; the root brief and plan are the default
-// project (references/projects.md). A repo with no project folders reports exactly as before.
+// A project's record lives in wiki/projects/<slug>/; `--project root` names the root brief and
+// plan (references/projects.md). A repo with no project folders reports exactly as before.
 
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -45,19 +45,24 @@ function git(dir, args) {
 }
 
 export const SLUG = /^[a-z0-9][a-z0-9-]*$/;
+// `--project root` names the root brief and plan, so no project folder may be called that.
+export const ROOT = 'root';
 
 export function listProjects(dir) {
   const root = join(dir, 'wiki', 'projects');
   if (!existsSync(root)) return [];
   return readdirSync(root)
-    .filter((d) => SLUG.test(d) && statSync(join(root, d)).isDirectory())
+    .filter((d) => SLUG.test(d) && d !== ROOT && statSync(join(root, d)).isDirectory())
     .sort();
 }
 
-// Which project (references/projects.md): the one given, else the one whose plan names the
-// checked-out branch, else the root files when they are real, else the only folder, else
-// the caller has to choose. Returns { project: slug | null } (null = root) or { choose }.
+// Which project (references/projects.md): the one given (`root` for the root files), else
+// the one whose plan names the checked-out branch, else the only folder when the root is a
+// stub, else the caller has to choose. With project folders, a real root plan is never a
+// silent default: a worker on its own branch would write the wrong plan.
+// Returns { project: slug | null } (null = root) or { choose: [slug | 'root'] }.
 export function pickProject(dir, given, branch) {
+  if (given === ROOT) return { project: null };
   if (given !== null) return { project: given };
   const projects = listProjects(dir);
   if (projects.length === 0) return { project: null };
@@ -69,9 +74,9 @@ export function pickProject(dir, given, branch) {
   if (names(join(wiki, 'plan.md'))) return { project: null };
   const onBranch = projects.filter((slug) => names(join(wiki, 'projects', slug, 'plan.md')));
   if (onBranch.length === 1) return { project: onBranch[0] };
-  if (!isStub(read(join(wiki, 'brief.md'))) || !isStub(read(join(wiki, 'plan.md')))) return { project: null };
-  if (projects.length === 1) return { project: projects[0] };
-  return { choose: projects };
+  const rootIsReal = !isStub(read(join(wiki, 'brief.md'))) || !isStub(read(join(wiki, 'plan.md')));
+  if (!rootIsReal && projects.length === 1) return { project: projects[0] };
+  return { choose: rootIsReal ? [ROOT, ...projects] : projects };
 }
 
 export function status(dir, given = null) {
