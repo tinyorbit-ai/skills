@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // The plan checks code can settle, run by forge-harden's eng pass (references/eng.md):
-// every `**Owns:**` path exists in the repo or is marked (new), and every `**Reads:**`
-// item is written by the same or an earlier phase or is marked (outside).
+// every `**Owns:**` path exists in the repo, is marked (new), or sits at or under a path
+// an earlier phase marked (new); every `**Reads:**` item is written by the same or an
+// earlier phase or is marked (outside). Markers ignore case and may carry a note:
+// `(new, the helper)`, `(Outside)`.
 //
 //   node plan-check.mjs <plan.md> [--dir <repo>] [--json]
 //
@@ -23,8 +25,13 @@ function field(block, name) {
 // The backticked items of a list, each with the marker in brackets after it, if any.
 function items(text) {
   if (!text) return [];
-  return [...text.matchAll(/`([^`\n]+)`(?:\s*\((new|outside)\))?/g)].map((m) => ({ name: m[1].trim(), mark: m[2] ?? null }));
+  return [...text.matchAll(/`([^`\n]+)`(?:\s*\((new|outside)\b[^)\n]*\))?/gi)].map((m) => ({
+    name: m[1].trim(),
+    mark: m[2]?.toLowerCase() ?? null,
+  }));
 }
+
+const bare = (path) => normalize(path).replace(/\/+$/, '');
 
 export function parse(plan) {
   const heads = [...plan.matchAll(/^## Phase (\d+)\s*[—-]\s*(.+)$/gm)];
@@ -42,12 +49,17 @@ export function parse(plan) {
 export function check(plan, dir) {
   const phases = parse(plan);
   const findings = [];
+  // Paths a phase creates, in plan order: a later phase may own them, or files under them.
+  const created = [];
+  const isCreated = (path) => created.some((c) => path === c || path.startsWith(`${c}/`));
   for (const p of phases) {
+    for (const { name, mark } of p.owns) if (mark === 'new') created.push(bare(name));
     for (const { name, mark } of p.owns) {
-      if (mark === 'new') continue;
-      const path = normalize(name);
-      if (isAbsolute(path) || path.startsWith('..')) {
+      const path = bare(name);
+      if (isAbsolute(path) || path === '..' || path.startsWith('../')) {
         findings.push(`phase ${p.n} owns ${name}, which is outside the repo`);
+      } else if (mark === 'new' || isCreated(path)) {
+        continue;
       } else if (!existsSync(join(dir, path))) {
         findings.push(`phase ${p.n} owns ${name}, which does not exist; fix the path, or mark it (new) if the phase creates it`);
       }

@@ -53,7 +53,8 @@ forge-design-explore; `none` means no UI.
 `Owns`, `Reads`, `Writes` and `QA` are optional; fill them in a project plan
 (`wiki/projects/<slug>/plan.md`), where a factory splits each phase into its own ticket
 and reads them. `Owns` is the exact paths the phase changes, each one checked in the
-repo (never guessed); a file the phase creates is marked `(new)`. `Reads` and `Writes`
+repo (never guessed); a file the phase creates is marked `(new)`, once, in the first
+phase that makes it; later phases own it, or files under it, unmarked. `Reads` and `Writes`
 are the shared data it uses: a field, table or API shape, spelled the same everywhere
 it appears in the plan; data that comes from outside the plan is marked `(outside)`.
 `QA` is the tools QA needs. List items in backticks, separated by commas.

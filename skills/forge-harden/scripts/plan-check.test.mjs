@@ -53,3 +53,30 @@ test('a plan with no Owns or Reads lines has nothing to find', () => {
   assert.deepEqual(r.findings, []);
   assert.equal(r.phases, 1);
 });
+
+test('a path an earlier phase creates is fine later, and so is anything under it', () => {
+  const p = `## Phase 1 — Helper
+**Owns:** \`src/helper/\` (new, the helper), \`src/Thing.ts\` (NEW)
+**Writes:** \`helper.api\`
+
+## Phase 2 — Use it
+**Owns:** \`src/helper/index.ts\`, \`src/helper\`, \`src/Thing.ts\`, \`src/helperish.ts\`
+**Reads:** \`helper.api\`, \`billing.rates\` (Outside), \`tax.table\` (outside, from finance)
+`;
+  const r = check(p, repo([]));
+  assert.deepEqual(r.findings, [
+    'phase 2 owns src/helperish.ts, which does not exist; fix the path, or mark it (new) if the phase creates it',
+  ]);
+});
+
+test('a path created only in a later phase still fails earlier', () => {
+  const p = `## Phase 1 — Early
+**Owns:** \`src/late.ts\`
+
+## Phase 2 — Late
+**Owns:** \`src/late.ts\` (new)
+`;
+  assert.deepEqual(check(p, repo([])).findings, [
+    'phase 1 owns src/late.ts, which does not exist; fix the path, or mark it (new) if the phase creates it',
+  ]);
+});
