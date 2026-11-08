@@ -18,7 +18,7 @@ block in both `AGENTS.md` and `CLAUDE.md` (a fresh `CLAUDE.md` is `@AGENTS.md` p
 block). It offers no discovery, prints what it wrote, and ends with the `FORGE_RESULT`
 line; a second run changes nothing. Not a git repo, or a rules marker without its pair:
 it ends `blocked`. An interactive run may use the same script for steps 2–3.
-`--new <slug>` adds a project folder instead (`../forge/references/projects.md`).
+`--new <slug>` adds a project folder (`../forge/references/projects.md`).
 
 ## What it does
 

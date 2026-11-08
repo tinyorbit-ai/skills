@@ -43,7 +43,8 @@ A slug is lowercase letters, digits and dashes.
 - Run `node ../forge-init/scripts/init.mjs --new <slug>`. It creates
   `wiki/projects/<slug>/` from the forge-init templates and adds the project to
   `wiki/index.md` under a `## Projects` heading. It never moves or rewrites the root
-  plan or any existing file.
+  plan; `index.md` is the only existing file it edits. With no `wiki/` yet, it runs
+  the forge-init setup first.
 - Then run `forge-discovery` for that project.
 
 ## Branches
