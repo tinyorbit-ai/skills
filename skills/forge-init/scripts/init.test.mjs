@@ -1,11 +1,11 @@
 // Run: node --test skills/forge-init/scripts/init.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { init, injectRules, addProjectToIndex, baseBranch } from './init.mjs';
+import { init, injectRules, addProjectToIndex, addRulesToIndex, baseBranch } from './init.mjs';
 
 function repo(files = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'forge-init-'));
@@ -57,6 +57,40 @@ test('a re-run swaps an old long block for the short one and keeps an existing R
   assert.match(agents, /END:forge-wiki-rules -->\n\n## After\n$/);
   assert.ok(blockOf(agents).split('\n').length <= 15);
   assert.equal(read(dir, 'wiki/RULES.md'), '# My rules\n');
+});
+
+test('a repo set up by the old init gets RULES.md and one [[RULES]] line in its index', () => {
+  // What the old init left: the scaffold with no RULES.md, an index with no RULES line,
+  // and the long block in AGENTS.md.
+  const dir = repo();
+  init(dir);
+  rmSync(join(dir, 'wiki/RULES.md'));
+  const oldIndex = read(dir, 'wiki/index.md').split('\n').filter((l) => !l.includes('[[RULES]]')).join('\n') + '\n- [[notes/2026-01-01-own]] — mine\n';
+  writeFileSync(join(dir, 'wiki/index.md'), oldIndex);
+  const long = Array.from({ length: 70 }, (_, k) => `old rule ${k}`).join('\n');
+  writeFileSync(join(dir, 'AGENTS.md'), `<!-- BEGIN:forge-wiki-rules -->\n${long}\n<!-- END:forge-wiki-rules -->\n`);
+
+  const r = init(dir);
+  assert.ok(r.created.includes('wiki/RULES.md'));
+  assert.ok(r.created.includes('wiki/index.md ([[RULES]])'));
+  const index = read(dir, 'wiki/index.md');
+  assert.equal((index.match(/\[\[RULES\]\]/g) ?? []).length, 1);
+  assert.match(index, /\[\[improvements\]\][^\n]*\n- \[\[RULES\]\]/);
+  assert.equal(index.replace(/^- \[\[RULES\]\].*\n/m, ''), oldIndex);
+  assert.doesNotMatch(read(dir, 'AGENTS.md'), /old rule/);
+
+  const before = snapshot(dir);
+  init(dir);
+  assert.equal(snapshot(dir), before);
+});
+
+test('the RULES line is added once, and placed even in an index of another shape', () => {
+  const line = '- [[RULES]] — rules';
+  for (const linked of ['- [[RULES]] — x\n', 'see [[RULES|the rules]]\n', 'see [rules](RULES.md)\n', 'see `wiki/RULES.md`\n']) {
+    assert.equal(addRulesToIndex(`# I\n${linked}`, line), `# I\n${linked}`);
+  }
+  assert.equal(addRulesToIndex('# I\n\n## Map of content\n\n- [[brief]]\n- [[plan]]\n\n### Decisions\n', line), '# I\n\n## Map of content\n\n- [[brief]]\n- [[plan]]\n- [[RULES]] — rules\n\n### Decisions\n');
+  assert.equal(addRulesToIndex('# I\nhello\n', line), '# I\nhello\n\n- [[RULES]] — rules\n');
 });
 
 test('a second run changes nothing', () => {

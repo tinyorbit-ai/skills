@@ -66,7 +66,9 @@ when the user ingests context (email, research, business rationale, conversation
 `wiki/index.md` must include a **Knowledge base** section linking `[[knowledge/INDEX]]`.
 
 If `wiki/` already exists, only add the missing files (including the `knowledge/`
-layer if an older project predates it); report what was added.
+layer if an older project predates it); report what was added. When this adds
+`wiki/RULES.md` beside an existing `wiki/index.md`, add one `[[RULES]]` line to that
+index, unless a line already links it.
 
 ### 3. Inject the rules into CLAUDE.md and AGENTS.md
 
