@@ -22,11 +22,13 @@ The first that applies wins:
 
 1. **Given.** An argument: `/forge <slug>`, `forge status --project <slug>`, or a slug
    passed to any forge skill.
-2. **The only one.** `wiki/projects/` holds exactly one folder.
+2. **The branch.** The project whose plan names the checked-out branch: you are mid-phase.
 3. **The root project.** No folders under `wiki/projects/`, or the root brief or plan is
    real (not a stub). The root files are the default project, so a repo with only
-   `wiki/brief.md` and `wiki/plan.md` works exactly as before.
-4. **Ask.** Name the choices (AskUserQuestion). Headless: end `blocked` with the
+   `wiki/brief.md` and `wiki/plan.md` works exactly as before, and adding a project
+   later doesn't hide the root plan.
+4. **The only one.** `wiki/projects/` holds exactly one folder and the root is a stub.
+5. **Ask.** Name the choices (AskUserQuestion). Headless: end `blocked` with the
    choices in `notes`.
 
 `node ../forge/scripts/status.mjs --project <slug> --json` applies the same rules;

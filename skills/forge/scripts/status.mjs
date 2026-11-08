@@ -54,15 +54,23 @@ export function listProjects(dir) {
     .sort();
 }
 
-// Which project: the one given, else the only folder, else the root files, else none
-// (the caller has to choose). Returns { project: slug | null } or { choose: [slugs] }.
-export function pickProject(dir, given) {
-  if (given) return { project: given };
+// Which project (references/projects.md): the one given, else the one whose plan names the
+// checked-out branch, else the root files when they are real, else the only folder, else
+// the caller has to choose. Returns { project: slug | null } (null = root) or { choose }.
+export function pickProject(dir, given, branch) {
+  if (given !== null) return { project: given };
   const projects = listProjects(dir);
-  if (projects.length === 1) return { project: projects[0] };
+  if (projects.length === 0) return { project: null };
   const wiki = join(dir, 'wiki');
-  const rootReal = !isStub(read(join(wiki, 'brief.md'))) || !isStub(read(join(wiki, 'plan.md')));
-  if (projects.length === 0 || rootReal) return { project: null };
+  const names = (file) => {
+    const plan = read(file);
+    return Boolean(branch && plan && parsePhases(plan).some((p) => p.branch === branch));
+  };
+  if (names(join(wiki, 'plan.md'))) return { project: null };
+  const onBranch = projects.filter((slug) => names(join(wiki, 'projects', slug, 'plan.md')));
+  if (onBranch.length === 1) return { project: onBranch[0] };
+  if (!isStub(read(join(wiki, 'brief.md'))) || !isStub(read(join(wiki, 'plan.md')))) return { project: null };
+  if (projects.length === 1) return { project: projects[0] };
   return { choose: projects };
 }
 
@@ -75,7 +83,7 @@ export function status(dir, given = null) {
 
   if (!existsSync(wiki)) return next('setup', 'forge-init');
   if (given !== null && !SLUG.test(given)) throw new Error(`not a project slug: ${given}`);
-  const pick = pickProject(dir, given);
+  const pick = pickProject(dir, given, branch);
   if (pick.choose) return next('choose', 'forge <slug>', { projects: pick.choose });
   const project = pick.project;
   const home = project ? join(wiki, 'projects', project) : wiki;

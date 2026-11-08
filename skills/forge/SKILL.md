@@ -74,8 +74,8 @@ Derive **next action** from this ladder (first unmet wins):
 | every plan phase has a build-log entry, **no retro covers the latest** | Wrap-up | invoke `forge-retro`, then report |
 
 **Which project.** The ladder reads the chosen project's files in `wiki/projects/<slug>/`:
-the one named (`/forge <slug>`), else the only one, else the root brief and plan, else
-ask (headless: end `blocked` naming them). Pass the slug to every skill you invoke.
+the one named (`/forge <slug>`), else the one whose plan names this branch, else the
+root brief and plan when real, else the only folder, else ask (headless: `blocked`). Pass the slug to every skill you invoke.
 `/forge new <slug>`: `references/projects.md`.
 
 ## Step 2 — run exactly the next thing, then stop

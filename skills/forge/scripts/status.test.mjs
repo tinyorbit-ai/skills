@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import { status } from './status.mjs';
 
@@ -106,6 +107,20 @@ test('a real root brief stays the default when there are several projects', () =
   const s = status(withProjects({ a: {}, b: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
   assert.equal(s.project, undefined);
   assert.equal(s.next, 'forge-harden');
+});
+
+test('a real root plan stays the default next to one project folder', () => {
+  const s = status(withProjects({ checkout: {} }, { 'brief.md': '# Brief', 'plan.md': plan() }));
+  assert.equal(s.project, undefined);
+  assert.equal(s.next, 'forge-harden');
+});
+
+test('the checked-out phase branch picks its project', () => {
+  const dir = twoProjects();
+  execFileSync('git', ['init', '-q', '-b', 'phase/a-2-second', dir]);
+  const s = status(dir);
+  assert.equal(s.project, 'a');
+  assert.equal(s.next, 'forge-build (continue) → forge-review → forge-ship');
 });
 
 test('a root-only repo reports no project key', () => {

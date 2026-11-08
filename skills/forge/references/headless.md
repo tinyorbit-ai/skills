@@ -32,6 +32,8 @@ FORGE_RESULT {"skill":"forge-build","status":"done","phase":3,"gate":"green","no
 
 - `status`: `done` or `blocked`.
 - `phase`: the phase number, or `null` outside the build loop.
+- `project`: the project's slug when the run used `wiki/projects/<slug>/`; left out
+  for the root project.
 - `gate`: `green`, `red`, `deferred` (crack-on, the agent can't run it) or `n/a`.
 - `notes`: one line. For `blocked`, the question or failure; for `done`, the
   assumptions made, the commit, or the PR URL.
