@@ -130,11 +130,17 @@ Phases should sequence so each leaves the project in a working state.
 Vertical slices, not horizontal layers. Architecture decisions in the ADRs
 must hold across phases — flag any phase that quietly diverges.
 
-When phases carry `**Reads:**` lines, every item read must be in the `**Writes:**`
-of the same or an earlier phase. A read nothing writes is a high-severity finding:
-add the phase that writes it, move the writer earlier, or name the outside source in
-the reading phase's Work. Two phases that `**Owns:**` the same path should be in order
-(the later one depends on the earlier), never marked parallel.
+When phases carry `**Owns:**` or `**Reads:**` lines, run
+`node <forge-harden>/scripts/plan-check.mjs <plan.md>` from the repo root. Each line it
+prints is a high-severity finding, and the plan fails hardening until it prints `ok`:
+
+- an owned path that does not exist and is not marked `(new)` — find the real path
+  in the repo, or mark it `(new)` when the phase creates it;
+- a read that no earlier or same phase writes — add the phase that writes it, move
+  the writer earlier, or mark the item `(outside)` and name the source in Work.
+
+Two phases that own the same path should be in order (the later one depends on the
+earlier), never marked parallel.
 
 ### 4. Fix policy
 
