@@ -128,13 +128,17 @@ const readPlan = async ($: EngineInterface, root: string, project?: string): Pro
   }
 }
 
+// A project slug, as forge/scripts/status.mjs reads one. It goes into a file path, so
+// nothing else is ever used as one.
+const SLUG = /^[a-z0-9][a-z0-9-]*$/
+
 // The project folders under wiki/projects/ (forge/references/projects.md); none when
 // there are none or the folder can't be listed.
 const projectsOf = async ($: EngineInterface, root: string): Promise<string[]> => {
   try {
     const entries = await $.fs.list(`${root}/wiki/projects`)
     return entries
-      .filter(entry => entry.kind === 'dir' && /^[a-z0-9][a-z0-9-]*$/.test(entry.name))
+      .filter(entry => entry.kind === 'dir' && SLUG.test(entry.name) && entry.name !== 'root')
       .map(entry => entry.name)
       .sort()
   } catch {
@@ -499,19 +503,54 @@ const forgeResultIn = (text: string): ForgeResult | undefined => {
   }
 }
 
+// The branch HEAD last moved from to reach `branch`, from the reflog: where a ship that
+// landed on the base branch came from. Null when git can't say.
+const cameFrom = async ($: EngineInterface, root: string, branch: string): Promise<string | null> => {
+  const log = await $.process.run(['git', 'reflog', '-n', '50', '--format=%gs'], { cwd: root })
+  if (log.exitCode !== 0) return null
+  for (const line of log.stdout.split('\n')) {
+    const move = /^checkout: moving from (\S+) to (\S+)$/.exec(line.trim())
+    if (move !== null && move[2] === branch) return move[1] ?? null
+  }
+  return null
+}
+
+// Whose phase `n` a result line without "project" means: the phase checked out now when
+// the numbers agree; else the plan whose phase `n` is the branch HEAD came from; else
+// the one plan that has a phase `n`. Null when that leaves more than one: scoring
+// another plan's gate is worse than not scoring.
+type Owner = { project?: string }
+
+const ownerOf = async ($: EngineInterface, dir: string, n: number, current: GatePhase | null): Promise<Owner | null> => {
+  const owner = (project: string | undefined): Owner => (project === undefined ? {} : { project })
+  if (current !== null && current.n === n) return owner(current.project)
+  const root = await rootOf($, dir)
+  if (root === null) return null
+  const having = (await plansOf($, root)).filter(entry => parsePhases(entry.plan).some(phase => phase.n === n))
+  if (having.length <= 1) return having[0] === undefined ? null : owner(having[0].project)
+  const head = (await $.process.run(['git', 'branch', '--show-current'], { cwd: root })).stdout.trim()
+  const from = head === '' ? null : await cameFrom($, root, head)
+  if (from === null) return null
+  const match = having.filter(entry => parsePhases(entry.plan).some(phase => phase.n === n && phase.branch === from))
+  return match.length === 1 && match[0] !== undefined ? owner(match[0].project) : null
+}
+
 // Checks a result line's "gate":"green" against what actually ran on the current
 // files. The phase is the one the line names, so forge-ship's claim is still checked
 // after it lands on the base branch. Undefined when there is nothing to hold: no
-// green claim, no such phase, or a gate that no command proves.
+// green claim, no such phase, a gate that no command proves, or a line whose plan
+// can't be told.
 const claimReason = async ($: EngineInterface, dir: string, result: ForgeResult): Promise<string | undefined> => {
   if (result.status !== 'done' || result.gate !== 'green') return undefined
   const current = await read($, phaseAtom)
   const n = typeof result.phase === 'number' ? result.phase : (current?.n ?? null)
   if (n === null) return undefined
-  // A project's line names it; a line without one means the phase checked out now, when
-  // the numbers agree, else the root plan.
-  const project = typeof result.project === 'string' ? result.project : current?.n === n ? current.project : undefined
-  const phase = await locate($, dir, n, project)
+  let owner: Owner | null
+  if (result.project === undefined || result.project === null) owner = await ownerOf($, dir, n, current)
+  else if (result.project === 'root') owner = {}
+  else owner = typeof result.project === 'string' && SLUG.test(result.project) ? { project: result.project } : null
+  if (owner === null) return undefined
+  const phase = await locate($, dir, n, owner.project)
   if (phase === null || phase.commands.length === 0) return undefined
   const runs = await runsFor($, phase.root)
   const tree = await treeId($, phase.root)
