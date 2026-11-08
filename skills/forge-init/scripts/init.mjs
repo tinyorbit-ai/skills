@@ -58,6 +58,20 @@ function git(dir, args) {
   }
 }
 
+// The branch phases merge back into: origin's default branch, else main or master when
+// one exists, else the branch checked out now. Not just the current branch, since a
+// headless run often starts on a work branch.
+export function baseBranch(root) {
+  const remote = git(root, ['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD']);
+  if (remote) return remote.replace(/^origin\//, '');
+  for (const name of ['main', 'master']) {
+    if (git(root, ['rev-parse', '--verify', '--quiet', `refs/heads/${name}`]) !== null) return name;
+  }
+  return git(root, ['symbolic-ref', '--short', 'HEAD']) || 'main';
+}
+
+const BASE_LINE = /^\*\*Base branch:\*\*.*$/m;
+
 function fill(text, vars) {
   return text.replace(/\{(PROJECT|ONELINE|BASE)\}/g, (_, k) => vars[k]);
 }
@@ -107,7 +121,7 @@ export function init(dir, { slug = null } = {}) {
   const root = git(dir, ['rev-parse', '--show-toplevel']);
   if (!root) return { status: 'blocked', notes: 'not a git repository; run git init first', created: [], agents: {} };
   const { files, rules } = parseTemplates(readFileSync(join(HERE, '..', 'references', 'templates.md'), 'utf8'));
-  const vars = { PROJECT: basename(root), ONELINE, BASE: git(root, ['symbolic-ref', '--short', 'HEAD']) || 'main' };
+  const vars = { PROJECT: basename(root), ONELINE, BASE: baseBranch(root) };
   const created = [];
   const agents = {};
   const write = (rel, text) => {
@@ -145,7 +159,14 @@ export function init(dir, { slug = null } = {}) {
   if (slug) {
     const p = (f) => `wiki/projects/${slug}/${f}`;
     const projectVars = { ...vars, PROJECT: slug };
-    for (const f of PROJECT_FILES) writeNew(p(`${f}.md`), projectTemplate(fill(files.get(`wiki/${f}.md`), projectVars), slug));
+    // A project merges where the root plan says the repo merges, when it says so.
+    const rootPlan = existsSync(join(root, 'wiki', 'plan.md')) ? readFileSync(join(root, 'wiki', 'plan.md'), 'utf8') : '';
+    const baseLine = rootPlan.match(BASE_LINE)?.[0];
+    for (const f of PROJECT_FILES) {
+      let text = projectTemplate(fill(files.get(`wiki/${f}.md`), projectVars), slug);
+      if (f === 'plan' && baseLine) text = text.replace(BASE_LINE, () => baseLine);
+      writeNew(p(`${f}.md`), text);
+    }
     writeNew(p('design/.gitkeep'), '');
     const indexPath = join(root, 'wiki', 'index.md');
     const index = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : '';

@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { init, injectRules, addProjectToIndex } from './init.mjs';
+import { init, injectRules, addProjectToIndex, baseBranch } from './init.mjs';
 
 function repo(files = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'forge-init-'));
@@ -80,4 +80,38 @@ test('a second project joins the same Projects list', () => {
   const index = addProjectToIndex(addProjectToIndex('# I\n\n## Knowledge base\n', 'a'), 'b');
   assert.equal((index.match(/^## Projects$/gm) ?? []).length, 1);
   assert.match(index, /\*\*a\*\*[^\n]*\n- \*\*b\*\*/);
+});
+
+const commit = (dir) => execFileSync('git', ['-C', dir, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'x']);
+
+test('the base branch is the default branch, not the work branch init runs on', () => {
+  const dir = repo();
+  commit(dir);
+  execFileSync('git', ['-C', dir, 'switch', '-q', '-c', 'arnold/ACME-42']);
+  init(dir);
+  assert.match(read(dir, 'wiki/plan.md'), /\*\*Base branch:\*\* `main`/);
+
+  const old = mkdtempSync(join(tmpdir(), 'forge-init-'));
+  execFileSync('git', ['init', '-q', '-b', 'master', old]);
+  commit(old);
+  execFileSync('git', ['-C', old, 'switch', '-q', '-c', 'feature/x']);
+  assert.equal(baseBranch(old), 'master');
+
+  execFileSync('git', ['-C', old, 'update-ref', 'refs/remotes/origin/develop', 'HEAD']);
+  execFileSync('git', ['-C', old, 'symbolic-ref', 'refs/remotes/origin/HEAD', 'refs/remotes/origin/develop']);
+  assert.equal(baseBranch(old), 'develop');
+
+  const bare = mkdtempSync(join(tmpdir(), 'forge-init-'));
+  execFileSync('git', ['init', '-q', '-b', 'trunk', bare]);
+  assert.equal(baseBranch(bare), 'trunk');
+});
+
+test('--new copies the root plan\'s Base branch line', () => {
+  const dir = repo();
+  init(dir);
+  writeFileSync(join(dir, 'wiki/plan.md'), '# Plan\n\n**Base branch:** `develop` (releases cut from here)\n');
+  init(dir, { slug: 'checkout' });
+  const plan = read(dir, 'wiki/projects/checkout/plan.md');
+  assert.match(plan, /^\*\*Base branch:\*\* `develop` \(releases cut from here\)$/m);
+  assert.equal((plan.match(/Base branch/g) ?? []).length, 1);
 });

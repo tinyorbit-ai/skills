@@ -86,8 +86,9 @@ and `AGENTS.md`:
 
 ### 4. Establish phase/branch discipline
 
-Confirm the base branch (current branch, usually `main`). Record it in
-`wiki/plan.md`'s header. State the contract back to the user explicitly:
+Confirm the base branch: origin's default branch, else `main` or `master` when one
+exists, else the current branch (`scripts/init.mjs` picks it the same way; a project
+copies the root plan's line). Record it in `wiki/plan.md`'s header. State the contract back to the user explicitly:
 
 > Phases run on `phase/<n>-<slug>` branches off `<base>`. Commit freely on a phase
 > branch; a finished phase merges back as exactly one squashed commit, only after
