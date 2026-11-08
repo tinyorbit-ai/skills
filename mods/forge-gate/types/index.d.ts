@@ -13,6 +13,8 @@ export type GatePhase = {
   /** True when the gate asks for more than its commands prove. */
   hasProse: boolean
   root: string
+  /** The project slug when the phase is in wiki/projects/<slug>/plan.md; absent for the root plan. */
+  project?: string
 }
 
 /** One run of one gate command, and the working tree it ran on. */

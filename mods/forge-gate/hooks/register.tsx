@@ -117,12 +117,41 @@ const rootOf = async ($: EngineInterface, dir: string): Promise<string | null> =
   return root
 }
 
-const readPlan = async ($: EngineInterface, root: string): Promise<string | null> => {
+const planPath = (root: string, project?: string): string =>
+  project === undefined ? `${root}/wiki/plan.md` : `${root}/wiki/projects/${project}/plan.md`
+
+const readPlan = async ($: EngineInterface, root: string, project?: string): Promise<string | null> => {
   try {
-    return String(await $.fs.read(`${root}/wiki/plan.md`))
+    return String(await $.fs.read(planPath(root, project)))
   } catch {
     return null
   }
+}
+
+// The project folders under wiki/projects/ (forge/references/projects.md); none when
+// there are none or the folder can't be listed.
+const projectsOf = async ($: EngineInterface, root: string): Promise<string[]> => {
+  try {
+    const entries = await $.fs.list(`${root}/wiki/projects`)
+    return entries
+      .filter(entry => entry.kind === 'dir' && /^[a-z0-9][a-z0-9-]*$/.test(entry.name))
+      .map(entry => entry.name)
+      .sort()
+  } catch {
+    return []
+  }
+}
+
+// Every plan in the repo: the root one (project undefined), then each project's.
+const plansOf = async ($: EngineInterface, root: string): Promise<{ project?: string; plan: string }[]> => {
+  const plans: { project?: string; plan: string }[] = []
+  const rootPlan = await readPlan($, root)
+  if (rootPlan !== null) plans.push({ plan: rootPlan })
+  for (const project of await projectsOf($, root)) {
+    const plan = await readPlan($, root, project)
+    if (plan !== null) plans.push({ project, plan })
+  }
+  return plans
 }
 
 const runnableOf = async ($: EngineInterface, root: string, candidates: readonly string[]): Promise<string[]> => {
@@ -133,43 +162,54 @@ const runnableOf = async ($: EngineInterface, root: string, candidates: readonly
   return commands
 }
 
-// The phase numbered `number`, else the one whose branch is checked out in `dir`;
-// null outside a forge repo.
-const locate = async ($: EngineInterface, dir: string, number: number | null): Promise<GatePhase | null> => {
+// The phase numbered `number` in the root plan (or `project`'s), else the one whose
+// branch is checked out in `dir`, from any plan; null outside a forge repo.
+const locate = async ($: EngineInterface, dir: string, number: number | null, project?: string): Promise<GatePhase | null> => {
   const root = await rootOf($, dir)
   if (root === null) return null
-  const plan = await readPlan($, root)
-  if (plan === null) return null
-  const phases = parsePhases(plan)
   let found: ParsedPhase | undefined
+  let owner: string | undefined
   if (number !== null) {
-    found = phases.find(phase => phase.n === number)
+    const plan = await readPlan($, root, project)
+    if (plan === null) return null
+    found = parsePhases(plan).find(phase => phase.n === number)
+    owner = project
   } else {
     const head = await $.process.run(['git', 'branch', '--show-current'], { cwd: root })
     const branch = head.stdout.trim()
-    found = branch === '' ? undefined : phases.find(phase => phase.branch === branch)
+    if (branch === '') return null
+    for (const entry of await plansOf($, root)) {
+      found = parsePhases(entry.plan).find(phase => phase.branch === branch)
+      owner = entry.project
+      if (found !== undefined) break
+    }
   }
   if (found === undefined) return null
   const commands = await runnableOf($, root, found.candidates)
-  return { n: found.n, title: found.title, branch: found.branch, gate: found.gate, commands, hasProse: found.hasProse, root }
+  const phase: GatePhase = { n: found.n, title: found.title, branch: found.branch, gate: found.gate, commands, hasProse: found.hasProse, root }
+  return owner === undefined ? phase : { ...phase, project: owner }
 }
 
-let planCache: { root: string; mtimeMs: number; commands: string[] } | null = null
+let planCache: { root: string; stamp: string; commands: string[] } | null = null
 
 // Every runnable gate command in the repo's plan, whichever branch is out: a run
 // counts before the branch matches (forge-build switches to its branch mid-turn,
 // Arnold works on its own branches).
 const planCommands = async ($: EngineInterface, root: string): Promise<string[]> => {
-  let mtimeMs: number
-  try {
-    mtimeMs = (await $.fs.stat(`${root}/wiki/plan.md`)).mtimeMs
-  } catch {
-    return []
+  const stamps: string[] = []
+  for (const project of [undefined, ...(await projectsOf($, root))]) {
+    try {
+      stamps.push(`${project ?? ''}:${(await $.fs.stat(planPath(root, project))).mtimeMs}`)
+    } catch {
+      // a project folder with no plan yet
+    }
   }
-  if (planCache !== null && planCache.root === root && planCache.mtimeMs === mtimeMs) return planCache.commands
-  const plan = (await readPlan($, root)) ?? ''
-  const commands = await runnableOf($, root, parsePhases(plan).flatMap(phase => phase.candidates))
-  planCache = { root, mtimeMs, commands }
+  if (stamps.length === 0) return []
+  const stamp = stamps.join(' ')
+  if (planCache !== null && planCache.root === root && planCache.stamp === stamp) return planCache.commands
+  const plans = await plansOf($, root)
+  const commands = await runnableOf($, root, plans.flatMap(entry => parsePhases(entry.plan).flatMap(phase => phase.candidates)))
+  planCache = { root, stamp, commands }
   return commands
 }
 
@@ -198,7 +238,9 @@ const treeId = async ($: EngineInterface, root: string): Promise<string> => {
 
 // Runs are kept per repo and command, so they don't depend on which phase is out.
 const runsKey = (root: string): string => `gate-runs:${root}`
-const checkedKey = (root: string, n: number): string => `gate-checked:${root}:${n}`
+// The root plan's keys are as they always were; a project's carry its slug.
+const checkedKey = (phase: GatePhase): string =>
+  `gate-checked:${phase.root}:${phase.project === undefined ? '' : `${phase.project}:`}${phase.n}`
 
 // The repo whose runs the state holds.
 let loadedRoot = ''
@@ -226,7 +268,7 @@ const refresh = async ($: EngineInterface): Promise<GatePhase | null> => {
   const phase = root === null ? null : await locate($, dir, pinned)
   const before = await read($, phaseAtom)
   if (JSON.stringify(before) !== JSON.stringify(phase)) {
-    const checked = phase === null ? null : (((await $.store.get(checkedKey(phase.root, phase.n))) as GateCheck | undefined) ?? null)
+    const checked = phase === null ? null : (((await $.store.get(checkedKey(phase))) as GateCheck | undefined) ?? null)
     await update($, phaseAtom, () => phase)
     await update($, checkedAtom, () => checked)
   }
@@ -417,7 +459,7 @@ const markChecked = async ($: EngineInterface): Promise<void> => {
   const [tree, at] = await Promise.all([treeId($, phase.root), $.clock.now()])
   await update($, treeAtom, () => tree)
   await update($, checkedAtom, () => ({ at, tree, gate: phase.gate }))
-  await $.store.set(checkedKey(phase.root, phase.n), { at, tree, gate: phase.gate })
+  await $.store.set(checkedKey(phase), { at, tree, gate: phase.gate })
 }
 
 // ---------- Hooks ----------
@@ -441,7 +483,7 @@ const claimsDone = (text: string): boolean =>
     .split(/(?<=[.!?])\s+|\n+/)
     .some(sentence => !sentence.trim().endsWith('?') && DONE_CLAIMS.some(pattern => pattern.test(sentence)))
 
-type ForgeResult = { skill?: unknown; status?: unknown; phase?: unknown; gate?: unknown }
+type ForgeResult = { skill?: unknown; status?: unknown; phase?: unknown; gate?: unknown; project?: unknown }
 
 // The FORGE_RESULT line every forge stage ends with (forge/references/headless.md).
 // When a message has several, the last one counts.
@@ -466,7 +508,10 @@ const claimReason = async ($: EngineInterface, dir: string, result: ForgeResult)
   const current = await read($, phaseAtom)
   const n = typeof result.phase === 'number' ? result.phase : (current?.n ?? null)
   if (n === null) return undefined
-  const phase = await locate($, dir, n)
+  // A project's line names it; a line without one means the phase checked out now, when
+  // the numbers agree, else the root plan.
+  const project = typeof result.project === 'string' ? result.project : current?.n === n ? current.project : undefined
+  const phase = await locate($, dir, n, project)
   if (phase === null || phase.commands.length === 0) return undefined
   const runs = await runsFor($, phase.root)
   const tree = await treeId($, phase.root)

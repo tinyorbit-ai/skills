@@ -42,6 +42,8 @@ type World = {
   duringRun?: () => void
   // The plan as it reads now, when a test edits it.
   plan?: string
+  // Project plans in wiki/projects/<slug>/plan.md, by slug.
+  projects?: Record<string, string>
 }
 
 const BAND = {
@@ -79,8 +81,15 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
     }
     return out('', 127)
   })
-  on('fs.read', () => ({ value: world.plan ?? PLAN }))
-  on('fs.stat', () => ({ value: { kind: 'file', size: (world.plan ?? PLAN).length, mtimeMs: (world.plan ?? PLAN).length, isLink: false } }))
+  const planAt = (path: string): string => {
+    const slug = path.match(/\/wiki\/projects\/([^/]+)\/plan\.md$/)?.[1]
+    return slug === undefined ? (world.plan ?? PLAN) : (world.projects?.[slug] ?? '')
+  }
+  on('fs.read', ($, e) => ({ value: planAt(e.path) }))
+  on('fs.stat', ($, e) => ({ value: { kind: 'file', size: planAt(e.path).length, mtimeMs: planAt(e.path).length, isLink: false } }))
+  on('fs.list', () => ({
+    value: Object.keys(world.projects ?? {}).map(name => ({ name, kind: 'dir' as const, size: 0, mtimeMs: 0, isLink: false })),
+  }))
   on('session.cwd', () => ({ value: '/repo' }))
   on('command.register', () => ({ value: { command: 'gate' } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -501,4 +510,36 @@ test('editing a manual gate voids an earlier Checked', async ($, on) => {
   world.plan = PLAN.replace('at every size', 'at every size, in light and dark')
   await $.turn.complete(turnEnd)
   expect(await band.find({ text: /◐ written checks, not checked/ })).toBeDefined()
+})
+
+const PROJECT_PLAN = `# Plan — sync
+
+## Phase 2 — Sync a folder
+**Branch:** \`phase/sync-2-folder\`
+**Verifiable gate:** \`dedupe ./fixtures/sync\` exits 0.
+**Design:** none
+`
+
+test("a project's phase branch and result line use the project's plan", async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/sync-2-folder', tree: 'A', results: {}, ran: [], projects: { sync: PROJECT_PLAN } }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
+  expect(await band.find({ text: /Phase 2 · Sync a folder/ })).toBeDefined()
+
+  // The root plan's phase 2 ran green; the project's phase 2 did not run.
+  await $.tool.call(DUPES)
+  await $.tool.call(CLEAN)
+  world.branch = 'main'
+  await $.turn.complete(turnEnd)
+  const stop = (text: string) => $.classic.Stop({ stop_hook_active: false, last_assistant_message: text })
+  const claim = await stop(finalMessage({ project: 'sync' }))
+  expect(claim.block).toContain('`dedupe ./fixtures/sync` has not run.')
+  // A line with no project still means the root plan.
+  expect((await stop(finalMessage({}))).block).toBeUndefined()
+
+  await $.tool.call({ tool: 'Bash', command: 'dedupe ./fixtures/sync' })
+  expect((await stop(finalMessage({ project: 'sync' }))).block).toBeUndefined()
 })
