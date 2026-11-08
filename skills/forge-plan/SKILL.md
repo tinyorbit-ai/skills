@@ -87,7 +87,8 @@ Read and apply `references/phase-contract.md` **in full** before writing phases.
 It defines the exact machine-read block, goal gates, behavior traceability,
 risk-first ordering, the conditional human-evidence stop, and the mandatory
 release-closure phase. A flat feature sequence that leaves a higher-risk bet
-untested while adding breadth is not a valid Forge plan.
+untested while adding breadth is not a valid Forge plan. In a project plan, fill each
+phase's `Owns`, `Reads`, `Writes` and `QA` lines too.
 
 ### 5. Write `wiki/plan.md`
 
