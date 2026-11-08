@@ -91,7 +91,20 @@ test('--project reads that folder', () => {
   assert.equal(a.phase, 2);
   assert.equal(a.phases[1].branch, 'phase/a-2-second');
   assert.equal(status(dir, 'b').stage, 'planning');
-  assert.equal(status(dir, 'new-one').stage, 'discovery');
+});
+
+test('a slug with no folder is refused and the known projects are named', () => {
+  const dir = twoProjects();
+  assert.throws(() => status(dir, 'fooo'), /no project "fooo".*the projects are a, b \(or root\).*init\.mjs --new fooo/);
+  let err;
+  try {
+    execFileSync('node', [script, '--dir', dir, '--project', 'fooo', '--json'], { encoding: 'utf8', stdio: 'pipe' });
+  } catch (e) {
+    err = e;
+  }
+  assert.equal(err?.status, 2);
+  assert.equal(err.stdout, '');
+  assert.match(err.stderr, /the projects are a, b/);
 });
 
 test('two projects and no root brief means choose', () => {

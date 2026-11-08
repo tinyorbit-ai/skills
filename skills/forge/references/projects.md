@@ -34,7 +34,8 @@ The first that applies wins:
    `notes`.
 
 `node ../forge/scripts/status.mjs --project <slug> --json` applies the same rules.
-Without `--project`, a `choose` stage lists the choices.
+Without `--project`, a `choose` stage lists the choices. A slug with no folder is a
+typo, not a new project: it exits 2 and names the projects there are.
 
 A slug is lowercase letters, digits and dashes; `root` is taken.
 

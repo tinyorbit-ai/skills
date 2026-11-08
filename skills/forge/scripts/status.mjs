@@ -63,8 +63,13 @@ export function listProjects(dir) {
 // Returns { project: slug | null } (null = root) or { choose: [slug | 'root'] }.
 export function pickProject(dir, given, branch) {
   if (given === ROOT) return { project: null };
-  if (given !== null) return { project: given };
   const projects = listProjects(dir);
+  if (given !== null) {
+    // A typo is not a new project: only `init.mjs --new <slug>` makes one.
+    if (projects.includes(given)) return { project: given };
+    const known = projects.length ? `the projects are ${projects.join(', ')} (or root)` : 'there are no project folders, only root';
+    throw new Error(`no project "${given}" in wiki/projects/; ${known}. To start one, run forge-init/scripts/init.mjs --new ${given}`);
+  }
   if (projects.length === 0) return { project: null };
   const wiki = join(dir, 'wiki');
   const names = (file) => {
