@@ -38,15 +38,17 @@ Every skill also runs standalone — invoke any directly:
   /forge-wiki                     (knowledge base — ask, ingest, maintain)
 
 /forge with no args continues from ▶ Next.
+/forge <slug> works on one project; /forge new <slug> starts one.
 ```
 
 Fill `<...>` from the live state. Keep the box; don't add a charter blurb.
 
 ## Step 1 — always: detect state and report "where you left off"
 
-Run `node scripts/status.mjs` (in this skill's folder; `--json` for factories). It
-reads `wiki/`, the plan, the build log and git, and applies the ladder below. Read the
-files yourself only when you need more than it reports. Then print a short status block:
+Run `node scripts/status.mjs` (in this skill's folder; `--json` for factories,
+`--project <slug>` for a project). It reads `wiki/`, the plan, the build log and git,
+and applies the ladder below. Read the files yourself only when you need more than it
+reports. Then print a short status block:
 
 ```
 forge status
@@ -70,6 +72,12 @@ Derive **next action** from this ladder (first unmet wins):
 | plan locked (`Lock status: locked`), unbuilt phase exists | Build loop | see below |
 | every plan phase has a build-log entry **and the latest is covered by a `wiki/retro.md` entry** | Done | report complete + open `improvements.md` |
 | every plan phase has a build-log entry, **no retro covers the latest** | Wrap-up | invoke `forge-retro`, then report |
+
+**Which project.** The ladder reads the chosen project's files in `wiki/projects/<slug>/`:
+the one named (`/forge <slug>` or `root`), else the plan naming this branch, else root
+if no project folders, else the only folder beside a stub root, else ask (headless:
+`blocked`). Pass the slug to every skill you invoke.
+`/forge new <slug>`: `references/projects.md`.
 
 ## Step 2 — run exactly the next thing, then stop
 
@@ -106,9 +114,9 @@ would re-present the gate. The build loop is now unlocked.
 ### Build loop (plan locked, phases remain) — ONE phase per run
 
 1. **Pick the phase, and enter at the right step.** The phase is the first in
-   `wiki/plan.md` with no `wiki/build-log.md` entry (if on a `phase/<k>-…` branch
-   with work in progress, that's the phase — don't start a new one). **Design
-   precondition:** if this phase's `Design:` marker is an unlocked `explore`, run
+   `wiki/plan.md` with no `wiki/build-log.md` entry (if on a `phase/<k>-…` branch, or
+   `phase/<slug>-<k>-…` for a project, with work in progress, that's the phase —
+   don't start a new one). **Design precondition:** if this phase's `Design:` marker is an unlocked `explore`, run
    `forge-design-explore` for its surface first — no code before the direction is
    locked. Then enter the loop at the *furthest step whose output isn't yet
    present*, not blindly at build:
@@ -160,6 +168,7 @@ End with the crack-on summary block from `references/crack-on.md`.
 - `forge-principles` — the quality bar every stage builds to
 - `references/branch-discipline.md` — phase/branch/squash/gate contract
 - `references/wiki.md` — wiki layout (incl. `learnings.md` + taste profile), ADR format, capture rule
+- `references/projects.md` — several projects in one repo: which one, where its files live, its branches
 - `references/reviewer-agents.md` — adversarial reviewer abstraction (codex/gemini/claude); used by forge-harden and forge-review
 - `references/question-style.md` — Decision Brief format for AskUserQuestion calls; used wherever a real decision is surfaced
 - `references/headless.md` — no-human rule, the Codex question tool, the `FORGE_RESULT` line

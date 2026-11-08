@@ -2,9 +2,12 @@
 // forge status without an LLM: reads wiki/ and git, prints where the project is and the
 // single next action, using the same ladder as forge/SKILL.md Step 1.
 //
-//   node status.mjs [--dir <repo>] [--json]
+//   node status.mjs [--dir <repo>] [--project <slug>|root] [--json]
+//
+// A project's record lives in wiki/projects/<slug>/; `--project root` names the root brief and
+// plan (references/projects.md). A repo with no project folders reports exactly as before.
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -41,7 +44,47 @@ function git(dir, args) {
   }
 }
 
-export function status(dir) {
+export const SLUG = /^[a-z0-9][a-z0-9-]*$/;
+// `--project root` names the root brief and plan, so no project folder may be called that.
+export const ROOT = 'root';
+
+export function listProjects(dir) {
+  const root = join(dir, 'wiki', 'projects');
+  if (!existsSync(root)) return [];
+  return readdirSync(root)
+    .filter((d) => SLUG.test(d) && d !== ROOT && statSync(join(root, d)).isDirectory())
+    .sort();
+}
+
+// Which project (references/projects.md): the one given (`root` for the root files), else
+// the one whose plan names the checked-out branch, else the only folder when the root is a
+// stub, else the caller has to choose. With project folders, a real root plan is never a
+// silent default: a worker on its own branch would write the wrong plan.
+// Returns { project: slug | null } (null = root) or { choose: [slug | 'root'] }.
+export function pickProject(dir, given, branch) {
+  if (given === ROOT) return { project: null };
+  const projects = listProjects(dir);
+  if (given !== null) {
+    // A typo is not a new project: only `init.mjs --new <slug>` makes one.
+    if (projects.includes(given)) return { project: given };
+    const known = projects.length ? `the projects are ${projects.join(', ')} (or root)` : 'there are no project folders, only root';
+    throw new Error(`no project "${given}" in wiki/projects/; ${known}. To start one, run forge-init/scripts/init.mjs --new ${given}`);
+  }
+  if (projects.length === 0) return { project: null };
+  const wiki = join(dir, 'wiki');
+  const names = (file) => {
+    const plan = read(file);
+    return Boolean(branch && plan && parsePhases(plan).some((p) => p.branch === branch));
+  };
+  if (names(join(wiki, 'plan.md'))) return { project: null };
+  const onBranch = projects.filter((slug) => names(join(wiki, 'projects', slug, 'plan.md')));
+  if (onBranch.length === 1) return { project: onBranch[0] };
+  const rootIsReal = !isStub(read(join(wiki, 'brief.md'))) || !isStub(read(join(wiki, 'plan.md')));
+  if (!rootIsReal && projects.length === 1) return { project: projects[0] };
+  return { choose: rootIsReal ? [ROOT, ...projects] : projects };
+}
+
+export function status(dir, given = null) {
   const wiki = join(dir, 'wiki');
   const branch = git(dir, ['branch', '--show-current']);
   const dirty = (git(dir, ['status', '--porcelain']) ?? '') !== '';
@@ -49,15 +92,23 @@ export function status(dir) {
   const next = (stage, skill, extra = {}) => ({ ...base, ...extra, stage, next: skill });
 
   if (!existsSync(wiki)) return next('setup', 'forge-init');
-  const brief = read(join(wiki, 'brief.md'));
+  if (given !== null && !SLUG.test(given)) throw new Error(`not a project slug: ${given}`);
+  const pick = pickProject(dir, given, branch);
+  if (pick.choose) return next('choose', 'forge <slug>', { projects: pick.choose });
+  const project = pick.project;
+  const home = project ? join(wiki, 'projects', project) : wiki;
+  // Only a project run carries the `project` key, so root output stays as it was.
+  if (project) base.project = project;
+
+  const brief = read(join(home, 'brief.md'));
   if (isStub(brief)) return next('discovery', 'forge-discovery');
-  const plan = read(join(wiki, 'plan.md'));
+  const plan = read(join(home, 'plan.md'));
   if (isStub(plan)) return next('planning', 'forge-plan');
 
   const phases = parsePhases(plan);
-  const log = read(join(wiki, 'build-log.md')) ?? '';
+  const log = read(join(home, 'build-log.md')) ?? '';
   const landed = [...log.matchAll(/^## Phase (\d+)\b/gm)].map((m) => Number(m[1]));
-  const retro = read(join(wiki, 'retro.md')) ?? '';
+  const retro = read(join(home, 'retro.md')) ?? '';
   const retroCovers = [...retro.matchAll(/^## \d{4}-\d{2}-\d{2}.*?phases?\s+\d+\s*[–-]\s*(\d+)/gim)].map((m) => Number(m[1]));
   const hardened = /^## Review\b/m.test(plan);
   const locked = /\*\*Lock status:\*\*\s*locked\b/i.test(plan);
@@ -91,14 +142,32 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) {
   const args = process.argv.slice(2);
   const i = args.indexOf('--dir');
-  const s = status(resolve(i === -1 ? '.' : args[i + 1]));
+  const p = args.indexOf('--project');
+  let s;
+  try {
+    s = status(resolve(i === -1 ? '.' : args[i + 1]), p === -1 ? null : (args[p + 1] ?? ''));
+  } catch (err) {
+    console.error(`forge status: ${err.message}`);
+    process.exit(2);
+  }
   if (args.includes('--json')) {
     console.log(JSON.stringify(s));
+  } else if (s.stage === 'choose') {
+    console.log(
+      [
+        'forge status',
+        `  Stage:    choose a project`,
+        `  Projects: ${s.projects.join(', ')}`,
+        `  Now:      on \`${s.branch ?? '?'}\`${s.dirty ? ' (uncommitted changes)' : ', clean'}`,
+        `  Next:     ${s.next}`,
+      ].join('\n'),
+    );
   } else {
     const landed = s.landed?.length ? `phases ${s.landed.sort((a, b) => a - b).join(', ')}` : 'none';
     console.log(
       [
         'forge status',
+        ...(s.project ? [`  Project:  ${s.project}`] : []),
         `  Stage:    ${s.stage}${s.phase ? ` (phase ${s.phase})` : ''}`,
         `  Plan:     ${s.phases ? `${s.phases.length} phases, hardened ${s.hardened ? '✓' : '–'}, locked ${s.locked ? '✓' : '–'}` : '–'}`,
         `  Landed:   ${landed}`,

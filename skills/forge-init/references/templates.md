@@ -338,6 +338,9 @@ it in one line. This is what keeps the wiki a living record instead of a stale o
   its declared **verifiable gate** is green.
 - Every merged phase gets one `wiki/build-log.md` entry: what was done, the *why*
   of notable decisions, and the exact gate that was met.
+- A repo can hold several projects: each keeps its brief, plan, build log, retro and
+  improvements in `wiki/projects/<slug>/` and builds on `phase/<slug>-<n>-<name>`
+  branches, while ADRs, notes, knowledge and architecture stay shared in `wiki/`.
 
 <!-- END:forge-wiki-rules -->
 ```

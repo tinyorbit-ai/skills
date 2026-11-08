@@ -39,12 +39,25 @@ Use `## Phase N — <title>` exactly — the evals and router machine-read it.
 **Risks retired:** <links/names from Risk contracts, or none>
 **Verifiable gate:** <exact command/check and expected output>
 **Design:** none | follow DESIGN.md | explore | locked via [[decisions/NNNN-…]]
+**Owns:** `<exact/file/path>`, `<path/it/creates>` (new), … (optional)
+**Reads:** `<shared data>`, `<data from outside>` (outside), … | none (optional)
+**Writes:** `<shared data>`, … | none (optional)
+**QA:** browser | xcode | none (optional)
 **Work:** <bullets>
 **Decisions:** <linked ADRs>
 ```
 
 The `Design:` value is exactly one form above, never prose. `explore` routes to
 forge-design-explore; `none` means no UI.
+
+`Owns`, `Reads`, `Writes` and `QA` are optional; fill them in a project plan
+(`wiki/projects/<slug>/plan.md`), where a factory splits each phase into its own ticket
+and reads them. `Owns` is the exact paths the phase changes, each one checked in the
+repo (never guessed); a file the phase creates is marked `(new)`, once, in the first
+phase that makes it; later phases own it, or files under it, unmarked. `Reads` and `Writes`
+are the shared data it uses: a field, table or API shape, spelled the same everywhere
+it appears in the plan; data that comes from outside the plan is marked `(outside)`.
+`QA` is the tools QA needs. List items in backticks, separated by commas.
 
 The gate must assert the Goal's own observable — name the command and the expected
 output that only this phase's work can produce. `typecheck && lint && test` runs at

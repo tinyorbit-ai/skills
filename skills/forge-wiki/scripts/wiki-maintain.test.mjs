@@ -51,3 +51,15 @@ test('same input and date give the same indexes', () => {
   maintain({ wikiDir: b, fix: true, today: '2026-09-26' });
   assert.equal(readFileSync(join(a, 'knowledge/INDEX.md'), 'utf8'), readFileSync(join(b, 'knowledge/INDEX.md'), 'utf8'));
 });
+
+test('--fix links a project file by its full path, under ## Projects', async () => {
+  const { mkdirSync, writeFileSync } = await import('node:fs');
+  const wiki = copy();
+  mkdirSync(join(wiki, 'projects', 'a'), { recursive: true });
+  writeFileSync(join(wiki, 'projects', 'a', 'plan.md'), '# Plan — a\n');
+  maintain({ wikiDir: wiki, fix: true, today: '2026-11-08' });
+  const index = readFileSync(join(wiki, 'index.md'), 'utf8');
+  assert.match(index, /## Projects\n\n- \[\[projects\/a\/plan\]\]/);
+  maintain({ wikiDir: wiki, fix: true, today: '2026-11-08' });
+  assert.equal(readFileSync(join(wiki, 'index.md'), 'utf8'), index);
+});

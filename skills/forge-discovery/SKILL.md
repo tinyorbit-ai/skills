@@ -12,6 +12,11 @@ pinned so the rest of forge can build it as high-quality, simple, performant sof
 
 If `wiki/` doesn't exist, run `forge-init` first.
 
+Given a project slug, the brief is `wiki/projects/<slug>/brief.md`
+(`../forge/references/projects.md`). For a new slug, first run
+`node ../forge-init/scripts/init.mjs --new <slug>`; it makes the folder and its index
+entry. Never move or rewrite the root brief or plan.
+
 ### 1. Find the seed — anchor on what the user gave you
 
 forge-discovery works from **the user's stated intent**, in one of three entry
@@ -147,8 +152,9 @@ section order, the unknown-real-use marker, ADR handling, and source filing.
 
 ### 5. Hand off
 
-- Update `wiki/index.md`: replace the `{ONELINE}` placeholder with a real
-  one-sentence summary from the brief; mark [[brief]] as filled.
+- Update `wiki/index.md`: replace the `{ONELINE}` placeholder (for a project, its
+  line under `## Projects`) with a real one-sentence summary from the brief; mark
+  [[brief]] as filled.
 - Recommend `forge-plan` next (or return to `forge` for the full pipeline).
 
 ## Result

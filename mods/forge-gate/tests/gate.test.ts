@@ -42,6 +42,12 @@ type World = {
   duringRun?: () => void
   // The plan as it reads now, when a test edits it.
   plan?: string
+  // Project plans in wiki/projects/<slug>/plan.md, by slug.
+  projects?: Record<string, string>
+  // HEAD's reflog subjects, newest first; absent when git can't read it.
+  reflog?: string[]
+  // Every path the mod read.
+  reads?: string[]
 }
 
 const BAND = {
@@ -70,6 +76,7 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
     const [bin, flag, script, , token] = e.argv
     if (bin === 'git' && flag === 'rev-parse') return out('/repo\n')
     if (bin === 'git' && flag === 'branch') return out(`${world.branch}\n`)
+    if (bin === 'git' && flag === 'reflog') return world.reflog === undefined ? out('', 128) : out(`${world.reflog.join('\n')}\n`)
     if (bin === '/bin/sh' && script?.includes('write-tree')) return world.isTreeBroken === true ? out('', 128) : out(`${world.tree}\n`)
     if (bin === '/bin/sh' && script?.startsWith('command -v')) return out('', token === 'dedupe' ? 0 : 1)
     if (bin === '/bin/sh' && script !== undefined) {
@@ -79,8 +86,18 @@ const machine = (on: On, world: World): { asked: string[]; toasts: string[] } =>
     }
     return out('', 127)
   })
-  on('fs.read', () => ({ value: world.plan ?? PLAN }))
-  on('fs.stat', () => ({ value: { kind: 'file', size: (world.plan ?? PLAN).length, mtimeMs: (world.plan ?? PLAN).length, isLink: false } }))
+  const planAt = (path: string): string => {
+    const slug = path.match(/\/wiki\/projects\/([^/]+)\/plan\.md$/)?.[1]
+    return slug === undefined ? (world.plan ?? PLAN) : (world.projects?.[slug] ?? '')
+  }
+  on('fs.read', ($, e) => {
+    world.reads?.push(e.path)
+    return { value: planAt(e.path) }
+  })
+  on('fs.stat', ($, e) => ({ value: { kind: 'file', size: planAt(e.path).length, mtimeMs: planAt(e.path).length, isLink: false } }))
+  on('fs.list', () => ({
+    value: Object.keys(world.projects ?? {}).map(name => ({ name, kind: 'dir' as const, size: 0, mtimeMs: 0, isLink: false })),
+  }))
   on('session.cwd', () => ({ value: '/repo' }))
   on('command.register', () => ({ value: { command: 'gate' } }))
   on('session.start', ($, e) => ({ cwd: e.cwd }))
@@ -501,4 +518,64 @@ test('editing a manual gate voids an earlier Checked', async ($, on) => {
   world.plan = PLAN.replace('at every size', 'at every size, in light and dark')
   await $.turn.complete(turnEnd)
   expect(await band.find({ text: /◐ written checks, not checked/ })).toBeDefined()
+})
+
+const PROJECT_PLAN = `# Plan — sync
+
+## Phase 2 — Sync a folder
+**Branch:** \`phase/sync-2-folder\`
+**Verifiable gate:** \`dedupe ./fixtures/sync\` exits 0.
+**Design:** none
+`
+
+test("a project's phase branch and result line use the project's plan", async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'phase/sync-2-folder', tree: 'A', results: {}, ran: [], projects: { sync: PROJECT_PLAN } }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const band = await $.ui.mount({ plugin: 'forge-gate', surface: 'terminal', ...BAND })
+  expect(await band.find({ text: /Phase 2 · Sync a folder/ })).toBeDefined()
+
+  // The root plan's phase 2 ran green; the project's phase 2 did not run.
+  await $.tool.call(DUPES)
+  await $.tool.call(CLEAN)
+  world.branch = 'main'
+  await $.turn.complete(turnEnd)
+  const stop = (text: string) => $.classic.Stop({ stop_hook_active: false, last_assistant_message: text })
+  const claim = await stop(finalMessage({ project: 'sync' }))
+  expect(claim.block).toContain('`dedupe ./fixtures/sync` has not run.')
+  // A line with no project, sent from main, means the plan of the branch HEAD came from.
+  world.reflog = ['commit: Sync a folder', 'checkout: moving from phase/sync-2-folder to main']
+  expect((await stop(finalMessage({}))).block).toContain('`dedupe ./fixtures/sync` has not run.')
+
+  await $.tool.call({ tool: 'Bash', command: 'dedupe ./fixtures/sync' })
+  expect((await stop(finalMessage({ project: 'sync' }))).block).toBeUndefined()
+})
+
+test('a result line without a project is never scored against the wrong plan', async ($, on) => {
+  mock.clock(on)
+  mock.store(on)
+  const world: World = { branch: 'main', tree: 'A', results: {}, ran: [], projects: { sync: PROJECT_PLAN }, reads: [] }
+  machine(on, world)
+  await $.session.start(SESSION)
+  const stop = (text: string) => $.classic.Stop({ stop_hook_active: false, last_assistant_message: text })
+
+  // Both plans have a phase 2 and git can't say which branch HEAD came from: neither is scored.
+  expect((await stop(finalMessage({ skill: 'forge-ship' }))).block).toBeUndefined()
+  // The reflog names the project's branch, so the project's gate is the one checked.
+  world.reflog = ['checkout: moving from phase/sync-2-folder to main']
+  const fromSync = await stop(finalMessage({ skill: 'forge-ship' }))
+  expect(fromSync.block).toContain('`dedupe ./fixtures/sync` has not run.')
+  expect(fromSync.block).not.toContain('fixtures/dupes')
+  // "root" names the root plan outright.
+  expect((await stop(finalMessage({ project: 'root' }))).block).toContain('`dedupe ./fixtures/dupes` has not run.')
+  // Phase 4 is only in the root plan, so a line without a project means it.
+  expect((await stop(finalMessage({ phase: 4 }))).block).toContain("phase 4's gate is green, but it is not green")
+
+  // A slug that is not one never becomes a path.
+  world.reads = []
+  expect((await stop(finalMessage({ project: '../../etc' }))).block).toBeUndefined()
+  expect((await stop(finalMessage({ project: 7 }))).block).toBeUndefined()
+  expect(world.reads.some(path => path.includes('..') || path.includes('/7/'))).toBe(false)
 })

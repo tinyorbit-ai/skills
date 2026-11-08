@@ -31,7 +31,9 @@ Answer using the wiki as the primary source. Full procedure in
 `references/ask.md`. In short:
 
 1. Read `wiki/index.md`, then `wiki/knowledge/INDEX.md`. Identify the 1–3 relevant
-   topics and any relevant project-record files (brief, ADRs, learnings).
+   topics and any relevant project-record files (brief, ADRs, learnings). Each
+   project's record is in `wiki/projects/<slug>/`, listed under `## Projects` in
+   `index.md` (`../forge/references/projects.md`).
 2. Read those topic `_index.md` files; select the 3–8 most relevant articles. Read
    them in full. Grep `wiki/` for keywords the indexes might have missed.
 3. Synthesize a direct answer. **Cite every source by wikilink** (e.g. "per
@@ -137,6 +139,8 @@ this skill; add `--fix` to apply safe fixes, `--json` for counts). It regenerate
 Timelines, runs the mechanical checks (orphans, stale index entries, missing summaries
 and frontmatter, broken `[[links]]`, stubs, stale evidence, Timeline health, nested
 folders, learnings hygiene) and writes `wiki/knowledge/_health-report.md`.
+Files under `wiki/projects/*/` must stay reachable from their project's entry in
+`index.md`, under `## Projects`.
 
 Then do the parts that need judgment, listed in `references/health.md`: write each
 missing or generic Summary line (a specific one, never "Overview of X"), re-run with

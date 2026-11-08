@@ -31,7 +31,9 @@ Output: `DESIGN.md` at the repo root, the design source of truth that
 bias toward what the user has approved; *flag* conflicts rather than
 silently overriding: "your record leans minimal; this brief asks for
 playful"), any design ADRs, and the actual stack (what CSS/toolkit the
-plan chose — tokens must land in its vocabulary).
+plan chose — tokens must land in its vocabulary). With a project, its brief is
+`wiki/projects/<slug>/brief.md` (`../forge/references/projects.md`); `DESIGN.md`,
+the taste profile and the ADRs stay shared.
 
 ### 2. The memorable thing (forcing question)
 

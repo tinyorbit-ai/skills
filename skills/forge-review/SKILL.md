@@ -88,7 +88,8 @@ touched subsystem). Risk promotes; escalation goes up only. The bar never moves.
    receipts, never silent.
 
    Send the standard prompt envelope from `reviewer-agents.md`: write the
-   artifact (phase diff + the phase spec from `wiki/plan.md`) to a temp file and
+   artifact (phase diff + the phase spec from `wiki/plan.md`, or a project's
+   `wiki/projects/<slug>/plan.md`) to a temp file and
    pass it per the **artifact-passing contract** there — never inline a diff
    into a double-quoted shell string; real diffs carry backticks, `$`, and
    quotes that break interpolation silently. Verify the reviewer exited 0 with

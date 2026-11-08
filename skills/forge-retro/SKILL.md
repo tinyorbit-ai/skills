@@ -22,7 +22,9 @@ synthesis you can act on. The only forge skill that reasons across the whole arc
 1. **Gather the arc.** Read `wiki/build-log.md` (phases, gates met),
    `wiki/learnings.md` (review lessons), `wiki/notes/` (incidents), and
    `git log --oneline <base>` since the last retro (one squashed commit per phase —
-   that's the intended grain). Optionally diff stats per phase.
+   that's the intended grain). Optionally diff stats per phase. With a project, its
+   `retro.md`, `build-log.md` and `improvements.md` are in `wiki/projects/<slug>/`
+   (`../forge/references/projects.md`); learnings and notes stay shared at `wiki/`.
 
 2. **Synthesize, don't list.** Produce:
    - **What shipped** — the phases, what each delivered, told as one coherent story

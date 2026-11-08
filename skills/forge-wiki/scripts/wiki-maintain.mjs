@@ -183,10 +183,26 @@ export function maintain({ wikiDir, fix = false, today = new Date().toISOString(
       .map((p) => relative(wiki, p).replace(/\.md$/, ''))
       .filter((r) => !r.startsWith('knowledge/') && r !== 'index')
       .sort();
-    const missing = record.filter((r) => !moc.includes(`[[${r}]]`) && !moc.includes(`[[${basename(r)}]]`));
+    // A project's files (projects/<slug>/plan) share basenames with the root ones, so only
+    // their full path counts as a link, and they go under `## Projects`.
+    const inProject = (r) => r.startsWith('projects/');
+    const missing = record.filter((r) => !moc.includes(`[[${r}]]`) && (inProject(r) || !moc.includes(`[[${basename(r)}]]`)));
     if (!moc.includes('[[knowledge/INDEX]]')) missing.push('knowledge/INDEX');
+    const addUnder = (text, heading, lines) => {
+      const all = text.replace(/\s*$/, '').split('\n');
+      const at = all.indexOf(heading);
+      if (at === -1) return `${all.join('\n')}\n\n${heading}\n\n${lines.join('\n')}\n`;
+      let end = all.findIndex((l, k) => k > at && /^## /.test(l));
+      if (end === -1) end = all.length;
+      while (end > at + 1 && all[end - 1].trim() === '') end--;
+      all.splice(end, 0, ...lines);
+      return `${all.join('\n')}\n`;
+    };
+    const projectLinks = missing.filter(inProject).map((r) => `- [[${r}]]`);
+    const otherLinks = missing.filter((r) => !inProject(r)).map((r) => `- [[${r}]]`);
+    if (projectLinks.length) moc = addUnder(moc, '## Projects', projectLinks);
+    if (otherLinks.length) moc = addUnder(moc, '## Added by wiki upkeep', otherLinks);
     if (missing.length) {
-      moc = `${moc.replace(/\s*$/, '')}\n\n## Added by wiki upkeep\n\n${missing.map((r) => `- [[${r}]]`).join('\n')}\n`;
       writeFileSync(mocPath, moc);
       fixed.push(`linked ${missing.length} unlinked pages from index.md`);
     }

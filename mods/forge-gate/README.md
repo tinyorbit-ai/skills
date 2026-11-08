@@ -10,8 +10,12 @@ Phase 5 · App icon     ◐ written checks, not checked           [ Checked ]
 ```
 
 - **Which phase:** your current git branch, matched against the `**Branch:**` lines in
-  `wiki/plan.md`. Off a phase branch the mod does nothing. `/gate 3` pins a phase and
-  `/gate auto` unpins it.
+  `wiki/plan.md` and each project's `wiki/projects/<slug>/plan.md`. Off a phase branch
+  the mod does nothing. `/gate 3` pins a phase of the root plan and `/gate auto` unpins
+  it. A result line with `"project"` is checked against that project's plan (`"root"`
+  is the root plan). One without it, off its phase's branch, is checked against the
+  plan of the branch HEAD came from, or the only plan with that phase number; when
+  several plans have it and git can't say, it isn't scored.
 - **Which commands:** the gate's backticked spans whose first word is a real
   executable. Deploy, release, install, send and rm-style commands are never run, and
   nor are spans with `<placeholders>`.

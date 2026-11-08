@@ -58,7 +58,8 @@ order. Skip a principle that doesn't bear on the question; never bend one.
 
 ## Process
 
-Prereq: `wiki/plan.md` with phases + gates — else run `forge-plan` first.
+Prereq: `wiki/plan.md` with phases + gates — else run `forge-plan` first. With a project,
+brief and plan are in `wiki/projects/<slug>/` (`../forge/references/projects.md`).
 
 ### 1. Detect scope
 

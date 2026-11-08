@@ -9,6 +9,17 @@ Sets up a project so every later decision and incident is captured, and so build
 follows the phase/branch discipline. Run once per repo. Idempotent — safe to re-run;
 it never clobbers existing content.
 
+## Headless mode
+
+With `--headless`, or when no one can answer (`../forge/references/headless.md`), run
+`node scripts/init.mjs --headless` from the repo and stop there. It does steps 1–4 from
+`references/templates.md` with no questions: the missing wiki files, then the rules
+block in both `AGENTS.md` and `CLAUDE.md` (a fresh `CLAUDE.md` is `@AGENTS.md` plus the
+block). It offers no discovery, prints what it wrote, and ends with the `FORGE_RESULT`
+line; a second run changes nothing. Not a git repo, or a rules marker without its pair:
+it ends `blocked`. An interactive run may use the same script for steps 2–3.
+`--new <slug>` adds a project folder (`../forge/references/projects.md`).
+
 ## What it does
 
 ### 1. Detect state
@@ -71,12 +82,15 @@ and `AGENTS.md`:
   is being created fresh and an `AGENTS.md` exists, make `CLAUDE.md` just `@AGENTS.md`
   plus the block — or, if the user prefers a single source, ask (AskUserQuestion)
   whether `CLAUDE.md` should `@AGENTS.md` or carry its own copy.
+- An existing `CLAUDE.md` that imports `@AGENTS.md` and has no markers is left alone
+  once `AGENTS.md` carries the block; it already reads it from there.
 - Never duplicate the block. Never edit outside the markers.
 
 ### 4. Establish phase/branch discipline
 
-Confirm the base branch (current branch, usually `main`). Record it in
-`wiki/plan.md`'s header. State the contract back to the user explicitly:
+Confirm the base branch: origin's default branch, else `main` or `master` when one
+exists, else the current branch (`scripts/init.mjs` picks it the same way; a project
+copies the root plan's line). Record it in `wiki/plan.md`'s header. State the contract back to the user explicitly:
 
 > Phases run on `phase/<n>-<slug>` branches off `<base>`. Commit freely on a phase
 > branch; a finished phase merges back as exactly one squashed commit, only after
