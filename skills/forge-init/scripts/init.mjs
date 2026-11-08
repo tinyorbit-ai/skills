@@ -84,6 +84,15 @@ export function injectRules(text, block) {
   return text.slice(0, i) + block + text.slice(j + END.length);
 }
 
+// A CLAUDE.md that pulls in AGENTS.md already reads the block from there.
+const importsAgents = (text) => /^@(?:\.\/)?AGENTS\.md\s*$/m.test(text);
+const hasBlock = (file) => {
+  if (!existsSync(file)) return false;
+  const text = readFileSync(file, 'utf8');
+  const i = text.indexOf(BEGIN);
+  return i !== -1 && text.indexOf(END) > i;
+};
+
 // The project version of a root template: its own links, its own branch form.
 export function projectTemplate(text, slug) {
   let out = text.replaceAll('phase/<n>-<slug>', `phase/${slug}-<n>-<name>`);
@@ -146,6 +155,10 @@ export function init(dir, { slug = null } = {}) {
         continue;
       }
       const before = readFileSync(abs, 'utf8');
+      if (name === 'CLAUDE.md' && importsAgents(before) && !before.includes(BEGIN) && !before.includes(END) && hasBlock(join(root, 'AGENTS.md'))) {
+        agents[name] = 'unchanged (imports @AGENTS.md)';
+        continue;
+      }
       const after = injectRules(before, rules);
       if (after === null) agents[name] = 'markers broken, left alone';
       else if (after === before) agents[name] = 'unchanged';

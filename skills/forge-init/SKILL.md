@@ -82,6 +82,8 @@ and `AGENTS.md`:
   is being created fresh and an `AGENTS.md` exists, make `CLAUDE.md` just `@AGENTS.md`
   plus the block — or, if the user prefers a single source, ask (AskUserQuestion)
   whether `CLAUDE.md` should `@AGENTS.md` or carry its own copy.
+- An existing `CLAUDE.md` that imports `@AGENTS.md` and has no markers is left alone
+  once `AGENTS.md` carries the block; it already reads it from there.
 - Never duplicate the block. Never edit outside the markers.
 
 ### 4. Establish phase/branch discipline

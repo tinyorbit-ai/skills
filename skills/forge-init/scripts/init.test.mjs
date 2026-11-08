@@ -115,3 +115,17 @@ test('--new copies the root plan\'s Base branch line', () => {
   assert.match(plan, /^\*\*Base branch:\*\* `develop` \(releases cut from here\)$/m);
   assert.equal((plan.match(/Base branch/g) ?? []).length, 1);
 });
+
+test('a CLAUDE.md that imports @AGENTS.md does not get a second copy of the block', () => {
+  const dir = repo({ 'AGENTS.md': '# Rules\n', 'CLAUDE.md': '@AGENTS.md\n' });
+  const r = init(dir);
+  assert.match(read(dir, 'AGENTS.md'), /BEGIN:forge-wiki-rules/);
+  assert.equal(read(dir, 'CLAUDE.md'), '@AGENTS.md\n');
+  assert.equal(r.agents['CLAUDE.md'], 'unchanged (imports @AGENTS.md)');
+  assert.equal(init(dir).notes.includes('nothing to change'), true);
+
+  // Without the block in AGENTS.md, the import alone isn't enough.
+  const broken = repo({ 'AGENTS.md': 'x\n<!-- BEGIN:forge-wiki-rules -->\n', 'CLAUDE.md': '@AGENTS.md\n' });
+  init(broken);
+  assert.match(read(broken, 'CLAUDE.md'), /^@AGENTS\.md\n\n<!-- BEGIN:forge-wiki-rules -->/);
+});
