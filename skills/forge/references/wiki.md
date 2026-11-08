@@ -35,6 +35,7 @@ wiki/
 ├── learnings.md        Running log of review findings + the rule-to-remember. (forge-review)
 ├── retro.md            Running build retrospectives — synthesis across phases. (forge-retro)
 ├── improvements.md     Running, honest "what I'd do with more time" + deliberate scope cuts.
+├── RULES.md            The full agent rules; the short block in AGENTS.md/CLAUDE.md links here. (forge-init)
 ├── .forge/             Machine-ish state — config.yaml (reviewer), taste.md (design-taste
 │                       record), specimen.html (forge-design-system preview).
 ├── projects/<slug>/    One more project's own brief, plan, build-log, retro, improvements
