@@ -207,8 +207,9 @@ if (isMain) {
   const args = process.argv.slice(2);
   const arg = (name) => (args.indexOf(name) === -1 ? null : (args[args.indexOf(name) + 1] ?? ''));
   const slug = arg('--new');
-  if (slug !== null && !SLUG.test(slug)) {
-    console.error(`forge-init: not a project slug: ${slug}`);
+  if (slug !== null && (!SLUG.test(slug) || slug === 'root')) {
+    // `root` is how status.mjs --project names the root files.
+    console.error(`forge-init: ${slug === 'root' ? '`root` names the root project; pick another slug' : `not a project slug: ${slug}`}`);
     process.exit(2);
   }
   const r = init(resolve(arg('--dir') ?? '.'), { slug });

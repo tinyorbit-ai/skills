@@ -129,3 +129,16 @@ test('a CLAUDE.md that imports @AGENTS.md does not get a second copy of the bloc
   init(broken);
   assert.match(read(broken, 'CLAUDE.md'), /^@AGENTS\.md\n\n<!-- BEGIN:forge-wiki-rules -->/);
 });
+
+test('--new root is refused: root names the root files', () => {
+  const dir = repo();
+  const script = join(import.meta.dirname, 'init.mjs');
+  let err;
+  try {
+    execFileSync('node', [script, '--dir', dir, '--new', 'root'], { encoding: 'utf8', stdio: 'pipe' });
+  } catch (e) {
+    err = e;
+  }
+  assert.equal(err?.status, 2);
+  assert.equal(existsSync(join(dir, 'wiki')), false);
+});
