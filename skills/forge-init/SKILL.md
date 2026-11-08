@@ -51,6 +51,7 @@ wiki/
 ├── learnings.md      running review lessons (appended by forge-review)
 ├── retro.md          running build retrospectives (appended by forge-retro)
 ├── improvements.md   running "what I'd do with more time" + scope cuts
+├── RULES.md          the full agent rules; the short block in AGENTS.md links here
 ├── .forge/           machine-ish state — config.yaml (reviewer, default auto)
 │                     + taste.md (design-taste record, starts empty)
 │   ── Knowledge base (ingested context) ──
@@ -65,19 +66,24 @@ when the user ingests context (email, research, business rationale, conversation
 `wiki/index.md` must include a **Knowledge base** section linking `[[knowledge/INDEX]]`.
 
 If `wiki/` already exists, only add the missing files (including the `knowledge/`
-layer if an older project predates it); report what was added.
+layer if an older project predates it); report what was added. When this adds
+`wiki/RULES.md` beside an existing `wiki/index.md`, add one `[[RULES]]` line to that
+index, unless a line already links it.
 
 ### 3. Inject the rules into CLAUDE.md and AGENTS.md
 
 The agent must be told to keep the wiki current. Inject the block from
 `references/templates.md` (section "Agent rules block") into **both** `CLAUDE.md`
-and `AGENTS.md`:
+and `AGENTS.md`. It is short on purpose (about a dozen lines), because those files
+load on every turn: the few rules that apply every turn and a link to
+`wiki/RULES.md`, which holds the full text and is written in step 2 like the other
+wiki files.
 
 - The block is delimited by:
   `<!-- BEGIN:forge-wiki-rules -->` … `<!-- END:forge-wiki-rules -->`
 - **Idempotent:** if those markers already exist in a file, replace the content
-  between them with the current block (so re-running updates it). Otherwise append
-  the block to the end of the file.
+  between them with the current block (so re-running updates it, and an old long
+  block becomes the short one). Otherwise append the block to the end of the file.
 - If a file does not exist, create it containing the block. For `CLAUDE.md`, if it
   is being created fresh and an `AGENTS.md` exists, make `CLAUDE.md` just `@AGENTS.md`
   plus the block — or, if the user prefers a single source, ask (AskUserQuestion)

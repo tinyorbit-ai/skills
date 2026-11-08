@@ -126,6 +126,24 @@ export function addProjectToIndex(index, slug) {
   return index.replace(/\s*$/, '') + '\n\n' + section.join('\n');
 }
 
+// An index made before wiki/RULES.md existed gets its one line: after the improvements
+// line, else at the end of the Map of content list, else at the end. Once only.
+export function addRulesToIndex(index, line) {
+  if (/\[\[RULES(?:\.md)?(?:[|#][^\]]*)?\]\]|\(RULES\.md\)|wiki\/RULES\.md/.test(index)) return index;
+  const lines = index.split('\n');
+  let at = lines.findIndex((l) => l.includes('[[improvements]]'));
+  if (at === -1) {
+    const map = lines.findIndex((l) => /^## Map of content\s*$/.test(l));
+    if (map !== -1) {
+      for (let k = map + 1; k < lines.length && !/^#/.test(lines[k]); k++) if (/^- /.test(lines[k])) at = k;
+      if (at === -1) at = map;
+    }
+  }
+  if (at === -1) return index.replace(/\s*$/, '') + '\n\n' + line + '\n';
+  lines.splice(at + 1, 0, line);
+  return lines.join('\n');
+}
+
 export function init(dir, { slug = null } = {}) {
   const root = git(dir, ['rev-parse', '--show-toplevel']);
   if (!root) return { status: 'blocked', notes: 'not a git repository; run git init first', created: [], agents: {} };
@@ -145,7 +163,17 @@ export function init(dir, { slug = null } = {}) {
   };
 
   if (!slug || !existsSync(join(root, 'wiki'))) {
+    const hadIndex = existsSync(join(root, 'wiki', 'index.md'));
     for (const [rel, text] of files) writeNew(rel, fill(text, vars));
+    if (hadIndex && created.includes('wiki/RULES.md')) {
+      const line = files.get('wiki/index.md').split('\n').find((l) => l.includes('[[RULES]]'));
+      const index = readFileSync(join(root, 'wiki', 'index.md'), 'utf8');
+      const next = line ? addRulesToIndex(index, line) : index;
+      if (next !== index) {
+        write('wiki/index.md', next);
+        created.push('wiki/index.md ([[RULES]])');
+      }
+    }
     for (const name of ['AGENTS.md', 'CLAUDE.md']) {
       const abs = join(root, name);
       if (!existsSync(abs)) {
