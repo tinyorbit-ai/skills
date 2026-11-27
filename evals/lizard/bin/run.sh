@@ -141,7 +141,7 @@ One raw JSON object, no code fence, exactly these keys. When the approval would 
       cd "$proj"
       export LIZARD_HOME="$scratch/home"
       run_with_timeout "$TIMEOUT_SECS" \
-        claude -p "$prompt" --permission-mode bypassPermissions \
+        claude -p "$prompt" --permission-mode bypassPermissions --setting-sources project,local \
         "${model_args[@]+"${model_args[@]}"}"
     ) > "$out_txt" 2>&1 || true
 

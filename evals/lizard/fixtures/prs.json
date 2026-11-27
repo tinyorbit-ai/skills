@@ -1,4 +1,16 @@
 {
+  "major-ungated-checkout-change": {
+    "number": 26,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/26"
+  },
+  "held-for-sign-off": {
+    "number": 25,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/25"
+  },
+  "clean-checkout-change-signed-off": {
+    "number": 24,
+    "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/24"
+  },
   "clean-invariant-preservation": {
     "number": 23,
     "url": "https://github.com/tinyorbit-ai/lizard-fixtures/pull/23"

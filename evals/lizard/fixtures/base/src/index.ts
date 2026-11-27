@@ -4,3 +4,5 @@ export { findProductById, findProductsByIds } from "./catalog/catalog";
 export type { Product } from "./catalog/catalog";
 export { configureClient } from "./db";
 export type { DbClient } from "./db";
+export { placeOrder, validateCheckoutDetails } from "./checkout/checkout";
+export type { CheckoutDetails } from "./checkout/checkout";

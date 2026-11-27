@@ -60,7 +60,8 @@ Treat a proposed new service, RPC, schema, migration, reconciler, worker, featur
 gate, or deploy sequence as a scope-brake trigger. First try subtraction or a local
 fix. If the only safe option genuinely expands the project, report the trade-off and
 require an explicit human scope choice; an automated review must not silently turn
-it into a blocker with a prescribed architecture.
+it into a blocker with a prescribed architecture. The rollout decision in
+`criteria.md` §5 is not this: a `Rollout:` line satisfies it, so it never forces a gate.
 
 ## Evidence that cannot exist before deploy
 

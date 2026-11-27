@@ -7,6 +7,7 @@ lists a customer's orders with their line-item products attached.
 
 - `src/catalog/` — product lookups (`findProductById`, `findProductsByIds`).
 - `src/orders/` — order retrieval (`orders.ts`) and pricing (`pricing.ts`).
+- `src/checkout/` — the checkout form every customer fills in, and placing the order.
 - `src/db/` — a thin query client seam the repositories share.
 - `migrations/` — SQL schema for products and orders.
 

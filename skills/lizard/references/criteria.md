@@ -22,7 +22,9 @@ by itself.
   `.find()`, or `.indexOf()` inside a loop over the same data (build a Set/Map first);
   sorting or regex-compiling inside an iteration.
 - **Unbounded queries** — reads with no limit/pagination on collections that grow;
-  fetching full documents for one field; full-table scans for a count.
+  fetching full documents for one field; full-table scans for a count. A cap on item
+  count does not bound response size: when each item returns a nested object, prove
+  the largest real tenant's response fits the transport limit.
 - **Missing indexes** — a new query shape (new filter/sort combination) on a large
   collection with no supporting index. Check the schema/index definitions near the
   changed query.
@@ -72,6 +74,13 @@ of an existing subsystem, an abstraction that will force future contortions.
   semantics (e.g. findOneAndUpdate old-vs-new), upsert flags, projection and sort.
 - **Removed or renamed exports** — every call site found and updated. A missed one is
   critical.
+- **A failed lookup is not an answer.** When a new filter or guard reads a lookup, ask
+  what an error, timeout or partial result does. Counting an error as "deny" or
+  "absent" drops rows with no log, and an admin bypass hides it from staff.
+- **New rejections must accept the system's own defaults.** For every new check that
+  refuses a value, find the value the system writes before any user input (the
+  placeholder, empty or initial value on a freshly created record). Prove the check
+  passes from a record created the way the app creates it, not one built by hand.
 - **Assertions of broken behavior must be grounded, not inferred.** A correctness
   finding is only as strong as the evidence under it — trace the real behavior (read
   the helper, follow the value, check the default) instead of inferring it from a name
@@ -148,6 +157,30 @@ Security regressions are **critical**.
 - Unverifiable issue fit on a non-trivial PR is itself **major** — the missing PR
   body is not the finding; the inability to know why the change exists is.
 - Stack-aware: judge whether this PR is a coherent step and name what is deferred.
+- **Read the whole task, not its summary.** Issue fit is judged against every linked
+  source: the ticket, its plan or task page, and its comments. A source left unread is
+  ✗ in the receipts, and issue fit resting on it cannot be ✓.
+
+### Rollout reach
+
+A diff that changes what customers see or do in a purchase or account flow (checkout,
+payment, booking, registration or sign-up forms, membership) needs a rollout decision.
+So does a diff that replaces, redirects or deletes an existing user-facing flow. Write
+the reach in the receipts: who sees the change at merge (every tenant, locale, event,
+flow) against who the issue names. Then require one of:
+
+- **a gate** — the changed path reads a feature flag. Where a flag service is
+  reachable, confirm the flag exists and is off by default in production. A gate on
+  some sibling paths and not this one is no gate.
+- **a sign-off** — a line in the PR body or a PR comment reading `Rollout: ungated —
+  <who it reaches> — <why>`. It records a decision; it grants nothing else. Its stated
+  reach must match the diff's.
+
+Neither is **major** ("not yet."). `Fix:` names both ways out: put the change behind a
+flag that is off in production, or add the `Rollout:` line. A reach wider than the
+issue's (the issue names one locale, event or cohort, the diff reaches all) is an
+unmet criterion even with a sign-off, unless the sign-off states the wider reach.
+Copy, styling and internal-only tooling with no customer path need no decision.
 
 ## 6. Repo bar & conventions
 
@@ -202,3 +235,7 @@ Field lessons that apply to every T2/T3 review, whatever the domain.
   is forced without equivalent code changes. Proof: rebuild the full issue-fit matrix
   for every user-facing entry point on the current head, including unchanged PR code,
   before resolving prior scope findings.
+- **The merge is the tree that ships, not the head.** Signal: the base moved since the
+  PR last merged it, a fix was ported from another PR, or CI builds the merge ref.
+  Proof: re-run the caller and mock inventory on the current merge projection; does a
+  new base caller, sibling fixture or duplicated port break there?
