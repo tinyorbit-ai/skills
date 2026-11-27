@@ -142,7 +142,7 @@ guidance and any `--brief` file.
 | `lessons-durable-work` | jobs, retries, idempotency, billing/credits/usage, exactly-once work |
 | `lessons-money` | charges, refunds, payouts, tax, currency, rounding, payment gates, ledgers |
 | `accessibility` | interactive UI, dialogs, focus, keyboard, labels, colour, media |
-| `auth-permissions` | authn/authz, roles, tenants, sessions, tokens, sharing, admin access |
+| `auth-permissions` | authn/authz, roles, tenants, sessions, tokens, sharing, admin, erasure, masking, consent |
 | `background-jobs-queues` | workers, queues, schedulers, DLQs, backfills, event consumers |
 | `code-structure-boundaries` | broad refactors, new subsystems, shared helpers, public interfaces |
 | `database-migrations` | migrations, schema, indexes, constraints, deletion, retention |

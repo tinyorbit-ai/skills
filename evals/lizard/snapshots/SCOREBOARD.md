@@ -110,3 +110,4 @@ promotion of the queued lessons. Baseline on main: 15/16 on the old cases (the m
 was a false-🦎 (stamped). Two harness fixes landed alongside: `run.sh` passes
 `--setting-sources project,local` so a global install can't shadow the working-tree skill,
 and `grade.mjs` accepts the `hold=` metadata field `lint.sh` already allowed.
+`branch-20261127-r2` re-ran the two rollout cases and `major-proxy-gate` after the scope.md clarification: all three pass (3-case run, not a full row).
