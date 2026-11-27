@@ -102,3 +102,11 @@ a real regression: the inline `**Why:**`/`**Fix:**` shape and metadata line had 
 to `github-review-api.md`, which the dry-run path then skipped. SKILL.md now states the
 exact inline shape and the receipts + metadata tail. `local-mode-4` is the effective
 result: 14/15, false-🦎 0; the one miss is a malformed metadata line (format flake).
+| 2026-11-27 | branch-20261127 | default | 18/18 | 0 | 0 | 100% |
+
+`branch-20261127` adds the rollout-reach rule (criteria §5), two new cases and the
+promotion of the queued lessons. Baseline on main: 15/16 on the old cases (the miss was
+`held-for-sign-off`, never bootstrapped), and on the new cases `major-ungated-checkout-change`
+was a false-🦎 (stamped). Two harness fixes landed alongside: `run.sh` passes
+`--setting-sources project,local` so a global install can't shadow the working-tree skill,
+and `grade.mjs` accepts the `hold=` metadata field `lint.sh` already allowed.

@@ -227,5 +227,29 @@
     "forbidden": ["stamps", "posts 🦎", "hallucinated blocker", "@-mentions the held-for login"],
     "allow_hedge": false,
     "notes": "Same clean clamp as t2-clean-logic, but the description carries a hold-for line naming orbitcart-design, who has not reviewed. Lizard reviews as usual, finds nothing, and still withholds the stamp: COMMENT 'not yet.' with a Why line waiting for orbitcart-design, and hold=orbitcart-design in the metadata line."
+  },
+  {
+    "id": "major-ungated-checkout-change",
+    "branch": "case/major-ungated-checkout-change",
+    "title": "feat(checkout): let buyers with one name skip the last name",
+    "expected_verdict": "wait",
+    "expected_tier": "standard",
+    "findings": [
+      {"path":  "src/checkout/checkout.ts", "class":  "ungated-customer-flow", "blocking":  true}
+    ],
+    "forbidden": ["stamps", "🦎 anywhere", "prescribes a flag service or architecture without offering the Rollout: line"],
+    "allow_hedge": false,
+    "notes": "Correct, tested change to the checkout form every customer fills in, with no feature gate and no `Rollout:` sign-off. The code is fine; the missing rollout decision is the only blocker (criteria §5 Rollout reach). Major → not yet, and the Fix names both ways out: a flag off in production, or the `Rollout:` line. Drawn from production fires where a customer-flow change shipped to everyone ungated."
+  },
+  {
+    "id": "clean-checkout-change-signed-off",
+    "branch": "case/clean-checkout-change-signed-off",
+    "title": "feat(checkout): let buyers with one name skip the last name",
+    "expected_verdict": "go",
+    "expected_tier": "standard",
+    "findings": [],
+    "forbidden": ["blocks", "asks for a feature flag", "hallucinated blocker", "🦎 in an inline comment or non-approval body"],
+    "allow_hedge": false,
+    "notes": "Twin of major-ungated-checkout-change. Same diff, but the issue names every store and the body carries `Rollout: ungated — every checkout, at merge — <why>`, whose stated reach matches the diff. The rollout gate must not over-block: clean stamp. Guards against the rule making ungated changes impossible to ship."
   }
 ]

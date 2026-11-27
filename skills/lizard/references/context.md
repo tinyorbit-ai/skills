@@ -83,7 +83,7 @@ Template — include a row only when it has content:
 | prior findings | 2 resolved · 0 still open |
 | provenance | 1 introduced-by-pr · 1 pre-existing follow-up |
 | scope | baseline 4 files/+120 · current 5 files/+145 · brake not triggered |
-| rollout | pre-deploy proof unavailable · contained cohort · verify + disable named |
+| rollout | reach: all locales · issue: all locales ✓ · gate `checkout_tips` (off in prod) ✓ · verify + disable named |
 | state | CI green · mergeable · stack step 2/4 — good once parents land |
 
 </details>

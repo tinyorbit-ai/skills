@@ -23,7 +23,7 @@ const LINT = path.join(SCRIPT_DIR, 'lint.sh');
 const SCOREBOARD = path.join(EVAL_DIR, 'snapshots', 'SCOREBOARD.md');
 
 const META_RE =
-  /<!-- lizard:v1 verdict=(go|wait|block) tier=(quick|standard|deep) adversary=(codex|claude|none) head=(\S+) diff=(\S+) context=(\S+) -->/;
+  /<!-- lizard:v1 verdict=(go|wait|block) tier=(quick|standard|deep) adversary=(codex|claude|none) head=(\S+) diff=(\S+) context=(\S+)(?: hold=\S+)? -->/;
 const EVENT_VERDICT = { APPROVE: 'go', COMMENT: 'wait', REQUEST_CHANGES: 'block' };
 
 function die(msg, code = 2) {
